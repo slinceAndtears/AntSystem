@@ -70,7 +70,7 @@ public class ReadFile {
     }
 
     public static void initialSubGraph(Graph graph, SubGraphs subGraphs) {
-        List<List<Integer>> res = ReadFile.readFile("E:\\workspace\\IdeaProject\\JavaProject\\src\\program\\AntSystem\\graph.txt");
+        List<List<Integer>> res = ReadFile.readFile("src/program/AntSystem/graph.txt");
         int start_node = 0;
         int start_area = 0;
         int end_node = 0;
@@ -91,17 +91,19 @@ public class ReadFile {
             if (subGraphs.subGraphs.get(start_area) == null) {
                 subGraphs.subGraphs.put(start_area, new SubGraph(start_area));
             }
+            subGraphs.subGraphs.get(start_area).addVertex(start_node);
             if (subGraphs.subGraphs.get(end_area) == null) {
                 subGraphs.subGraphs.put(end_area, new SubGraph(end_area));
             }
+            subGraphs.subGraphs.get(end_area).addVertex(end_node);
             if (start_area == end_area) {
                 subGraphs.subGraphs.get(start_area).vertex.get(start_node).addNbr(end_node, weight);
                 //subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
             }
         }
-        res = readFile("E:\\workspace\\IdeaProject\\JavaProject\\src\\program\\AntSystem\\area.txt");
+        res = readFile("src/program/AntSystem/area.txt");
         subGraphs.areaGraph = initialSingleGraph(res);
-        res = readFile("E:\\workspace\\IdeaProject\\JavaProject\\src\\program\\AntSystem\\connect.txt");
+        res = readFile("src/program/AntSystem/connect.txt");
         for (int i = 0; i < res.size(); ++i) {
             int start = res.get(i).get(0);
             int end = res.get(i).get(1);
