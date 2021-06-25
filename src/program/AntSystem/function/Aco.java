@@ -3,6 +3,10 @@ package program.AntSystem.function;
 import program.AntSystem.graph.Graph;
 import program.AntSystem.graph.SubGraphs;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -10,8 +14,8 @@ import java.util.*;
  *  节点还是从0 开始比较方便
  * */
 public class Aco {
-    public static final int ANT_NUM =50;//蚂蚁数量
-    public static final int MAX_ITE = 10;//最大迭代次数
+    public static final int ANT_NUM =500;//蚂蚁数量
+    public static final int MAX_ITE = 1;//最大迭代次数
     public static final double T0 = 0.002d;//初始信息素含量
     public static final double B = 3d;//启发式信息计算公式中的参数β
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -23,6 +27,7 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.5d;//蚂蚁的速度
     public static final int w = 3;//全局信息素更新的排序参数
+    public static final double W=0.01d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
@@ -83,8 +88,8 @@ public class Aco {
 
     public static double getVelocity(int start, int end) {
         double density = flow[start][end] / allGraph.vertex.get(start).getWeight(end);
-        //return VELOCITY * Math.exp(-1 * w * density);
-        return VELOCITY;
+        return VELOCITY * Math.exp(-1 * W * density);
+        //return VELOCITY;
     }
 
     public static double addTime(List<Integer> path) {
@@ -96,7 +101,6 @@ public class Aco {
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
             sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
-            localPheUpdate(start,path.get(i));
             start = path.get(i);
         }
         return sumTime;
@@ -136,9 +140,10 @@ public class Aco {
         }
     }
 
-    public static void acoDemo() {
+    public static List<List<Integer>> acoDemo() {
         Random r = new Random();
         initialGraph();
+        List<List<Integer>> allPath=new ArrayList<>();
         for (int k = 0; k < MAX_ITE; ++k) {
             for (int i = 0; i < ANT_NUM; ++i) {
                 int end_node = 3;
@@ -156,6 +161,7 @@ public class Aco {
                         next_node = end_node;
                     }
                     List<Integer> path = Dijkstra.dijkstra(subGraph.subGraphs.get(now_area), now_node, next_node);
+                    localPheUpdate(now_area,next_area);
                     now_area = next_area;
                     now_node = next_node;
                     if (now_node != end_node) {
@@ -170,13 +176,42 @@ public class Aco {
                         path.add(now_node);
                     }
                     addTime(path);
+                    allPath.add(path);
                 }
+            }
+        }
+        return allPath;
+    }
+
+    public static void savePath(List<List<Integer>> allPath) {
+        String fileName = "src/program/AntSystem/path.txt";
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(fileName));
+            StringBuilder path;
+            for (int i = 0; i < allPath.size(); ++i) {
+                path = new StringBuilder();
+                for (int j = 0; j < allPath.get(i).size(); ++j) {
+                    path.append(allPath.get(i).get(j));
+                    path.append(" ");
+                }
+                path.append("\n");
+                writer.write(path.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
     public static void main(String[] args) {
-        acoDemo();
+        List<List<Integer>> allPath=acoDemo();
         System.out.println(sumTime);
+        savePath(allPath);
     }
 }

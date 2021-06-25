@@ -4,13 +4,20 @@ import program.AntSystem.graph.Graph;
 
 import java.util.*;
 
+
+/**
+ * 相同的路径 迪杰斯特拉的权值变大方法 要比ACS的速度降低方法 时间低 4-5 S
+ * */
 public class Dijkstra {
-    private static final int ANT_NUM = 50;
+    private static final int ANT_NUM = 500;
     private static Graph graph;
-    private static double INCREASE = 0.2d;
+    //private static double INCREASE = 0.2d;
     private static final int START = 0;
     private static final int END = 3;
-    private static final double VELOCITY = 0.3;
+    private static final double VELOCITY = 0.5d;
+    private static int[][] flow;
+    public static final double W=0.01d;//速度-流量的参数
+    public static Graph staticGraph;
 
     //id 为起始节点
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
@@ -63,11 +70,17 @@ public class Dijkstra {
     public static void initGraph() {
         List<List<Integer>> res = ReadFile.readFile("E:\\workspace\\IdeaProject\\JavaProject\\src\\program\\AntSystem\\single.txt");
         graph = ReadFile.initialSingleGraph(res);
+        staticGraph=ReadFile.initialSingleGraph(res);
+        flow=new int[graph.nodeNum][graph.nodeNum];
     }
 
     public static void changeWeight(int start, int end) {
-        double weight = graph.vertex.get(start).getWeight(end);
-        graph.vertex.get(start).addNbr(end, weight * (1 + INCREASE));
+        double density = flow[start][end] / graph.vertex.get(start).getWeight(end);
+        double velocity = VELOCITY * Math.exp(-1 * W * density);
+        //时间应该是权值没有变化过的来除
+        double time = staticGraph.vertex.get(start).getWeight(end) / velocity;
+        double weight = time * VELOCITY;
+        graph.vertex.get(start).addNbr(end, weight);
     }
 
     public static double getSumTime() {
@@ -78,7 +91,27 @@ public class Dijkstra {
             for (int j = 1; j < path.size(); ++j) {
                 sumTime += graph.vertex.get(s).getWeight(path.get(j)) / VELOCITY;
                 changeWeight(s, path.get(j));
+                ++flow[s][path.get(j)];
                 s = path.get(j);
+            }
+        }
+        return sumTime;
+    }
+
+    public static double test(){
+        double sumTime=0d;
+        List<List<Integer>> path=ReadFile.readFile("src/program/AntSystem/path.txt");
+        for (int i=0;i<path.size();++i){
+            int s=path.get(i).get(0);
+            for (int j=1;j<path.get(i).size();++j){
+
+                //double density=flow[s][path.get(i).get(j)] / graph.vertex.get(s).getWeight(path.get(i).get(j));
+                //double velocity=VELOCITY * Math.exp(-1 * W * density);
+                sumTime+=graph.vertex.get(s).getWeight(path.get(i).get(j))/VELOCITY;
+
+                changeWeight(s,path.get(i).get(j));
+                ++flow[s][path.get(i).get(j)];
+                s=path.get(i).get(j);
             }
         }
         return sumTime;
@@ -87,5 +120,6 @@ public class Dijkstra {
     public static void main(String[] args) {
         initGraph();
         System.out.println(getSumTime());
+        //System.out.println(test());
     }
 }
