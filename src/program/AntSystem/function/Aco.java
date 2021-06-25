@@ -96,6 +96,7 @@ public class Aco {
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
             sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            localPheUpdate(start,path.get(i));
             start = path.get(i);
         }
         return sumTime;
@@ -126,7 +127,11 @@ public class Aco {
     public static void update() {//更新新信息素
         for (int i=0;i<pheromone.length;++i){
             for (int j=0;j<pheromone[i].length;++j){
+                if (subGraph.areaGraph.vertex.get(i).getWeight(j)!=Integer.MAX_VALUE){
+                    double t=0d;
 
+                    pheromone[i][j]=(1-p)*pheromone[i][j]+t;
+                }
             }
         }
     }
