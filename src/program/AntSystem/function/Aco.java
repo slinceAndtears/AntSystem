@@ -11,7 +11,11 @@ import java.util.*;
 
 /**
  * 简单的实现一个ACO 寻找最短路径的ACO算法
- *  节点还是从0 开始比较方便
+ * 节点还是从0 开始比较方便
+ * 两个分区之间的连通性，目前设置所有点都可以，
+ * 两个分区之间的权值，就设置为他们相连边的数量
+ * 找到合适的图数据
+ * 全局信息素更新机制
  * */
 public class Aco {
     public static final int ANT_NUM =500;//蚂蚁数量
@@ -140,6 +144,23 @@ public class Aco {
         }
     }
 
+    //获取从起始分区到达终点分区的所有点
+    public static List<Integer> getConnectNode(int start_area,int end_area){
+        List<Integer> connect=new ArrayList<>();
+        List<Integer> startNode=subGraph.subGraphs.get(start_area).getAllVertex();
+        List<Integer> endNode=subGraph.subGraphs.get(end_area).getAllVertex();
+        for (Integer x:startNode){
+            for (Integer y:endNode){
+                if (allGraph.vertex.get(x).getWeight(y)!=Integer.MAX_VALUE){
+                    connect.add(x);
+                    break;
+                }
+            }
+        }
+        return connect;
+    }
+
+    //输出的路径是分开的 后续需要想如何将路径整合一起，后续整合还是前期整合
     public static List<List<Integer>> acoDemo() {
         Random r = new Random();
         initialGraph();
@@ -155,7 +176,8 @@ public class Aco {
                 while (now_node != end_node) {
                     if (now_area != end_area) {
                         next_area = nextStep(now_area);
-                        List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
+                        //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
+                        List<Integer> connect=getConnectNode(now_area,next_area);
                         next_node = connect.get(r.nextInt(connect.size()));
                     } else {
                         next_node = end_node;
@@ -209,9 +231,20 @@ public class Aco {
         }
     }
 
-    public static void main(String[] args) {
+    public static void runACS(){
         List<List<Integer>> allPath=acoDemo();
+        System.out.println(allPath);
         System.out.println(sumTime);
         savePath(allPath);
+    }
+
+    public static void test(){
+        initialGraph();
+        System.out.println(getConnectNode(0,1));
+    }
+
+    public static void main(String[] args) {
+        //test();
+        runACS();
     }
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReadFile {
+    //权值大概率为double类型, 目前还只支持是int类型，后续再继续改进
     public static List<List<Integer>> readFile(String fileName) {
         List<List<Integer>> res = new ArrayList<>();
         BufferedReader reader = null;
@@ -76,6 +77,7 @@ public class ReadFile {
         int end_node = 0;
         int end_area = 0;
         double weight = 0d;
+        Graph area=new Graph();//分区图
         for (int i = 0; i < res.size(); ++i) {
             start_node = res.get(i).get(0);
             start_area = res.get(i).get(1);
@@ -100,10 +102,22 @@ public class ReadFile {
                 subGraphs.subGraphs.get(start_area).vertex.get(start_node).addNbr(end_node, weight);
                 //subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
             }
+            //在此处可以导入分区图
+            if (!area.vertex.containsKey(start_area)){
+                area.addVertex(start_area);
+            }
+            if (!area.vertex.containsKey(end_area)){
+                area.addVertex(end_area);
+            }
+            if (start_area!=end_area){
+                area.vertex.get(start_area).addNbr(end_area,1);
+            }
+
         }
-        res = readFile("src/program/AntSystem/area.txt");
-        subGraphs.areaGraph = initialSingleGraph(res);
-        res = readFile("src/program/AntSystem/connect.txt");
+        //设置分区图的权值
+
+        subGraphs.areaGraph=area;
+/*        //分区之间的联通性 ,目前建议都联通 不做特殊处理 还是手动导入？？？
         for (int i = 0; i < res.size(); ++i) {
             int start = res.get(i).get(0);
             int end = res.get(i).get(1);
@@ -112,6 +126,6 @@ public class ReadFile {
                 connect.add(res.get(i).get(j));
             }
             subGraphs.subGraphs.get(start).connect.put(end, connect);
-        }
+        }*/
     }
 }
