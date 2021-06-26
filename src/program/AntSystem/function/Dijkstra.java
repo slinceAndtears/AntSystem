@@ -6,7 +6,8 @@ import java.util.*;
 
 
 /**
- * 相同的路径 迪杰斯特拉的权值变大方法 要比ACS的速度降低方法 时间低 4-5 S
+ * 权值的改变只用于选路，
+ * 时间的计算公式 还是按照蚁群的算
  * */
 public class Dijkstra {
     private static final int ANT_NUM = 500;
@@ -83,13 +84,19 @@ public class Dijkstra {
         graph.vertex.get(start).addNbr(end, weight);
     }
 
+    public static double getTime(int start,int end){
+        double density=flow[start][end]/staticGraph.vertex.get(start).getWeight(end);
+        double velocity=VELOCITY *Math.exp(-1*W*density);
+        return staticGraph.vertex.get(start).getWeight(end)/velocity;
+    }
+
     public static double getSumTime() {
         double sumTime = 0d;
         for (int i = 0; i < ANT_NUM; ++i) {
             List<Integer> path = dijkstra(graph, START, END);
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
-                sumTime += graph.vertex.get(s).getWeight(path.get(j)) / VELOCITY;
+                sumTime += getTime(s,path.get(j));
                 changeWeight(s, path.get(j));
                 ++flow[s][path.get(j)];
                 s = path.get(j);
@@ -104,11 +111,7 @@ public class Dijkstra {
         for (int i=0;i<path.size();++i){
             int s=path.get(i).get(0);
             for (int j=1;j<path.get(i).size();++j){
-
-                //double density=flow[s][path.get(i).get(j)] / graph.vertex.get(s).getWeight(path.get(i).get(j));
-                //double velocity=VELOCITY * Math.exp(-1 * W * density);
-                sumTime+=graph.vertex.get(s).getWeight(path.get(i).get(j))/VELOCITY;
-
+                sumTime+=getTime(s,path.get(i).get(j));
                 changeWeight(s,path.get(i).get(j));
                 ++flow[s][path.get(i).get(j)];
                 s=path.get(i).get(j);
@@ -119,7 +122,7 @@ public class Dijkstra {
 
     public static void main(String[] args) {
         initGraph();
-        System.out.println(getSumTime());
-        //System.out.println(test());
+        //System.out.println(getSumTime());
+        System.out.println(test());
     }
 }
