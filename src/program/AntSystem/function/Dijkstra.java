@@ -69,7 +69,7 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        List<List<Integer>> res = ReadFile.readFile("E:\\workspace\\IdeaProject\\JavaProject\\src\\program\\AntSystem\\single.txt");
+        List<List<Double>> res = ReadFile.readFile("src/program/AntSystem/testgraph/single.txt");
         graph = ReadFile.initialSingleGraph(res);
         staticGraph=ReadFile.initialSingleGraph(res);
         flow=new int[graph.nodeNum][graph.nodeNum];
@@ -107,7 +107,7 @@ public class Dijkstra {
 
     public static double test(){
         double sumTime=0d;
-        List<List<Integer>> path=ReadFile.readFile("src/program/AntSystem/path.txt");
+        List<List<Integer>> path=ReadFile.readIntData("src/program/AntSystem/testgraph/path.txt");
         for (int i=0;i<path.size();++i){
             int s=path.get(i).get(0);
             for (int j=1;j<path.get(i).size();++j){
@@ -122,7 +122,7 @@ public class Dijkstra {
 
     public static void main(String[] args) {
         initGraph();
-        //System.out.println(getSumTime());
-        System.out.println(test());
+        System.out.println(getSumTime());
+        //System.out.println(test());
     }
 }

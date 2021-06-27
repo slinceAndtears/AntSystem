@@ -16,6 +16,7 @@ import java.util.*;
  * 两个分区之间的权值，就设置为他们相连边的数量
  * 找到合适的图数据
  * 全局信息素更新机制
+ * 寻找合适的起始区域和终点区域
  * */
 public class Aco {
     public static final int ANT_NUM =500;//蚂蚁数量
@@ -38,9 +39,10 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵
     public static void initialGraph() {//将文件中获取的二维数组，转化为图对象
+        String fileName="src/program/AntSystem/friedrichshain/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
-        ReadFile.initialSubGraph(allGraph, subGraph);
+        ReadFile.initialSubGraph(allGraph, subGraph,fileName);
         graph = subGraph.areaGraph;
         pheromone = new double[graph.nodeNum][graph.nodeNum];
         flow = new int[allGraph.nodeNum][allGraph.nodeNum];
@@ -233,18 +235,18 @@ public class Aco {
 
     public static void runACS(){
         List<List<Integer>> allPath=acoDemo();
-        System.out.println(allPath);
+        //System.out.println(allPath);
         System.out.println(sumTime);
-        savePath(allPath);
+        //savePath(allPath);
     }
 
     public static void test(){
         initialGraph();
-        System.out.println(getConnectNode(0,1));
+        System.out.println(subGraph.subGraphs.get(17).getAllVertex());
     }
 
     public static void main(String[] args) {
-        //test();
-        runACS();
+        test();
+        //runACS();
     }
 }
