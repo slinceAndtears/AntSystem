@@ -17,6 +17,9 @@ import java.util.*;
  * 找到合适的图数据
  * 全局信息素更新机制
  * 寻找合适的起始区域和终点区域
+ *
+ * 223所在的区域，为起始   0
+ * 142 所在的区域，为终点  20
  * */
 public class Aco {
     public static final int ANT_NUM =500;//蚂蚁数量
@@ -37,8 +40,8 @@ public class Aco {
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
 
-    //从文件中导入图 然后初始化信息素和流量矩阵
-    public static void initialGraph() {//将文件中获取的二维数组，转化为图对象
+    //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
+    public static void initialGraph() {
         String fileName="src/program/AntSystem/friedrichshain/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
