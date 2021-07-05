@@ -20,9 +20,12 @@ import java.util.*;
  *
  * 223所在的区域，为起始   0
  * 129 所在的区域，为终点  6
+ * 目前的问题 如果同层之前可以随意走，那么会走回头路，小概率会一直循环
+ * 如果同层之前也不能走，那么有概率会到不了终点。
+ * 解决办法 手动绘制分区图？？ 以后不太现实
  * */
 public class Aco {
-    public static final int ANT_NUM =500;//蚂蚁数量
+    public static final int ANT_NUM = 100;//蚂蚁数量
     public static final int MAX_ITE = 1;//最大迭代次数
     public static final double T0 = 0.002d;//初始信息素含量
     public static final double B = 3d;//启发式信息计算公式中的参数β
@@ -35,17 +38,17 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.01d;//蚂蚁的速度
     public static final int w = 3;//全局信息素更新的排序参数
-    public static final double W=0.006d;//速度-流量的参数
+    public static final double W = 0.006d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
     public static void initialGraph() {
-        String fileName="src/program/AntSystem/friedrichshain/finalLink.txt";
+        String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
-        ReadFile.initialSubGraph(allGraph, subGraph,fileName);
+        ReadFile.initialSubGraph(allGraph, subGraph, fileName);
         graph = subGraph.areaGraph;
         pheromone = new double[graph.nodeNum][graph.nodeNum];
         flow = new int[allGraph.nodeNum][allGraph.nodeNum];
@@ -56,8 +59,19 @@ public class Aco {
 
     //蚂蚁根据当前顶线选择下一节点
     public static int nextStep(int now_node) {
-        List<Integer> nbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
+        List<Integer> allNbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
         //在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
+        Map<Integer, Integer> level = BFS.bfs(graph, 0);//目前所有的起点都在区域0
+        List<Integer> nbr = new ArrayList<>();//经过层次遍历之后，可以走的邻居
+        for (Integer x : allNbr) {
+            if (level.get(now_node) < level.get(x)) {
+                nbr.add(x);
+            }
+        }
+        if (nbr.size()==0){
+            System.out.println("起点为： "+now_node+"没有路可以走");
+            return -1;//如果没有路可以走
+        }
         double[] state = new double[nbr.size()];//邻居的转移信息
         double n_ij = 0d;
         double t_ij = 0d;
@@ -92,7 +106,7 @@ public class Aco {
                 }
             }
         }
-        return -1;//如果没有路可以走
+        return -1;
     }
 
     public static double getVelocity(int start, int end) {
@@ -138,25 +152,25 @@ public class Aco {
     }
 
     public static void update() {//更新新信息素
-        for (int i=0;i<pheromone.length;++i){
-            for (int j=0;j<pheromone[i].length;++j){
-                if (subGraph.areaGraph.vertex.get(i).getWeight(j)!=Integer.MAX_VALUE){
-                    double t=0d;
+        for (int i = 0; i < pheromone.length; ++i) {
+            for (int j = 0; j < pheromone[i].length; ++j) {
+                if (subGraph.areaGraph.vertex.get(i).getWeight(j) != Integer.MAX_VALUE) {
+                    double t = 0d;
 
-                    pheromone[i][j]=(1-p)*pheromone[i][j]+t;
+                    pheromone[i][j] = (1 - p) * pheromone[i][j] + t;
                 }
             }
         }
     }
 
     //获取从起始分区到达终点分区的所有点
-    public static List<Integer> getConnectNode(int start_area,int end_area){
-        List<Integer> connect=new ArrayList<>();
-        List<Integer> startNode=subGraph.subGraphs.get(start_area).getAllVertex();
-        List<Integer> endNode=subGraph.subGraphs.get(end_area).getAllVertex();
-        for (Integer x:startNode){
-            for (Integer y:endNode){
-                if (allGraph.vertex.get(x).getWeight(y)!=Integer.MAX_VALUE){
+    public static List<Integer> getConnectNode(int start_area, int end_area) {
+        List<Integer> connect = new ArrayList<>();
+        List<Integer> startNode = subGraph.subGraphs.get(start_area).getAllVertex();
+        List<Integer> endNode = subGraph.subGraphs.get(end_area).getAllVertex();
+        for (Integer x : startNode) {
+            for (Integer y : endNode) {
+                if (allGraph.vertex.get(x).getWeight(y) != Integer.MAX_VALUE) {
                     connect.add(x);
                     break;
                 }
@@ -169,7 +183,7 @@ public class Aco {
     public static List<List<Integer>> acoDemo() {
         Random r = new Random();
         initialGraph();
-        List<List<Integer>> allPath=new ArrayList<>();
+        List<List<Integer>> allPath = new ArrayList<>();
         for (int k = 0; k < MAX_ITE; ++k) {
             for (int i = 0; i < ANT_NUM; ++i) {
                 int end_node = 3;
@@ -182,13 +196,13 @@ public class Aco {
                     if (now_area != end_area) {
                         next_area = nextStep(now_area);
                         //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
-                        List<Integer> connect=getConnectNode(now_area,next_area);
+                        List<Integer> connect = getConnectNode(now_area, next_area);
                         next_node = connect.get(r.nextInt(connect.size()));
                     } else {
                         next_node = end_node;
                     }
                     List<Integer> path = Dijkstra.dijkstra(subGraph.subGraphs.get(now_area), now_node, next_node);
-                    localPheUpdate(now_area,next_area);
+                    localPheUpdate(now_area, next_area);
                     now_area = next_area;
                     now_node = next_node;
                     if (now_node != end_node) {
@@ -227,7 +241,7 @@ public class Aco {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 writer.close();
             } catch (IOException e) {
@@ -236,31 +250,32 @@ public class Aco {
         }
     }
 
-    public static void runACS(){
-        List<List<Integer>> allPath=acoDemo();
+    public static void runACS() {
+        List<List<Integer>> allPath = acoDemo();
         //System.out.println(allPath);
         System.out.println(sumTime);
         //savePath(allPath);
     }
 
-    public static void test(){
+    //在两个区域内随机生成起点和终点
+    public static void test() {
         initialGraph();
-        List<Integer> zero=subGraph.subGraphs.get(0).getAllVertex();
-        List<Integer> six=subGraph.subGraphs.get(6).getAllVertex();
-        List<Integer> start=new ArrayList<>();
-        List<Integer> end=new ArrayList<>();
-        Random r=new Random();
-        for (int i=0;i<ANT_NUM;++i){
+        List<Integer> zero = subGraph.subGraphs.get(0).getAllVertex();
+        List<Integer> six = subGraph.subGraphs.get(6).getAllVertex();
+        List<Integer> start = new ArrayList<>();
+        List<Integer> end = new ArrayList<>();
+        Random r = new Random();
+        for (int i = 0; i < ANT_NUM; ++i) {
             start.add(zero.get(r.nextInt(zero.size())));
             end.add(six.get(r.nextInt(six.size())));
         }
-        String fileName="src/program/AntSystem/friedrichshain/startend";
-        BufferedWriter writer=null;
+        String fileName = "src/program/AntSystem/friedrichshain/startend";
+        BufferedWriter writer = null;
         try {
-            writer=new BufferedWriter(new FileWriter(fileName));
-            StringBuilder s=new StringBuilder();
-            StringBuilder e=new StringBuilder();
-            for (int i=0;i<start.size();++i){
+            writer = new BufferedWriter(new FileWriter(fileName));
+            StringBuilder s = new StringBuilder();
+            StringBuilder e = new StringBuilder();
+            for (int i = 0; i < start.size(); ++i) {
                 s.append(start.get(i));
                 s.append(' ');
                 e.append(end.get(i));
@@ -269,13 +284,28 @@ public class Aco {
             s.append('\n');
             writer.write(s.toString());
             writer.write(e.toString());
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public static void testLevel() {
+        initialGraph();
+/*        int start=15;
+        List<Integer> nbr=graph.vertex.get(start).getAllNbr();
+        for (Integer x :nbr){
+            System.out.println(graph.vertex.get(start).getWeight(x));
+        }*/
+        int start=0;
+        int end=6;
+        while (start!=end){
+            start=nextStep(start);
+            System.out.println(start);
+        }
+    }
+
     public static void main(String[] args) {
-        test();
+        testLevel();
         //runACS();
     }
 }
