@@ -1,6 +1,7 @@
 package program.AntSystem.function;
 
 import program.AntSystem.graph.Graph;
+import program.AntSystem.graph.SubGraphs;
 
 import java.util.*;
 
@@ -10,14 +11,14 @@ import java.util.*;
  * 时间的计算公式 还是按照蚁群的算
  * */
 public class Dijkstra {
-    private static final int ANT_NUM = 500;
+    private static final int ANT_NUM = 100;
     private static Graph graph;
     //private static double INCREASE = 0.2d;
-    private static final int START = 0;
-    private static final int END = 3;
-    private static final double VELOCITY = 0.5d;
+    private static final int START = 223;
+    private static final int END = 129;
+    private static final double VELOCITY = 2d;
     private static int[][] flow;
-    public static final double W=0.01d;//速度-流量的参数
+    public static final double W=0.006d;//速度-流量的参数
     public static Graph staticGraph;
 
     //id 为起始节点
@@ -69,9 +70,11 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        List<List<Double>> res = ReadFile.readFile("src/program/AntSystem/testgraph/single.txt");
-        graph = ReadFile.initialSingleGraph(res);
-        staticGraph=ReadFile.initialSingleGraph(res);
+        String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
+        graph=new Graph();
+        staticGraph=new Graph();
+        ReadFile.initialSubGraph(graph,new SubGraphs(),fileName);
+        ReadFile.initialSubGraph(staticGraph,new SubGraphs(),fileName);
         flow=new int[graph.nodeNum][graph.nodeNum];
     }
 
@@ -105,24 +108,12 @@ public class Dijkstra {
         return sumTime;
     }
 
-    public static double test(){
-        double sumTime=0d;
-        List<List<Integer>> path=ReadFile.readIntData("src/program/AntSystem/testgraph/path.txt");
-        for (int i=0;i<path.size();++i){
-            int s=path.get(i).get(0);
-            for (int j=1;j<path.get(i).size();++j){
-                sumTime+=getTime(s,path.get(i).get(j));
-                changeWeight(s,path.get(i).get(j));
-                ++flow[s][path.get(i).get(j)];
-                s=path.get(i).get(j);
-            }
-        }
-        return sumTime;
+    public static void test(){
+        initGraph();
+        System.out.println(getSumTime());
     }
 
     public static void main(String[] args) {
-        initGraph();
-        System.out.println(getSumTime());
-        //System.out.println(test());
+        test();
     }
 }

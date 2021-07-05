@@ -19,7 +19,7 @@ import java.util.*;
  * 寻找合适的起始区域和终点区域
  *
  * 223所在的区域，为起始   0
- * 142 所在的区域，为终点  20
+ * 129 所在的区域，为终点  6
  * */
 public class Aco {
     public static final int ANT_NUM =500;//蚂蚁数量
@@ -33,9 +33,9 @@ public class Aco {
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 0.5d;//蚂蚁的速度
+    public static final double VELOCITY = 0.01d;//蚂蚁的速度
     public static final int w = 3;//全局信息素更新的排序参数
-    public static final double W=0.01d;//速度-流量的参数
+    public static final double W=0.006d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
@@ -57,7 +57,7 @@ public class Aco {
     //蚂蚁根据当前顶线选择下一节点
     public static int nextStep(int now_node) {
         List<Integer> nbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
-        //需要检查邻居的可行性吗？？？？不检查了
+        //在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         double[] state = new double[nbr.size()];//邻居的转移信息
         double n_ij = 0d;
         double t_ij = 0d;
@@ -245,7 +245,33 @@ public class Aco {
 
     public static void test(){
         initialGraph();
-        System.out.println(subGraph.subGraphs.get(17).getAllVertex());
+        List<Integer> zero=subGraph.subGraphs.get(0).getAllVertex();
+        List<Integer> six=subGraph.subGraphs.get(6).getAllVertex();
+        List<Integer> start=new ArrayList<>();
+        List<Integer> end=new ArrayList<>();
+        Random r=new Random();
+        for (int i=0;i<ANT_NUM;++i){
+            start.add(zero.get(r.nextInt(zero.size())));
+            end.add(six.get(r.nextInt(six.size())));
+        }
+        String fileName="src/program/AntSystem/friedrichshain/startend";
+        BufferedWriter writer=null;
+        try {
+            writer=new BufferedWriter(new FileWriter(fileName));
+            StringBuilder s=new StringBuilder();
+            StringBuilder e=new StringBuilder();
+            for (int i=0;i<start.size();++i){
+                s.append(start.get(i));
+                s.append(' ');
+                e.append(end.get(i));
+                e.append(' ');
+            }
+            s.append('\n');
+            writer.write(s.toString());
+            writer.write(e.toString());
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {

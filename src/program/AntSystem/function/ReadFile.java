@@ -101,7 +101,7 @@ public class ReadFile {
             graph.addVertex(end_node);
 
             graph.vertex.get(start_node).addNbr(end_node, weight);
-            //graph.vertex.get(end_node).addNbr(start_node,weight);
+            graph.vertex.get(end_node).addNbr(start_node,weight);
             if (subGraphs.subGraphs.get(start_area) == null) {
                 subGraphs.subGraphs.put(start_area, new SubGraph(start_area));
             }
@@ -112,7 +112,7 @@ public class ReadFile {
             subGraphs.subGraphs.get(end_area).addVertex(end_node);
             if (start_area == end_area) {
                 subGraphs.subGraphs.get(start_area).vertex.get(start_node).addNbr(end_node, weight);
-                //subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
+                subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
             }
             //在此处可以导入分区图
             if (!area.vertex.containsKey(start_area)) {
@@ -121,13 +121,18 @@ public class ReadFile {
             if (!area.vertex.containsKey(end_area)) {
                 area.addVertex(end_area);
             }
+            //如果没有边，那么权值为1，如果已经有边，那么权值加1
             if (start_area != end_area) {
-                area.vertex.get(start_area).addNbr(end_area, 1);
+                double w=area.vertex.get(start_area).getWeight(end_area);
+                if (w==Integer.MAX_VALUE){
+                    area.vertex.get(start_area).addNbr(end_area,1d);
+                }else {
+                    area.vertex.get(start_area).addNbr(end_area,w+1);
+                }
             }
 
         }
         //设置分区图的权值
-
         subGraphs.areaGraph = area;
 /*        //分区之间的联通性 ,目前建议都联通 不做特殊处理 还是手动导入？？？
         for (int i = 0; i < res.size(); ++i) {
@@ -142,10 +147,14 @@ public class ReadFile {
     }
 
     public static double distance(List<Double> x, List<Double> y) {
-        double xx = x.get(0) * 100;
-        double xy = x.get(1) * 100;
-        double yx = y.get(0) * 100;
-        double yy = y.get(1) * 100;
+        //double xx = x.get(0) * 100;
+        //double xy = x.get(1) * 100;
+        //double yx = y.get(0) * 100;
+        //double yy = y.get(1) * 100;
+        double xx = x.get(0);
+        double xy = x.get(1);
+        double yx = y.get(0);
+        double yy = y.get(1);
         return Math.sqrt((xx - yx) * (xx - yx) + (xy - yy) * (xy - yy));
     }
 
@@ -185,4 +194,7 @@ public class ReadFile {
         }
     }
 
+    public static void main(String[] args) {
+        handleData();
+    }
 }
