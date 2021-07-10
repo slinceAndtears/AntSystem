@@ -36,13 +36,14 @@ public class Aco {
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 0.01d;//蚂蚁的速度
+    public static final double VELOCITY = 0.1d;//蚂蚁的速度
     public static final int w = 3;//全局信息素更新的排序参数
-    public static final double W = 0.006d;//速度-流量的参数
+    public static final double W = 0.01d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
-
+    public static List<Integer> startNodeList;
+    public static List<Integer> endNodeList;
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
     public static void initialGraph() {
         String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
@@ -55,19 +56,16 @@ public class Aco {
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
+        fileName="src/program/AntSystem/friedrichshain/startend.txt";
+        List<List<Integer>> nodes=ReadFile.readIntData(fileName);
+        startNodeList=nodes.get(0);
+        endNodeList=nodes.get(1);
     }
 
     //蚂蚁根据当前顶线选择下一节点
     public static int nextStep(int now_node) {
-        List<Integer> allNbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
+        List<Integer> nbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
         //在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
-        Map<Integer, Integer> level = BFS.bfs(graph, 0);//目前所有的起点都在区域0
-        List<Integer> nbr = new ArrayList<>();//经过层次遍历之后，可以走的邻居
-        for (Integer x : allNbr) {
-            if (level.get(now_node) < level.get(x)) {
-                nbr.add(x);
-            }
-        }
         if (nbr.size()==0){
             System.out.println("起点为： "+now_node+"没有路可以走");
             return -1;//如果没有路可以走
@@ -223,7 +221,7 @@ public class Aco {
         }
         return allPath;
     }
-
+    //讲路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
         String fileName = "src/program/AntSystem/path.txt";
         BufferedWriter writer = null;
@@ -269,7 +267,7 @@ public class Aco {
             start.add(zero.get(r.nextInt(zero.size())));
             end.add(six.get(r.nextInt(six.size())));
         }
-        String fileName = "src/program/AntSystem/friedrichshain/startend";
+        String fileName = "src/program/AntSystem/friedrichshain/startend.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -282,24 +280,27 @@ public class Aco {
                 e.append(' ');
             }
             s.append('\n');
-            writer.write(s.toString());
-            writer.write(e.toString());
+            System.out.println(s);
+            //writer.write(s.toString());
+            //writer.write(e.toString());
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static void testLevel() {
         initialGraph();
-        for (Integer x :subGraph.areaGraph.getAllVertex()){
-            for (Integer y:subGraph.areaGraph.vertex.get(x).getAllNbr()){
-                System.out.println(x+" "+y+" "+subGraph.areaGraph.vertex.get(x).getWeight(y));
-            }
-        }
+        System.out.println();
     }
 
     public static void main(String[] args) {
-        testLevel();
+        //test();
         //runACS();
     }
 }
