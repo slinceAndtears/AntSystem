@@ -89,7 +89,7 @@ public class ReadFile {
         int end_node = 0;
         int end_area = 0;
         double weight = 0d;
-        Graph area = new Graph();//分区图
+        Graph area = initialSingleGraph(readFile("src/program/AntSystem/friedrichshain/graph.txt"));
         for (int i = 0; i < res.size(); ++i) {
             start_node = (int) Math.round(res.get(i).get(0));
             start_area = (int) Math.round(res.get(i).get(1));
@@ -115,35 +115,27 @@ public class ReadFile {
                 subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
             }
             //在此处可以导入分区图
-            if (!area.vertex.containsKey(start_area)) {
+/*            if (!area.vertex.containsKey(start_area)) {
                 area.addVertex(start_area);
             }
             if (!area.vertex.containsKey(end_area)) {
                 area.addVertex(end_area);
-            }
+            }*/
             //如果没有边，那么权值为1，如果已经有边，那么权值加1
-            if (start_area != end_area) {
+            if (start_area != end_area &&start_area!=15&&start_area!=22&&end_area!=15&&end_area!=22) {
                 double w=area.vertex.get(start_area).getWeight(end_area);
-                if (w==Integer.MAX_VALUE){
-                    area.vertex.get(start_area).addNbr(end_area,1d);
-                }else {
-                    area.vertex.get(start_area).addNbr(end_area,w+1);
+                if (w!=Integer.MAX_VALUE) {
+                    area.vertex.get(start_area).addNbr(end_area, w + 1);
                 }
             }
-
+            if (start_area==9 &&end_area==14){
+                System.out.println("9-------14");
+                System.out.println("start_node"+start_node);
+                System.out.println("end_node"+end_node);
+            }
         }
         //设置分区图的权值
         subGraphs.areaGraph = area;
-/*        //分区之间的联通性 ,目前建议都联通 不做特殊处理 还是手动导入？？？
-        for (int i = 0; i < res.size(); ++i) {
-            int start = res.get(i).get(0);
-            int end = res.get(i).get(1);
-            List<Integer> connect = new ArrayList<>();
-            for (int j = 2; j < res.get(i).size(); ++j) {
-                connect.add(res.get(i).get(j));
-            }
-            subGraphs.subGraphs.get(start).connect.put(end, connect);
-        }*/
     }
 
     public static double distance(List<Double> x, List<Double> y) {
@@ -195,6 +187,8 @@ public class ReadFile {
     }
 
     public static void main(String[] args) {
-        handleData();
+        List<List<Double>> coordinate=readFile("src/program/AntSystem/friedrichshain/coordinate.txt");
+        System.out.println(distance(coordinate.get(18),coordinate.get(222)));
+        //handleData();
     }
 }

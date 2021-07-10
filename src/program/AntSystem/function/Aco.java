@@ -291,16 +291,10 @@ public class Aco {
 
     public static void testLevel() {
         initialGraph();
-/*        int start=15;
-        List<Integer> nbr=graph.vertex.get(start).getAllNbr();
-        for (Integer x :nbr){
-            System.out.println(graph.vertex.get(start).getWeight(x));
-        }*/
-        int start=0;
-        int end=6;
-        while (start!=end){
-            start=nextStep(start);
-            System.out.println(start);
+        for (Integer x :subGraph.areaGraph.getAllVertex()){
+            for (Integer y:subGraph.areaGraph.vertex.get(x).getAllNbr()){
+                System.out.println(x+" "+y+" "+subGraph.areaGraph.vertex.get(x).getWeight(y));
+            }
         }
     }
 
