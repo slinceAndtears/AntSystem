@@ -104,7 +104,7 @@ public class Dijkstra {
         for (int i = 0; i < ANT_NUM; ++i) {
             int start = startNodeList.get(i);
             int end = endNodeList.get(i);
-            List<Integer> path = dijkstra(graph, start, end);
+            List<Integer> path = dijkstra(graph, start, end);//迪杰斯特拉算法挑选路径
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
                 sumTime += getTime(s, path.get(j));

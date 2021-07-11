@@ -15,8 +15,7 @@ import java.util.*;
  * 两个分区之间的连通性，目前设置所有点都可以，
  * 两个分区之间的权值，就设置为他们相连边的数量
  * 找到合适的图数据
- * 全局信息素更新机制
- * 寻找合适的起始区域和终点区域
+ * 全局信息素更新机制 tudo
  *
  * 223所在的区域，为起始   0
  * 129 所在的区域，为终点  6
@@ -46,6 +45,7 @@ public class Aco {
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength=0d;//通过路径的总长度
+
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
     public static void initialGraph() {
         String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
@@ -192,6 +192,7 @@ public class Aco {
             int next_area = 0;
             int now_node = startNodeList.get(i);
             int next_node = 0;
+            List<Integer> oneAntPath=new ArrayList<>();//一只蚂蚁从起点到终点的路径
             while (now_node != end_node) {
                 if (now_area != end_area) {
                     next_area = nextStep(now_area);//根据蚁群算法挑选出下一个区域
@@ -219,14 +220,19 @@ public class Aco {
                     path.add(now_node);
                 }
                 addTime(path);
-                allPath.add(path);
+                //List返回的都是Integer对象，所以需要使用equals来进行比较
+                if (!path.get(0).equals(startNodeList.get(i))){
+                    Integer t=path.remove(0);
+                }
+                oneAntPath.addAll(path);
             }
+            allPath.add(oneAntPath);
         }
         return allPath;
     }
     //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
-        String fileName = "src/program/AntSystem/path.txt";
+        String fileName = "src/program/AntSystem/friedrichshain/finalPath.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
