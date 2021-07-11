@@ -16,13 +16,19 @@ import java.util.*;
  * 两个分区之间的权值，就设置为他们相连边的数量
  * 找到合适的图数据
  * 全局信息素更新机制 tudo
- *
+ * 修改速度-流量的公式
  * 223所在的区域，为起始   0
  * 129 所在的区域，为终点  6
  * 目前的问题 如果同层之前可以随意走，那么会走回头路，小概率会一直循环
  * 如果同层之前也不能走，那么有概率会到不了终点。
  * 解决办法 手动绘制分区图？？ 以后不太现实
  * 统计总路程
+ * 释放的信息素的倒数，通过总时间的倒数。
+ * 每个蚂蚁释放的信息素数量，通过的时间
+ *
+ * Tb全局最优蚂蚁的时间
+ * Tk 本次迭代 的top w 个蚂蚁
+ * 本次迭代最优的k个蚂蚁和全局最优的蚂蚁，如何计算获取
  * */
 public class Aco {
     public static final int ANT_NUM = 100;//蚂蚁数量
@@ -37,7 +43,7 @@ public class Aco {
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.1d;//蚂蚁的速度
-    public static final int w = 3;//全局信息素更新的排序参数
+    public static final int w = 10;//全局信息素更新的排序参数
     public static final double W = 0.001d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
@@ -45,8 +51,12 @@ public class Aco {
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength=0d;//通过路径的总长度
+    public static double globalBestAntTime=Integer.MAX_VALUE;
+    public static List<Integer> globalBestAntPath;//全局最优蚂蚁得路径
+    public static double[] antPathTime;//
+    public static double[] antPhe;
 
-    //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
+    //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
         String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
         subGraph = new SubGraphs();
@@ -62,6 +72,9 @@ public class Aco {
         List<List<Integer>> nodes=ReadFile.readIntData(fileName);
         startNodeList=nodes.get(0);
         endNodeList=nodes.get(1);
+        antPathTime=new double[ANT_NUM];
+        antPhe=new double[ANT_NUM];
+        globalBestAntPath=new ArrayList<>();
     }
 
     //蚂蚁根据当前顶线选择下一节点
@@ -117,7 +130,7 @@ public class Aco {
 
     public static double addTime(List<Integer> path) {
         if (path.size() < 2) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("路径长度小于2");
         }
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
@@ -152,12 +165,17 @@ public class Aco {
         System.out.println(allAntPath.get(0));
     }
 
-    public static void update() {//更新新信息素
+    //全局信息素更新，每跑完一代之后执行
+    public static void update() {
         for (int i = 0; i < pheromone.length; ++i) {
             for (int j = 0; j < pheromone[i].length; ++j) {
                 if (subGraph.areaGraph.vertex.get(i).getWeight(j) != Integer.MAX_VALUE) {
                     double t = 0d;
-
+                    for(int k=1;k<w;++k){
+                        double Tk=0d;//通过的总时间的倒数
+                        double b=0d;//释放信息素
+                        t=t+(w-k)*+w*b;
+                    }
                     pheromone[i][j] = (1 - p) * pheromone[i][j] + t;
                 }
             }
