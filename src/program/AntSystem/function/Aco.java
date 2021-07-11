@@ -23,14 +23,15 @@ import java.util.*;
  * 目前的问题 如果同层之前可以随意走，那么会走回头路，小概率会一直循环
  * 如果同层之前也不能走，那么有概率会到不了终点。
  * 解决办法 手动绘制分区图？？ 以后不太现实
+ * 统计总路程
  * */
 public class Aco {
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 1;//最大迭代次数
+    public static final int MAX_ITE = 10;//最大迭代次数
     public static final double T0 = 0.002d;//初始信息素含量
     public static final double B = 3d;//启发式信息计算公式中的参数β
     public static final double C = 0.2d;//全局信息素更新的参数
-    public static final double q0 = 0.5d;//轮盘赌与贪心的阈值
+    public static final double q0 = 0.1d;//轮盘赌与贪心的阈值 小于该值则采用贪心
     public static Graph graph;//图数据对象 使用邻接表存储
     public static SubGraphs subGraph;//所有的子图
     public static double[][] pheromone;//信息素矩阵
@@ -38,12 +39,13 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.1d;//蚂蚁的速度
     public static final int w = 3;//全局信息素更新的排序参数
-    public static final double W = 0.01d;//速度-流量的参数
+    public static final double W = 0.001d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
+    public static double pathLength=0d;//通过路径的总长度
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，广度优先
     public static void initialGraph() {
         String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
@@ -122,6 +124,7 @@ public class Aco {
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
             sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            pathLength+=allGraph.vertex.get(start).getWeight(path.get(i));
             start = path.get(i);
         }
         return sumTime;
@@ -182,46 +185,46 @@ public class Aco {
         Random r = new Random();
         initialGraph();
         List<List<Integer>> allPath = new ArrayList<>();
-        for (int k = 0; k < MAX_ITE; ++k) {
-            for (int i = 0; i < ANT_NUM; ++i) {
-                int end_node = 3;
-                int end_area = 1;
-                int now_area = 0;
-                int next_area = 0;
-                int now_node = 0;
-                int next_node = 0;
-                while (now_node != end_node) {
-                    if (now_area != end_area) {
-                        next_area = nextStep(now_area);
-                        //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
-                        List<Integer> connect = getConnectNode(now_area, next_area);
-                        next_node = connect.get(r.nextInt(connect.size()));
-                    } else {
-                        next_node = end_node;
-                    }
-                    List<Integer> path = Dijkstra.dijkstra(subGraph.subGraphs.get(now_area), now_node, next_node);
-                    localPheUpdate(now_area, next_area);
-                    now_area = next_area;
-                    now_node = next_node;
-                    if (now_node != end_node) {
-                        List<Integer> nbr = allGraph.vertex.get(now_node).getAllNbr();
-                        List<Integer> connectNextArea = new ArrayList<>();
-                        for (Integer x : nbr) {
-                            if (subGraph.subGraphs.get(next_area).vertex.containsKey(x)) {
-                                connectNextArea.add(x);
-                            }
-                        }
-                        now_node = connectNextArea.get(r.nextInt(connectNextArea.size()));
-                        path.add(now_node);
-                    }
-                    addTime(path);
-                    allPath.add(path);
+        for (int i = 0; i < ANT_NUM; ++i) {
+            int end_node = endNodeList.get(i);
+            int end_area = 6;
+            int now_area = 0;
+            int next_area = 0;
+            int now_node = startNodeList.get(i);
+            int next_node = 0;
+            while (now_node != end_node) {
+                if (now_area != end_area) {
+                    next_area = nextStep(now_area);//根据蚁群算法挑选出下一个区域
+                    //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
+                    List<Integer> connect = getConnectNode(now_area, next_area);
+                    next_node = connect.get(r.nextInt(connect.size()));
+                } else {
+                    next_node = end_node;
                 }
+                //List<Integer> path = Dijkstra.dijkstra(subGraph.subGraphs.get(now_area), now_node, next_node);
+                //目前使用大图来算区间内的路径，因为分区不合理，区间内的点不在区间内不互通
+                List<Integer> path = Dijkstra.dijkstra(allGraph, now_node, next_node);
+                localPheUpdate(now_area, next_area);
+                now_area = next_area;
+                now_node = next_node;
+                if (now_node != end_node) {
+                    List<Integer> nbr = allGraph.vertex.get(now_node).getAllNbr();
+                    List<Integer> connectNextArea = new ArrayList<>();
+                    for (Integer x : nbr) {
+                        if (subGraph.subGraphs.get(next_area).vertex.containsKey(x)) {
+                            connectNextArea.add(x);
+                        }
+                    }
+                    now_node = connectNextArea.get(r.nextInt(connectNextArea.size()));
+                    path.add(now_node);
+                }
+                addTime(path);
+                allPath.add(path);
             }
         }
         return allPath;
     }
-    //讲路径保存至txt文件
+    //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
         String fileName = "src/program/AntSystem/path.txt";
         BufferedWriter writer = null;
@@ -249,14 +252,14 @@ public class Aco {
     }
 
     public static void runACS() {
-        List<List<Integer>> allPath = acoDemo();
-        //System.out.println(allPath);
-        System.out.println(sumTime);
-        //savePath(allPath);
+        for (int i=0;i<MAX_ITE;++i){
+            acoDemo();
+            System.out.println(pathLength/sumTime);
+        }
     }
 
     //在两个区域内随机生成起点和终点
-    public static void test() {
+    public static void generateStartAndEndNode() {
         initialGraph();
         List<Integer> zero = subGraph.subGraphs.get(0).getAllVertex();
         List<Integer> six = subGraph.subGraphs.get(6).getAllVertex();
@@ -296,11 +299,21 @@ public class Aco {
 
     public static void testLevel() {
         initialGraph();
-        System.out.println();
+        List<Integer> paths=Dijkstra.dijkstra(allGraph,178,189);
+        addTime(paths);
+        System.out.println(sumTime);
+    }
+
+    public static void testFlow(){
+        initialGraph();
+        for (int i=0;i<100;++i){
+            flow[178][201]=i;
+            System.out.println(getVelocity(178,201));
+        }
     }
 
     public static void main(String[] args) {
-        //test();
-        //runACS();
+        //testLevel();
+        runACS();
     }
 }

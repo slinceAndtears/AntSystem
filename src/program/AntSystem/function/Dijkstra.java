@@ -18,11 +18,11 @@ public class Dijkstra {
     //private static final int END = 129;
     private static final double VELOCITY = 0.1d;
     private static int[][] flow;
-    public static final double W = 0.01d;//速度-流量的参数
+    public static final double W = 0.001d;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
-
+    public static double pathLength=0d;
     //id 为起始节点
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -108,6 +108,7 @@ public class Dijkstra {
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
                 sumTime += getTime(s, path.get(j));
+                pathLength += staticGraph.vertex.get(s).getWeight(path.get(j));
                 changeWeight(s, path.get(j));
                 ++flow[s][path.get(j)];
                 s = path.get(j);
@@ -119,6 +120,8 @@ public class Dijkstra {
     public static void test() {
         initGraph();
         System.out.println(getSumTime());
+        System.out.println(pathLength);
+        //List<Integer> path=dijkstra(staticGraph,178,189);
     }
 
     public static void main(String[] args) {
