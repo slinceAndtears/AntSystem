@@ -1,9 +1,17 @@
 package program.test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import program.AntSystem.function.Solution;
 
+import java.util.*;
+
+class ListNode{
+    int val;
+    ListNode next;
+    ListNode(){}
+    ListNode(int val){
+        this.val=val;
+    }
+}
 public class LeetCode {
     static int hIndex(int[] citations) {
         //6 5 3 1 0
@@ -71,9 +79,126 @@ public class LeetCode {
         return res;
     }
 
+    static int maxLen(String s,int left,int right) {
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            --left;
+            ++right;
+        }
+        return right - left-1;
+    }
+    // 1 2
+    static String longestPalindrome(String s){
+        int max=0;
+        int resLeft=0;
+        int resRight=0;
+        for (int i=0;i<s.length();++i){
+            int one=maxLen(s,i,i);//奇数
+            if (one>max){
+                max=one;
+                resLeft=i-one/2;
+                resRight=i+one/2;
+            }
+            int two=maxLen(s,i,i+1);//偶数
+            if (two>max){
+                max=two;
+                resLeft=i - two/2 + 1;
+                resRight= i + two/2;
+            }
+        }
+        return s.substring(resLeft,resRight+1);
+    }
+
+    static String convert(String s,int numRows) {
+        if (numRows==1){
+            return s;
+        }
+        List<StringBuilder> tmp = new ArrayList<>();
+        for (int i = 0; i < numRows; ++i) {
+            tmp.add(new StringBuilder());
+        }
+        int index = 0;
+        boolean tag = true;
+        for (int i = 0; i < s.length(); ++i) {
+            tmp.get(index).append(s.charAt(i));
+            if (tag) {
+                ++index;
+                if (index == numRows - 1) {
+                    tag = false;
+                }
+            } else {
+                --index;
+                if (index == 0) {
+                    tag = true;
+                }
+            }
+        }
+        StringBuilder res = new StringBuilder();
+        for (StringBuilder t : tmp) {
+            res.append(t);
+        }
+        return res.toString();
+    }
+
+    static List<List<Integer>> resp;
+    static boolean[] tag;
+    static void dfs(int[] nums,int cur,List<Integer> tmp){
+        if (cur==nums.length){
+            resp.add(tmp);
+            return;
+        }
+        for (int i=0;i<nums.length;++i){
+            if (!tag[i]){
+                List<Integer> t=new ArrayList<>(tmp);
+                t.add(nums[i]);
+                tag[i]=true;
+                dfs(nums,cur+1,t);
+                tag[i]=false;
+            }
+        }
+    }
+
+    static List<List<Integer>> permute(int[] nums){
+        resp=new ArrayList<>();
+        tag=new boolean[nums.length];
+        dfs(nums,0,new ArrayList<>());
+        return resp;
+    }
+
+    static int jump(int[] nums) {
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            for (int j = i + 1; j < Math.min(nums.length, i + nums[i] + 1); ++j) {
+                dp[j] = Math.min(dp[j], dp[i] + 1);
+            }
+        }
+        System.out.println(Arrays.toString(dp));
+        return dp[nums.length - 1];
+    }
+    static int jump1(int[] nums) {
+        int length = nums.length;
+        int end = 0;
+        int maxPosition = 0;
+        int step = 0;
+        for (int i = 0; i < length - 1; ++i) {
+            maxPosition = Math.max(maxPosition, i + nums[i]);
+            if (i == end) {
+                end = maxPosition;
+                ++step;
+            }
+        }
+        return step;
+    }
+
     static void test() {
-        int[] a={0,1,0,2,1,0,1,3,2,1,2,1};
-        System.out.println(trap(a));
+        List<List<Integer>> a=new ArrayList<>();
+        List<Integer> tmp=new ArrayList<>();
+        tmp.add(10);
+        a.add(tmp);
+        Solution s=new Solution(a,1,a);
+        a.get(0).add(100);
+        System.out.println(s.path);
     }
 
     public static void main(String[] args) {

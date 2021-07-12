@@ -26,13 +26,13 @@ import java.util.*;
  * 释放的信息素的倒数，通过总时间的倒数。
  * 每个蚂蚁释放的信息素数量，通过的时间
  *
- * Tb全局最优蚂蚁的时间
- * Tk 本次迭代 的top w 个蚂蚁
- * 本次迭代最优的k个蚂蚁和全局最优的蚂蚁，如何计算获取
+ * Tb 全局最优的蚁群所需的总时间
+ * Tk top w个蚁群
+ * 每轮迭代 10个解 ，top 2 的和最优的蚂蚁 可以释放信息素
  * */
 public class Aco {
-    public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 10;//最大迭代次数
+    public static final int ANT_NUM = 10;//蚂蚁数量
+    public static final int MAX_ITE = 1;//最大迭代次数
     public static final double T0 = 0.002d;//初始信息素含量
     public static final double B = 3d;//启发式信息计算公式中的参数β
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -43,18 +43,17 @@ public class Aco {
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.1d;//蚂蚁的速度
-    public static final int w = 10;//全局信息素更新的排序参数
+    public static final int w = 3;//全局信息素更新的排序参数
     public static final double W = 0.001d;//速度-流量的参数
     public static Graph allGraph;//整个图
-    public static double sumTime = 0;//通过的所有时间
+    //public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength=0d;//通过路径的总长度
-    public static double globalBestAntTime=Integer.MAX_VALUE;
-    public static List<Integer> globalBestAntPath;//全局最优蚂蚁得路径
-    public static double[] antPathTime;//
-    public static double[] antPhe;
+    public static Solution globalBestSolution;//全局最优蚂蚁的解
+    public static int Sn = 10;//每次迭代产生解的数量
+    public static PriorityQueue<Solution> topWAnt;
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
@@ -72,9 +71,17 @@ public class Aco {
         List<List<Integer>> nodes=ReadFile.readIntData(fileName);
         startNodeList=nodes.get(0);
         endNodeList=nodes.get(1);
-        antPathTime=new double[ANT_NUM];
-        antPhe=new double[ANT_NUM];
-        globalBestAntPath=new ArrayList<>();
+        globalBestSolution=new Solution(new ArrayList<>(),Integer.MAX_VALUE,new ArrayList<>());
+        topWAnt=new PriorityQueue<>(w - 1, new Comparator<Solution>() {
+            @Override
+            public int compare(Solution o1, Solution o2) {
+                if (o1.sumTime<o2.sumTime){
+                    return 1;
+                }else {
+                    return -1;
+                }
+            }
+        });
     }
 
     //蚂蚁根据当前顶线选择下一节点
@@ -132,6 +139,7 @@ public class Aco {
         if (path.size() < 2) {
             throw new IllegalArgumentException("路径长度小于2");
         }
+        double sumTime=0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
             double velocity = getVelocity(start, path.get(i));
@@ -165,7 +173,10 @@ public class Aco {
         System.out.println(allAntPath.get(0));
     }
 
-    //全局信息素更新，每跑完一代之后执行
+    /**
+     * 全局信息素更新，每跑完一代之后执行 一次将优先队列中的solution出队，然后全局更新
+     * 需要重复更新吗，首先计算出需要更新的数量 所以我的解 只用更新区域图就可以了
+     **/
     public static void update() {
         for (int i = 0; i < pheromone.length; ++i) {
             for (int j = 0; j < pheromone[i].length; ++j) {
@@ -198,11 +209,13 @@ public class Aco {
         return connect;
     }
 
-    //输出的路径是分开的 后续需要想如何将路径整合一起，后续整合还是前期整合
-    public static List<List<Integer>> acoDemo() {
+    //产生一个解并且返回
+    public static Solution acoDemo() {
         Random r = new Random();
-        initialGraph();
+        double sumTime=0d;
+        Solution solution=new Solution();
         List<List<Integer>> allPath = new ArrayList<>();
+        List<List<Integer>> areaPath=new ArrayList<>();
         for (int i = 0; i < ANT_NUM; ++i) {
             int end_node = endNodeList.get(i);
             int end_area = 6;
@@ -211,6 +224,8 @@ public class Aco {
             int now_node = startNodeList.get(i);
             int next_node = 0;
             List<Integer> oneAntPath=new ArrayList<>();//一只蚂蚁从起点到终点的路径
+            List<Integer> oneAreaPath=new ArrayList<>();//分区图经过的路径
+            oneAreaPath.add(now_area);
             while (now_node != end_node) {
                 if (now_area != end_area) {
                     next_area = nextStep(now_area);//根据蚁群算法挑选出下一个区域
@@ -224,6 +239,10 @@ public class Aco {
                 //目前使用大图来算区间内的路径，因为分区不合理，区间内的点不在区间内不互通
                 List<Integer> path = Dijkstra.dijkstra(allGraph, now_node, next_node);
                 localPheUpdate(now_area, next_area);
+                //到了最后可能会重复添加2次终点分区
+                if (end_area!=oneAreaPath.get(oneAreaPath.size()-1)){
+                    oneAreaPath.add(next_area);//添加分区路径
+                }
                 now_area = next_area;
                 now_node = next_node;
                 if (now_node != end_node) {
@@ -237,7 +256,7 @@ public class Aco {
                     now_node = connectNextArea.get(r.nextInt(connectNextArea.size()));
                     path.add(now_node);
                 }
-                addTime(path);
+                sumTime+=addTime(path);
                 //List返回的都是Integer对象，所以需要使用equals来进行比较
                 if (!path.get(0).equals(startNodeList.get(i))){
                     Integer t=path.remove(0);
@@ -245,8 +264,12 @@ public class Aco {
                 oneAntPath.addAll(path);
             }
             allPath.add(oneAntPath);
+            areaPath.add(oneAreaPath);
         }
-        return allPath;
+        solution.sumTime=sumTime;
+        solution.path=allPath;
+        solution.areaPath=areaPath;
+        return solution;
     }
     //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
@@ -275,10 +298,27 @@ public class Aco {
         }
     }
 
+    //目前路径对象的各种复制都使用的是浅拷贝，感觉解建立之后不会改变
     public static void runACS() {
+        initialGraph();
+        //总迭代次数
+        double[] time=new double[Sn];
         for (int i=0;i<MAX_ITE;++i){
-            acoDemo();
-            System.out.println(pathLength/sumTime);
+            //没轮迭代产生Sn个解，然后挑选出top个解，释放信息素
+            for (int j=0;j<Sn;++j){
+                Solution t=acoDemo();
+                //随时更新全局最优解
+                if (t.sumTime<globalBestSolution.sumTime){
+                    globalBestSolution=t;
+                }
+                topWAnt.offer(t);
+                if (topWAnt.size()==w){
+                    topWAnt.poll();
+                }
+                time[j]=t.sumTime;
+            }
+            //求出top w个解，然后对这些解经过的变和全局最优蚂蚁经过的边释放信息素
+
         }
     }
 
@@ -325,19 +365,18 @@ public class Aco {
         initialGraph();
         List<Integer> paths=Dijkstra.dijkstra(allGraph,178,189);
         addTime(paths);
-        System.out.println(sumTime);
+        System.out.println();
     }
 
     public static void testFlow(){
         initialGraph();
-        for (int i=0;i<100;++i){
-            flow[178][201]=i;
-            System.out.println(getVelocity(178,201));
-        }
+        Solution s=acoDemo();
+        System.out.println(s.areaPath);
     }
 
     public static void main(String[] args) {
         //testLevel();
-        runACS();
+        testFlow();
+        //runACS();
     }
 }
