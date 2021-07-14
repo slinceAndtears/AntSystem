@@ -1,7 +1,5 @@
 package program.test;
 
-import program.AntSystem.function.Solution;
-
 import java.util.*;
 
 class ListNode{
@@ -13,6 +11,18 @@ class ListNode{
     }
 }
 public class LeetCode {
+    static ListNode createList(int[] a){
+        ListNode h=new ListNode(a[0]);
+        ListNode p=h;
+        for (int i=1;i<a.length;++i){
+            ListNode t=new ListNode(a[i]);
+            p.next=t;
+            p=t;
+        }
+        p.next=null;
+        return h;
+    }
+
     static int hIndex(int[] citations) {
         //6 5 3 1 0
         Arrays.sort(citations);
@@ -191,14 +201,50 @@ public class LeetCode {
         return step;
     }
 
+    static int reverse(int x) {
+        if (x == 0 || x == Integer.MIN_VALUE) {
+            return 0;
+        }
+        int tag = x > 0 ? 1 : -1;
+        x = Math.abs(x);
+        int boundary = Integer.MAX_VALUE / 10;
+        int res = 0;
+        while (x != 0) {
+            int t = x % 10;
+            if (res > boundary) {
+                return 0;
+            } else if (res == boundary) {
+                if (t >= 7) {
+                    return 0;
+                } else {
+                    res = res * 10 + t;
+                }
+            } else {
+                res = res * 10 + t;
+            }
+            x = x / 10;
+        }
+        return res * tag;
+    }
+
+    static int uniquePaths(int m,int n) {
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < dp.length; ++i) {
+            for (int j = 0; j < dp[i].length; ++j) {
+                if (i == 0 && j == 0) {
+                    dp[i][j] = 0;
+                } else if (i == 0 || j == 0) {
+                    dp[i][j] = 1;
+                } else {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
     static void test() {
-        List<List<Integer>> a=new ArrayList<>();
-        List<Integer> tmp=new ArrayList<>();
-        tmp.add(10);
-        a.add(tmp);
-        Solution s=new Solution(a,1,a,0);
-        a.get(0).add(100);
-        System.out.println(s.path);
+        System.out.println(reverse(Integer.MAX_VALUE));
     }
 
     public static void main(String[] args) {
