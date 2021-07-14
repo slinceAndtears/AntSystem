@@ -33,7 +33,7 @@ import java.util.*;
  * */
 public class Aco {
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 50;//最大迭代次数
+    public static final int MAX_ITE = 10;//最大迭代次数
     public static final double T0 = 0.02d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -72,7 +72,7 @@ public class Aco {
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
-        globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>());
+        globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(),0);
         topWAnt = new PriorityQueue<>(w - 1, new Comparator<Solution>() {
             @Override
             public int compare(Solution o1, Solution o2) {
@@ -297,6 +297,7 @@ public class Aco {
         solution.sumTime = sumTime;
         solution.path = allPath;
         solution.areaPath = areaPath;
+        solution.sumLength=pathLength;
         return solution;
     }
 
@@ -347,10 +348,11 @@ public class Aco {
                 for (int[] x:flow){
                     Arrays.fill(x,0);
                 }
+                pathLength=0;
             }
             //求出top w个解，然后对这些解经过的变和全局最优蚂蚁经过的边释放信息素
             update();
-            System.out.println(globalBestSolution.sumTime);
+            System.out.println(globalBestSolution);
         }
         //保存路径
         savePath(globalBestSolution.areaPath);

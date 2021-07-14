@@ -196,7 +196,7 @@ public class LeetCode {
         List<Integer> tmp=new ArrayList<>();
         tmp.add(10);
         a.add(tmp);
-        Solution s=new Solution(a,1,a);
+        Solution s=new Solution(a,1,a,0);
         a.get(0).add(100);
         System.out.println(s.path);
     }
