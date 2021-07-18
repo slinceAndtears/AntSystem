@@ -55,10 +55,11 @@ public class Aco {
     public static Solution globalBestSolution;//全局最优蚂蚁的解
     public static int Sn = 10;//每次迭代产生解的数量
     public static PriorityQueue<Solution> topWAnt;
+    public static List<Integer> area;
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
-        String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
+        String fileName = "src/program/AntSystem/subshain/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
@@ -68,7 +69,7 @@ public class Aco {
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
-        fileName = "src/program/AntSystem/friedrichshain/startend.txt";
+        fileName = "src/program/AntSystem/subshain/startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
@@ -83,6 +84,10 @@ public class Aco {
                 }
             }
         });
+        List<List<Integer>> t =ReadFile.readIntData("src/program/AntSystem/subshain/area.txt");
+        for (List<Integer> x:t){
+            area.add(x.get(0));
+        }
     }
 
     //蚂蚁根据当前顶线选择下一节点
@@ -157,21 +162,27 @@ public class Aco {
         pheromone[start][end] = (1 - phe) * pheromone[start][end] + phe * T0;
     }
 
-    public static void runOneAnt() {//一只蚂蚁走完全部的路程
-        List<List<Integer>> allAntPath = new ArrayList<>();//记录所有蚂蚁路径的列表
+    public static Solution runOneAnt() {//一只蚂蚁走完全部的路程
+        Random r=new Random();
+        double sumTime = 0d;
+        Solution solution = new Solution();
+        List<List<Integer>> allPath = new ArrayList<>();
+        List<List<Integer>> areaPath = new ArrayList<>();
         for (int i = 0; i < ANT_NUM; ++i) {
-            int start_node = 0;//初始点
-            int end_node = 3;//终止点
-            int now_node = 0;//当前顶点
-            List<Integer> path = new ArrayList<>();//当前蚂蚁经过的路径
-            path.add(start_node);
-            while (now_node != end_node && path.size() < 10) {
-                now_node = nextStep(now_node);
-                path.add(now_node);
+            int startNode=startNodeList.get(i);
+            int endNode=endNodeList.get(i);
+            List<Integer> oneAreaPath=Dijkstra.dijkstra(graph,area.get(startNode),area.get(endNode));
+            int startArea=oneAreaPath.get(0);
+            for (int j=1;j<oneAreaPath.size();++j){
+                int nextArea=oneAreaPath.get(j);//需要走到的区域
+                
             }
-            allAntPath.add(path);
         }
-        System.out.println(allAntPath.get(0));
+        solution.sumTime = sumTime;
+        solution.path = allPath;
+        solution.areaPath = areaPath;
+        solution.sumLength=pathLength;
+        return solution;
     }
 
     /**

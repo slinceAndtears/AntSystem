@@ -89,7 +89,7 @@ public class ReadFile {
         int end_node = 0;
         int end_area = 0;
         double weight = 0d;
-        Graph area = initialSingleGraph(readFile("src/program/AntSystem/friedrichshain/graph.txt"));
+        Graph area = initialGraph(readFile("src/program/AntSystem/subshain/graph.txt"));
         for (int i = 0; i < res.size(); ++i) {
             start_node = (int) Math.round(res.get(i).get(0));
             start_area = (int) Math.round(res.get(i).get(1));
@@ -122,17 +122,12 @@ public class ReadFile {
                 area.addVertex(end_area);
             }*/
             //如果没有边，那么权值为1，如果已经有边，那么权值加1
-            if (start_area != end_area &&start_area!=15&&start_area!=22&&end_area!=15&&end_area!=22) {
+/*            if (start_area != end_area &&start_area!=15&&start_area!=22&&end_area!=15&&end_area!=22) {
                 double w=area.vertex.get(start_area).getWeight(end_area);
                 if (w!=Integer.MAX_VALUE) {
                     area.vertex.get(start_area).addNbr(end_area, w + 1);
                 }
-            }
-            if (start_area==9 &&end_area==14){
-                System.out.println("9-------14");
-                System.out.println("start_node"+start_node);
-                System.out.println("end_node"+end_node);
-            }
+            }*/
         }
         //设置分区图的权值
         subGraphs.areaGraph = area;
@@ -152,16 +147,16 @@ public class ReadFile {
 
     //每个点的坐标都乘以100 如果坐标是0 ，那么怎么办，分区图，是采用如何以单向图导入
     public static void handleData() {
-        List<List<Integer>> area = readIntData("src/program/AntSystem/friedrichshain/area.txt");
-        List<List<Integer>> link = readIntData("src/program/AntSystem/friedrichshain/link.txt.txt");
-        List<List<Double>> coordinate = readFile("src/program/AntSystem/friedrichshain/coordinate.txt");
+        List<List<Integer>> area = readIntData("src/program/AntSystem/subshain/area.txt");
+        List<List<Integer>> link = readIntData("src/program/AntSystem/subshain/link.txt");
+        List<List<Double>> coordinate = readFile("src/program/AntSystem/subshain/coordinate.txt");
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter("src/program/AntSystem/friedrichshain/finalLink.txt"));
+            writer = new BufferedWriter(new FileWriter("src/program/AntSystem/subshain/finalLink.txt"));
             for (int i = 0; i < link.size(); ++i) {
                 StringBuilder res = new StringBuilder();
-                int start_node = link.get(i).get(0) - 1;
-                int end_node = link.get(i).get(1) - 1;
+                int start_node = link.get(i).get(0);
+                int end_node = link.get(i).get(1);
                 int start_area = area.get(start_node).get(0);
                 int end_area = area.get(end_node).get(0);
                 double weight = distance(coordinate.get(start_node), coordinate.get(end_node));
@@ -187,8 +182,8 @@ public class ReadFile {
     }
 
     public static void main(String[] args) {
-        List<List<Double>> coordinate=readFile("src/program/AntSystem/friedrichshain/coordinate.txt");
-        System.out.println(distance(coordinate.get(18),coordinate.get(222)));
+        List<List<Double>> coordinate=readFile("src/program/AntSystem/subshain/startend.txt");
+        System.out.println(distance(coordinate.get(8),coordinate.get(7)));
         //handleData();
     }
 }
