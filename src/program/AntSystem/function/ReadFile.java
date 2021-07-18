@@ -153,7 +153,7 @@ public class ReadFile {
     //每个点的坐标都乘以100 如果坐标是0 ，那么怎么办，分区图，是采用如何以单向图导入
     public static void handleData() {
         List<List<Integer>> area = readIntData("src/program/AntSystem/friedrichshain/area.txt");
-        List<List<Integer>> link = readIntData("src/program/AntSystem/friedrichshain/link.txt");
+        List<List<Integer>> link = readIntData("src/program/AntSystem/friedrichshain/link.txt.txt");
         List<List<Double>> coordinate = readFile("src/program/AntSystem/friedrichshain/coordinate.txt");
         BufferedWriter writer = null;
         try {

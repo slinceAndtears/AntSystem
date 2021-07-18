@@ -242,9 +242,22 @@ public class LeetCode {
         }
         return dp[m - 1][n - 1];
     }
+    
+    static int rob(int[] nums) {
+        int yes = nums[0];
+        int no = 0;
+        int t;
+        for (int i = 1; i < nums.length; ++i) {
+            t = nums[i] + no;
+            no = Math.max(no ,yes);
+            yes = t;
+
+        }
+        return Math.max(yes, no);
+    }
 
     static void test() {
-        System.out.println(reverse(Integer.MAX_VALUE));
+        System.out.println(rob(new int[]{2,1,1,2}));
     }
 
     public static void main(String[] args) {
