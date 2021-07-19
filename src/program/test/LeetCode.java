@@ -10,6 +10,20 @@ class ListNode{
         this.val=val;
     }
 }
+class TreeNode{
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(){}
+    TreeNode(int val){
+        this(val,null,null);
+    }
+    TreeNode(int val,TreeNode left,TreeNode right){
+        this.val=val;
+        this.left=left;
+        this.right=right;
+    }
+}
 public class LeetCode {
     static ListNode createList(int[] a){
         ListNode h=new ListNode(a[0]);
@@ -256,8 +270,166 @@ public class LeetCode {
         return Math.max(yes, no);
     }
 
+    static int search(int[] nums,int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        //左右两边一定有一个是有序的数组
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[low] <= nums[mid]) {
+                if (target >= nums[low] && target <= nums[mid]) {
+                    high = mid;
+                } else {
+                    low = mid + 1;
+                }
+            } else {
+                if (target >= nums[mid] && target <= nums[high]) {
+                    low = mid;
+                } else {
+                    high = mid - 1;
+                }
+            }
+        }
+        return nums[low] == target ? low : -1;
+    }
+
+    static int[] searchRange(int[] nums,int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] > target) {
+                high = mid - 1;
+            } else if (nums[mid]<target){
+                low = mid+1;
+            }else {
+                low=mid;
+                break;
+            }
+        }
+        if (nums[low]!=target){
+            return new int[]{-1, -1};
+        }
+        int left=low;
+        int right=low;
+        while (left>=0&&nums[left]==target){
+            --left;
+        }
+        while (right<nums.length&&nums[right]==target){
+            ++right;
+        }
+        return new int[]{left+1,right-1};
+    }
+
+    static  int firstMissing(int[] nums) {
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] <= 0) {
+                nums[i] = nums.length+1;
+            }
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            int t=nums[i];
+            if (Math.abs(t)<=nums.length){
+                t=Math.abs(t)-1;
+                nums[t]=-Math.abs(nums[t]);
+            }
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] >= 0) {
+                return i + 1;
+            }
+        }
+        return nums.length;
+    }
+
+    static StringBuilder mul(String num1,int num2) {
+        if (num2 == 0) {
+            return new StringBuilder("0");
+        }
+        StringBuilder res = new StringBuilder();
+        int i = num1.length() - 1;
+        int jump = 0;
+        while (i >= 0) {
+            int r = num2 * (num1.charAt(i) - '0') + jump;
+            jump = r / 10;
+            r = r % 10;
+            res.insert(0,r);
+            --i;
+        }
+        if (jump!=0){
+            res.insert(0,jump);
+        }
+        return res;
+    }
+
+    static StringBuilder add(String num1,String num2){
+        StringBuilder res=new StringBuilder();
+        int i=num1.length()-1;
+        int j=num2.length()-1;
+        int jump=0;
+        while (i>=0||j>=0){
+            int numA=i>=0?num1.charAt(i)-'0':0;
+            int numB=j>=0?num2.charAt(j)-'0':0;
+            int r=numA+numB+jump;
+            if (r>9){
+                r-=10;
+                jump=1;
+            }else {
+                jump=0;
+            }
+            res.insert(0,r);
+            --i;
+            --j;
+        }
+        if (jump!=0){
+            res.insert(0,jump);
+        }
+        return res;
+    }
+
+    static String multiply(String num1,String num2) {
+        if (num1.equals("0")||num2.equals("0")){
+            return "0";
+        }
+        StringBuilder res = new StringBuilder('0');
+        int a = 1;
+        for (int i = num2.length() - 1; i >= 0; --i) {
+            StringBuilder t = mul(num1, num2.charAt(i) - '0');
+            if (!t.equals("0")) {
+                for (int j = num2.length() - 1; j > i; --j) {
+                    t.append('0');
+                }
+            }
+            res = add(res.toString(), t.toString());
+        }
+        return res.toString();
+    }
+
+    static List<List<Integer>> levelOrder(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            List<Integer> t = new ArrayList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; ++i) {
+                root = queue.poll();
+                t.add(root.val);
+                if (root.left != null) {
+                    queue.offer(root.left);
+                }
+                if (root.right != null) {
+                    queue.offer(root.right);
+                }
+            }
+            res.add(t);
+        }
+        return res;
+    }
+
     static void test() {
-        System.out.println(rob(new int[]{2,1,1,2}));
+        System.out.println(multiply("123456789","987654321"));
+        //StringBuilder r=new StringBuilder();
     }
 
     public static void main(String[] args) {
