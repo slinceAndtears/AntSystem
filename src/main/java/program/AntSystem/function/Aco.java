@@ -1,6 +1,9 @@
 package program.AntSystem.function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import program.AntSystem.graph.Graph;
+import program.AntSystem.graph.LevelGraph;
 import program.AntSystem.graph.SubGraphs;
 
 import java.io.BufferedWriter;
@@ -32,8 +35,8 @@ import java.util.*;
  *  测试信息素的影响力
  * */
 public class Aco {
-    public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 10;//最大迭代次数
+    public static final int ANT_NUM = 1;//蚂蚁数量
+    public static final int MAX_ITE = 1;//最大迭代次数
     public static final double T0 = 0.02d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -59,20 +62,20 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
-        String fileName = "src/program/AntSystem/subshain/finalLink.txt";
+        String fileName = "src/main/java/program/AntSystem/subshain/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
         graph = subGraph.areaGraph;
-        pheromone = new double[graph.nodeNum][graph.nodeNum];
+        pheromone = new double[allGraph.nodeNum][allGraph.nodeNum];
         flow = new int[allGraph.nodeNum][allGraph.nodeNum];
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
-        fileName = "src/program/AntSystem/subshain/startend.txt";
+        fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
-        startNodeList = nodes.get(0);
-        endNodeList = nodes.get(1);
+        //startNodeList = nodes.get(0);
+        //endNodeList = nodes.get(1);
         globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(),0);
         topWAnt = new PriorityQueue<>(w - 1, new Comparator<Solution>() {
             @Override
@@ -84,16 +87,28 @@ public class Aco {
                 }
             }
         });
-        List<List<Integer>> t =ReadFile.readIntData("src/program/AntSystem/subshain/area.txt");
+        area=new ArrayList<>();
+        List<List<Integer>> t =ReadFile.readIntData("src/main/java/program/AntSystem/subshain/area.txt");
         for (List<Integer> x:t){
             area.add(x.get(0));
         }
     }
 
-    //蚂蚁根据当前顶线选择下一节点
-    public static int nextStep(int now_node) {
-        List<Integer> nbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
-        //在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
+    public static int nextStep(int now_node){
+        return nextStep(graph,now_node);
+    }
+
+    //蚂蚁根据当前顶点选择下一节点
+    public static int nextStep(Graph graph,int now_node) {
+        //List<Integer> nbr = graph.vertex.get(now_node).getAllNbr();//获取所有的邻居 然后做出选择
+        //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
+        Map<Integer,Integer> level=BFS.bfs(graph,now_node);
+        List<Integer> nbr=new ArrayList<>();
+        for (Integer x:graph.vertex.get(now_node).getAllNbr()){
+            if (level.get(x)>level.get(now_node)){
+                nbr.add(x);
+            }
+        }
         if (nbr.size() == 0) {
             System.out.println("起点为： " + now_node + "没有路可以走");
             return -1;//如果没有路可以走
@@ -162,26 +177,53 @@ public class Aco {
         pheromone[start][end] = (1 - phe) * pheromone[start][end] + phe * T0;
     }
 
+    //利用蚁群算法，选出一条完整的路径
+    public static List<Integer> antSystemPath(Graph graph,int start,int end){
+        List<Integer> path=new ArrayList<>();
+        path.add(start);
+        while (start!=end){
+            start=nextStep(graph,start);
+            path.add(start);
+            logger.info(" "+start);
+        }
+        return path;
+    }
+
     public static Solution runOneAnt() {//一只蚂蚁走完全部的路程
-        Random r=new Random();
+        Random r = new Random();
         double sumTime = 0d;
         Solution solution = new Solution();
         List<List<Integer>> allPath = new ArrayList<>();
         List<List<Integer>> areaPath = new ArrayList<>();
         for (int i = 0; i < ANT_NUM; ++i) {
-            int startNode=startNodeList.get(i);
-            int endNode=endNodeList.get(i);
-            List<Integer> oneAreaPath=Dijkstra.dijkstra(graph,area.get(startNode),area.get(endNode));
-            int startArea=oneAreaPath.get(0);
-            for (int j=1;j<oneAreaPath.size();++j){
-                int nextArea=oneAreaPath.get(j);//需要走到的区域
-                
+            //int startNode = startNodeList.get(i);
+            int startNode = 0;
+            //int endNode = endNodeList.get(i);
+            int endNode = 59;
+            List<Integer> oneAreaPath = Dijkstra.dijkstra(graph, area.get(startNode), area.get(endNode));
+            int startArea = oneAreaPath.get(0);
+            for (int j = 1; j < oneAreaPath.size(); ++j) {
+                int nextArea = oneAreaPath.get(j);//需要走到的区域
+                List<Integer> connection = getConnectNode(startArea, nextArea);//与目标分区相连的所有顶点
+                int next_node = connection.get(r.nextInt(connection.size()));//随机挑选一个作为出口
+                //利用蚁群算法，算出路径
+                List<Integer> path = antSystemPath(subGraph.subGraphs.get(startArea), startNode, next_node);
+                //随机跳到下一个区域的起点。然后赋值
+                List<Integer> conn = new ArrayList<>();
+                for (Integer x : subGraph.subGraphs.get(nextArea).getAllVertex()) {
+                    if (allGraph.vertex.get(next_node).getWeight(x) != Integer.MAX_VALUE) {
+                        conn.add(x);
+                    }
+                }
+                startNode = conn.get(r.nextInt(conn.size()));
+                path.add(startNode);
+                startArea = nextArea;
             }
         }
         solution.sumTime = sumTime;
         solution.path = allPath;
         solution.areaPath = areaPath;
-        solution.sumLength=pathLength;
+        solution.sumLength = pathLength;
         return solution;
     }
 
@@ -346,7 +388,7 @@ public class Aco {
         for (int i = 0; i < MAX_ITE; ++i) {
             //没轮迭代产生Sn个解，然后挑选出top个解，释放信息素
             for (int j = 0; j < Sn; ++j) {
-                Solution t = acoDemo();
+                Solution t = runOneAnt();
                 //随时更新全局最优解
                 if (t.sumTime < globalBestSolution.sumTime) {
                     globalBestSolution = t;
@@ -422,10 +464,10 @@ public class Aco {
         }
     }
 
+    private static final Logger logger= LoggerFactory.getLogger(Aco.class);
     public static void testFlow() {
         initialGraph();
-        pheromone[0][8]=0.04;
-        System.out.println(nextStep(0));
+        //logger.info("logger success");
     }
 
     public static void main(String[] args) {

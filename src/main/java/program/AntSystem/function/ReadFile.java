@@ -89,7 +89,7 @@ public class ReadFile {
         int end_node = 0;
         int end_area = 0;
         double weight = 0d;
-        Graph area = initialGraph(readFile("src/program/AntSystem/subshain/graph.txt"));
+        Graph area = initialGraph(readFile("src/main/java/program/AntSystem/subshain/graph.txt"));
         for (int i = 0; i < res.size(); ++i) {
             start_node = (int) Math.round(res.get(i).get(0));
             start_area = (int) Math.round(res.get(i).get(1));
@@ -120,9 +120,9 @@ public class ReadFile {
             }
             if (!area.vertex.containsKey(end_area)) {
                 area.addVertex(end_area);
-            }*/
+            }
             //如果没有边，那么权值为1，如果已经有边，那么权值加1
-/*            if (start_area != end_area &&start_area!=15&&start_area!=22&&end_area!=15&&end_area!=22) {
+            if (start_area != end_area &&start_area!=15&&start_area!=22&&end_area!=15&&end_area!=22) {
                 double w=area.vertex.get(start_area).getWeight(end_area);
                 if (w!=Integer.MAX_VALUE) {
                     area.vertex.get(start_area).addNbr(end_area, w + 1);
@@ -182,7 +182,7 @@ public class ReadFile {
     }
 
     public static void main(String[] args) {
-        List<List<Double>> coordinate=readFile("src/program/AntSystem/subshain/startend.txt");
+        List<List<Double>> coordinate=readFile("src/main/java/program/AntSystem/subshain/startend.txt");
         System.out.println(distance(coordinate.get(8),coordinate.get(7)));
         //handleData();
     }

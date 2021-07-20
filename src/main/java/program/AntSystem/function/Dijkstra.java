@@ -72,7 +72,7 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        String fileName = "src/program/AntSystem/friedrichshain/finalLink.txt";
+        String fileName = "src/main/java/program/AntSystem/friedrichshain/finalLink.txt";
         graph = new Graph();
         staticGraph = new Graph();
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
