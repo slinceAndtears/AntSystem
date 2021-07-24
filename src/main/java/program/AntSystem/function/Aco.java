@@ -39,6 +39,9 @@ import java.util.*;
  *  这个区域的序列就是蚁群算法参考的路径？
  * */
 public class Aco {
+    private static final Logger logger= LoggerFactory.getLogger(Aco.class);
+
+
     public static final int ANT_NUM = 1;//蚂蚁数量
     public static final int MAX_ITE = 1;//最大迭代次数
     public static final double T0 = 0.02d;//初始信息素含量
@@ -281,6 +284,18 @@ public class Aco {
         }
     }
 
+    //根据最短路径获取分区之间的路径
+    public static List<Integer> getAreaPathByDijkstra(List<Integer> path){
+        List<Integer> areaPath=new ArrayList<>();
+        for (Integer x:path){
+            int a=area.get(x);
+            if (areaPath.size()==0||a!=areaPath.get(areaPath.size()-1)){
+                areaPath.add(a);
+            }
+        }
+        return areaPath;
+    }
+
     //获取从起始分区到达终点分区的所有点
     public static List<Integer> getConnectNode(int start_area, int end_area) {
         List<Integer> connect = new ArrayList<>();
@@ -471,15 +486,25 @@ public class Aco {
         }
     }
 
-    private static final Logger logger= LoggerFactory.getLogger(Aco.class);
     public static void testFlow() {
         initialGraph();
-        //logger.info("logger success");
+        int start = 0;
+        int end = 53;
+        List<Integer> path = Dijkstra.dijkstra(allGraph, start, end);
+        System.out.println(path);
+        for (Integer x : path) {
+            System.out.print(area.get(x) + "  ");
+        }
+        System.out.println();
+        logger.info("分区路径"+getAreaPathByDijkstra(path));
+        int startArea = 0;
+        int endArea = 7;
+        System.out.println(Dijkstra.dijkstra(graph, startArea, endArea));
     }
 
     public static void main(String[] args) {
         //testLevel();
-        //testFlow();
-        runACS();
+        testFlow();
+        //runACS();
     }
 }
