@@ -33,6 +33,10 @@ import java.util.*;
  * Tk top w个蚁群
  * 每轮迭代 10个解 ，top 2 的和最优的蚂蚁 可以释放信息素√
  *  测试信息素的影响力
+ *  2021-07-24
+ *  分区之间利用迪杰斯特拉算法确定的方法。
+ *  1. 首先利用迪杰斯特拉算法跑完全程，然后找出路径上面的点经过了那些区域。
+ *  这个区域的序列就是蚁群算法参考的路径？
  * */
 public class Aco {
     public static final int ANT_NUM = 1;//蚂蚁数量
@@ -189,7 +193,10 @@ public class Aco {
         return path;
     }
 
-    public static Solution runOneAnt() {//一只蚂蚁走完全部的路程
+    /**
+     * 一只蚂蚁走完全部的路程 分区之间用迪杰斯特拉算法确定。
+     * */
+    public static Solution runOneAnt() {
         Random r = new Random();
         double sumTime = 0d;
         Solution solution = new Solution();
