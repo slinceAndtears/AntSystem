@@ -72,13 +72,13 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        String fileName = "src/main/java/program/AntSystem/friedrichshain/finalLink.txt";
+        String fileName = "src/main/java/program/AntSystem/subshain/finalLink.txt";
         graph = new Graph();
         staticGraph = new Graph();
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
         ReadFile.initialSubGraph(staticGraph, new SubGraphs(), fileName);
         flow = new int[graph.nodeNum][graph.nodeNum];
-        fileName = "src/program/AntSystem/friedrichshain/startend.txt";
+        fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);

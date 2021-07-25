@@ -11,7 +11,10 @@ public class BFS {
      * @Params start 广度优先遍历的起点
      * @return level 每个节点对应的层次
      * */
-    public static Map<Integer,Integer> bfs(Graph graph,int start){
+    public static Map<Integer,Integer> bfdWithEnd(Graph graph,int end){
+        return bfsWithStart(graph,end);
+    }
+    public static Map<Integer,Integer> bfsWithStart(Graph graph,int start){
         int l=0;
         Map<Integer,Integer> level=new HashMap<>();
         Queue<Integer> queue=new LinkedList<>();

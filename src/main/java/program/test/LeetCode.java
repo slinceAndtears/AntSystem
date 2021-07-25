@@ -472,10 +472,12 @@ public class LeetCode {
     }
 
     static void test() {
-        int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        rotate(a, 3);
-        System.out.println(Arrays.toString(a));
-        //StringBuilder r=new StringBuilder();
+        List<Integer> a=new ArrayList<>();
+        a.add(10);
+        a.add(0);
+        a.add(1);
+        Integer x=a.remove(0);
+        System.out.println(a);
     }
 
     public static void main(String[] args) {

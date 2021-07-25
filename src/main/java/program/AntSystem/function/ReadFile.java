@@ -1,5 +1,7 @@
 package program.AntSystem.function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import program.AntSystem.graph.Graph;
 import program.AntSystem.graph.SubGraph;
 import program.AntSystem.graph.SubGraphs;
@@ -9,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReadFile {
-    //权值大概率为double类型, 目前还只支持是int类型，后续再继续改进
+
+    private static final Logger logger= LoggerFactory.getLogger(ReadFile.class);
+
+    //权值为double类型,由一开始的int改的
     public static List<List<Double>> readFile(String fileName) {
         List<List<Double>> res = new ArrayList<>();
         BufferedReader reader = null;
@@ -147,12 +152,12 @@ public class ReadFile {
 
     //每个点的坐标都乘以100 如果坐标是0 ，那么怎么办，分区图，是采用如何以单向图导入
     public static void handleData() {
-        List<List<Integer>> area = readIntData("src/program/AntSystem/subshain/area.txt");
-        List<List<Integer>> link = readIntData("src/program/AntSystem/subshain/link.txt");
-        List<List<Double>> coordinate = readFile("src/program/AntSystem/subshain/coordinate.txt");
+        List<List<Integer>> area = readIntData("src/main/java/program/AntSystem/subshain/area.txt");
+        List<List<Integer>> link = readIntData("src/main/java/program/AntSystem/subshain/link.txt");
+        List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/subshain/coordinate.txt");
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter("src/program/AntSystem/subshain/finalLink.txt"));
+            writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/subshain/finalLink.txt"));
             for (int i = 0; i < link.size(); ++i) {
                 StringBuilder res = new StringBuilder();
                 int start_node = link.get(i).get(0);
@@ -169,21 +174,25 @@ public class ReadFile {
                 writer.write("\n");
             }
         } catch (IOException e) {
+            logger.error("write file failure");
             e.printStackTrace();
         }finally {
             if (writer!=null){
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("close writer failure");
                 }
             }
         }
     }
 
     public static void main(String[] args) {
-        List<List<Double>> coordinate=readFile("src/main/java/program/AntSystem/subshain/startend.txt");
-        System.out.println(distance(coordinate.get(8),coordinate.get(7)));
-        //handleData();
+/*        List<List<Double>> coordinate=readFile("src/main/java/program/AntSystem/subshain/coordinate.txt");
+        System.out.println(coordinate.get(7));
+        System.out.println(coordinate.get(8));
+        System.out.println(coordinate.get(9));
+        System.out.println(distance(coordinate.get(8),coordinate.get(9)));*/
+        handleData();
     }
 }
