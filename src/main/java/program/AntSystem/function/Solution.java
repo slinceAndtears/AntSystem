@@ -27,6 +27,6 @@ public class Solution {
 
     @Override
     public String toString() {
-        return "总时间为："+sumTime+"  总路径为："+sumLength;
+        return "总时间为："+sumTime+"  总路径为："+sumLength+"  平均速度为:  "+sumLength/sumTime;
     }
 }

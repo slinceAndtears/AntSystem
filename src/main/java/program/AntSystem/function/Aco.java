@@ -47,7 +47,7 @@ public class Aco {
 
 
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 1;//最大迭代次数
+    public static final int MAX_ITE = 100;//最大迭代次数
     public static final double T0 = 0.02d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -58,8 +58,8 @@ public class Aco {
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.1d;//蚂蚁的速度
-    public static final int w = 3;//全局信息素更新的排序参数
-    public static final double W = 0.001d;//速度-流量的参数
+    public static final int w = 5;//全局信息素更新的排序参数
+    public static final double W = 0.05d;//速度-流量的参数
     public static Graph allGraph;//整个图
     //public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
@@ -413,7 +413,7 @@ public class Aco {
 
     //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
-        String fileName = "src/program/AntSystem/friedrichshain/finalPath.txt";
+        String fileName = "src/main/java/program/AntSystem/subshain/finalPath.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -446,6 +446,7 @@ public class Aco {
             //没轮迭代产生Sn个解，然后挑选出top个解，释放信息素
             for (int j = 0; j < Sn; ++j) {
                 Solution t = runOneAnt();
+                logger.info(String.format("第%s轮迭代第%s个解结果为%s",i,j,t.toString()));
                 //随时更新全局最优解
                 if (t.sumTime < globalBestSolution.sumTime) {
                     globalBestSolution = t;
@@ -464,7 +465,7 @@ public class Aco {
             System.out.println(globalBestSolution);
         }
         //保存路径
-        savePath(globalBestSolution.areaPath);
+        savePath(globalBestSolution.path);
     }
 
     //在起点终点区域内随机生成起点和终点
@@ -529,7 +530,7 @@ public class Aco {
     }
 
     public static void main(String[] args) {
-        testFlow();
-        //runACS();
+        //testFlow();
+        runACS();
     }
 }

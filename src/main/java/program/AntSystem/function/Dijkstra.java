@@ -18,7 +18,7 @@ public class Dijkstra {
     //private static final int END = 129;
     private static final double VELOCITY = 0.1d;
     private static int[][] flow;
-    public static final double W = 0.001d;//速度-流量的参数
+    public static final double W = 0.05d;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
@@ -119,8 +119,9 @@ public class Dijkstra {
 
     public static void test() {
         initGraph();
-        System.out.println(getSumTime());
-        System.out.println(pathLength);
+        System.out.println("总时间"+getSumTime());
+        System.out.println("总路径"+pathLength);
+        System.out.println("平均速度"+(pathLength/getSumTime()));
         //List<Integer> path=dijkstra(staticGraph,178,189);
     }
 

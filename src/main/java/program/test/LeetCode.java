@@ -1,6 +1,8 @@
 package program.test;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class ListNode{
     int val;
@@ -471,13 +473,76 @@ public class LeetCode {
         numReverse(nums, 0, nums.length - 1);
     }
 
+     static int removeSDuplicates(int[] nums) {
+        if (nums.length<2){
+            return nums.length;
+        }
+         int index = 0;
+         int tag = 1;
+         for (int i = 1; i < nums.length; ++i) {
+             if (nums[i] == nums[index]) {
+                 if (tag == 1) {
+                     nums[++index] = nums[i];
+                     ++tag;
+                 }
+             } else {
+                 tag = 1;
+                 nums[++index] = nums[i];
+             }
+
+         }
+         return index + 1;
+     }
+     // 0 1  第 0行，第1 列 0 3
+     static void setZeros(int[][] matrix) {
+         int[] x = new int[matrix[0].length];
+         int[] y = new int[matrix.length];
+         Arrays.fill(x, 1);
+         Arrays.fill(y, 1);
+         for (int i = 0; i < matrix.length; ++i) {
+             for (int j = 0; j < matrix[0].length; ++j) {
+                 if (matrix[i][j] == 0) {
+                     x[j] = 0;
+                     y[i] = 0;
+                 }
+             }
+         }
+         //某一列置为0
+         for (int i = 0; i < x.length; ++i) {
+             if (x[i] == 0) {
+                 for (int j = 0; j < matrix.length; ++j) {
+                     matrix[j][i] = 0;
+                 }
+             }
+         }
+         //某一行置为0
+         for (int i = 0; i < y.length; ++i) {
+             if (y[i] == 0) {
+                 Arrays.fill(matrix[i], 0);
+             }
+         }
+     }
+
+     static ListNode deleteDuplicates(ListNode head) {
+         ListNode h = new ListNode();
+         ListNode p = h;
+         while (head != null) {
+             if (head.next == null || head.val != head.next.val) {
+                 p.next = head;
+                 p = head;
+                 head = head.next;
+             } else {
+                 int val = head.val;
+                 while (head != null && head.val == val) {
+                     head = head.next;
+                 }
+             }
+         }
+         p.next = null;
+         return h.next;
+     }
+
     static void test() {
-        List<Integer> a=new ArrayList<>();
-        a.add(10);
-        a.add(0);
-        a.add(1);
-        Integer x=a.remove(0);
-        System.out.println(a);
     }
 
     public static void main(String[] args) {
