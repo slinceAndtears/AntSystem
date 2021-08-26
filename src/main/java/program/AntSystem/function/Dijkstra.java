@@ -1,5 +1,7 @@
 package program.AntSystem.function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import program.AntSystem.graph.Graph;
 import program.AntSystem.graph.SubGraphs;
 
@@ -11,6 +13,7 @@ import java.util.*;
  * 时间的计算公式 还是按照蚁群的算
  * */
 public class Dijkstra {
+    private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
     private static final int ANT_NUM = 100;
     private static Graph graph;
     //private static double INCREASE = 0.2d;
@@ -23,7 +26,7 @@ public class Dijkstra {
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength=0d;
-    //id 为起始节点
+
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
         Map<Integer, Double> dist = new HashMap<>();
@@ -50,7 +53,9 @@ public class Dijkstra {
             }
             flag.put(allVertex.get(k), 1);
             for (int j = 0; j < graph.nodeNum; ++j) {
-                tmp = graph.vertex.get(allVertex.get(k)).getWeight(allVertex.get(j)) == (Integer.MAX_VALUE) ? Integer.MAX_VALUE : (min + graph.vertex.get(allVertex.get(k)).getWeight(allVertex.get(j)));
+                tmp = graph.vertex.get(allVertex.get(k)).getWeight(allVertex.get(j)) == (Integer.MAX_VALUE)
+                        ? Integer.MAX_VALUE :
+                        (min + graph.vertex.get(allVertex.get(k)).getWeight(allVertex.get(j)));
                 if (flag.get(allVertex.get(j)) == 0 && tmp < dist.get(allVertex.get(j))) {
                     dist.put(allVertex.get(j), tmp);
                     pre.put(allVertex.get(j), allVertex.get(k));
@@ -82,11 +87,21 @@ public class Dijkstra {
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
+        for (int i = 0; i < flow.length; ++i) {
+            Arrays.fill(flow[i], 1);
+        }
+    }
+
+    public static double getVelocity(int start, int end){
+        double density = flow[start][end] / staticGraph.vertex.get(start).getWeight(end);
+        //double velocity = VELOCITY * Math.exp(-1 * W * density);
+        double velocity = VELOCITY * (1 - flow[start][end] / 50d);
+        return velocity;
     }
 
     public static void changeWeight(int start, int end) {
-        double density = flow[start][end] / graph.vertex.get(start).getWeight(end);
-        double velocity = VELOCITY * Math.exp(-1 * W * density);
+        //double density = flow[start][end] / graph.vertex.get(start).getWeight(end);
+        double velocity = getVelocity(start, end);
         //时间应该是权值没有变化过的来除
         double time = staticGraph.vertex.get(start).getWeight(end) / velocity;
         double weight = time * VELOCITY;
@@ -94,8 +109,7 @@ public class Dijkstra {
     }
 
     public static double getTime(int start, int end) {
-        double density = flow[start][end] / staticGraph.vertex.get(start).getWeight(end);
-        double velocity = VELOCITY * Math.exp(-1 * W * density);
+        double velocity = getVelocity(start, end);
         return staticGraph.vertex.get(start).getWeight(end) / velocity;
     }
 
@@ -123,6 +137,12 @@ public class Dijkstra {
         System.out.println("总路径"+pathLength);
         System.out.println("平均速度"+(pathLength/getSumTime()));
         //List<Integer> path=dijkstra(staticGraph,178,189);
+    }
+
+    public static void test1() {
+        for (int i = 1; i < 100; ++i) {
+            logger.info(i + "  " + VELOCITY * (1 - i / 100d));
+        }
     }
 
     public static void main(String[] args) {

@@ -1,8 +1,6 @@
 package program.test;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 class ListNode{
     int val;
@@ -473,76 +471,217 @@ public class LeetCode {
         numReverse(nums, 0, nums.length - 1);
     }
 
-     static int removeSDuplicates(int[] nums) {
-        if (nums.length<2){
+    static int removeSDuplicates(int[] nums) {
+        if (nums.length < 2) {
             return nums.length;
         }
-         int index = 0;
-         int tag = 1;
-         for (int i = 1; i < nums.length; ++i) {
-             if (nums[i] == nums[index]) {
-                 if (tag == 1) {
-                     nums[++index] = nums[i];
-                     ++tag;
-                 }
-             } else {
-                 tag = 1;
-                 nums[++index] = nums[i];
-             }
+        int index = 0;
+        int tag = 1;
+        for (int i = 1; i < nums.length; ++i) {
+            if (nums[i] == nums[index]) {
+                if (tag == 1) {
+                    nums[++index] = nums[i];
+                    ++tag;
+                }
+            } else {
+                tag = 1;
+                nums[++index] = nums[i];
+            }
 
-         }
-         return index + 1;
-     }
-     // 0 1  第 0行，第1 列 0 3
-     static void setZeros(int[][] matrix) {
-         int[] x = new int[matrix[0].length];
-         int[] y = new int[matrix.length];
-         Arrays.fill(x, 1);
-         Arrays.fill(y, 1);
-         for (int i = 0; i < matrix.length; ++i) {
-             for (int j = 0; j < matrix[0].length; ++j) {
-                 if (matrix[i][j] == 0) {
-                     x[j] = 0;
-                     y[i] = 0;
-                 }
-             }
-         }
-         //某一列置为0
-         for (int i = 0; i < x.length; ++i) {
-             if (x[i] == 0) {
-                 for (int j = 0; j < matrix.length; ++j) {
-                     matrix[j][i] = 0;
-                 }
-             }
-         }
-         //某一行置为0
-         for (int i = 0; i < y.length; ++i) {
-             if (y[i] == 0) {
-                 Arrays.fill(matrix[i], 0);
-             }
-         }
-     }
+        }
+        return index + 1;
+    }
 
-     static ListNode deleteDuplicates(ListNode head) {
-         ListNode h = new ListNode();
-         ListNode p = h;
-         while (head != null) {
-             if (head.next == null || head.val != head.next.val) {
-                 p.next = head;
-                 p = head;
-                 head = head.next;
-             } else {
-                 int val = head.val;
-                 while (head != null && head.val == val) {
-                     head = head.next;
-                 }
-             }
-         }
-         p.next = null;
-         return h.next;
-     }
+    // 0 1  第 0行，第1 列 0 3
+    static void setZeros(int[][] matrix) {
+        int[] x = new int[matrix[0].length];
+        int[] y = new int[matrix.length];
+        Arrays.fill(x, 1);
+        Arrays.fill(y, 1);
+        for (int i = 0; i < matrix.length; ++i) {
+            for (int j = 0; j < matrix[0].length; ++j) {
+                if (matrix[i][j] == 0) {
+                    x[j] = 0;
+                    y[i] = 0;
+                }
+            }
+        }
+        //某一列置为0
+        for (int i = 0; i < x.length; ++i) {
+            if (x[i] == 0) {
+                for (int j = 0; j < matrix.length; ++j) {
+                    matrix[j][i] = 0;
+                }
+            }
+        }
+        //某一行置为0
+        for (int i = 0; i < y.length; ++i) {
+            if (y[i] == 0) {
+                Arrays.fill(matrix[i], 0);
+            }
+        }
+    }
+
+    static ListNode deleteDuplicates(ListNode head) {
+        ListNode h = new ListNode();
+        ListNode p = h;
+        while (head != null) {
+            if (head.next == null || head.val != head.next.val) {
+                p.next = head;
+                p = head;
+                head = head.next;
+            } else {
+                int val = head.val;
+                while (head != null && head.val == val) {
+                    head = head.next;
+                }
+            }
+        }
+        p.next = null;
+        return h.next;
+    }
+
+    static boolean isVowels(char s) {
+        if (s == 'a' || s == 'A') {
+            return true;
+        }
+        if (s == 'e' || s == 'E') {
+            return true;
+        }
+        if (s == 'i' || s == 'I') {
+            return true;
+        }
+        if (s == 'o' || s == 'O') {
+            return true;
+        }
+        if (s == 'u' || s == 'U') {
+            return true;
+        }
+        return false;
+    }
+
+    static String reverseVowels(String s) {
+        StringBuilder res = new StringBuilder(s);
+        int left = 0;
+        int right = res.length() - 1;
+        while (left < right) {
+            while (left < right && !isVowels(res.charAt(right))) {
+                --right;
+            }
+            while (left < right && !isVowels(res.charAt(left))) {
+                ++left;
+            }
+            char t = res.charAt(right);
+            res.setCharAt(right, res.charAt(left));
+            res.setCharAt(left, t);
+            --right;
+            ++left;
+        }
+        return res.toString();
+    }
+
+    static int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        final int MOD = 1000000007;
+        int[][][] dp = new int[maxMove + 1][m][n];
+        int[][] moves = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};//方便遍历四个方向
+        int sum = 0;
+        dp[0][startRow][startColumn] = 1;
+        for (int i = 0; i < maxMove; ++i) {//从第0步开始，最后就可以直接返回sum了
+            for (int j = 0; j < m; ++j) {
+                for (int k = 0; k < n; ++k) {
+                    int now=dp[i][j][k];
+                    if (now>0) {
+                        for (int[] move : moves) {
+                            int x = j + move[0];
+                            int y = k + move[1];
+                            if (x == m || x < 0 || y == n || y < 0) {
+                                sum = (sum + now) % MOD;
+                            }else {
+                                dp[i+1][x][y]=(dp[i+1][x][y]+now)%MOD;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return sum;
+    }
+
+    //所有节点最短路径里面长度最长的长度
+    static int networkDelayTime(int[][] times,int n,int k) {
+        int[][] graph = new int[n + 1][n + 1];
+        for (int[] g:graph) {
+            Arrays.fill(g, Integer.MAX_VALUE);
+        }
+        for (int[] edge : times) {
+            graph[edge[0]][edge[1]] = edge[2];
+        }
+        int[] pre = new int[n + 1];
+        int[] dist = new int[n + 1];
+        boolean[] tag = new boolean[n + 1];
+        for (int i = 1; i <= n; ++i) {
+            pre[i] = -1;
+            dist[i] = graph[k][i];
+        }
+        dist[k] = 0;
+        tag[k] = true;
+        for (int i = 1; i < n; ++i) {
+            int min = Integer.MAX_VALUE;
+            int index = i;
+            for (int j = 1; j <= n; ++j) {
+                if (!tag[j] && dist[j] < min) {
+                    index = j;
+                    min = dist[j];
+                }
+            }
+            tag[index] = true;
+            for (int j = 1; j <= n; ++j) {
+                int tmp = graph[index][j] == Integer.MAX_VALUE ? Integer.MAX_VALUE : graph[index][j] + min;
+                if (!tag[j] && tmp < dist[j]) {
+                    dist[j] = tmp;
+                    pre[j] = k;
+                }
+            }
+        }
+        int ant = Arrays.stream(dist).max().getAsInt();
+        return ant == Integer.MAX_VALUE ? -1 : ant;
+    }
+
+    static ListNode mergeKLists(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+        if (lists.length==1){
+            return lists[0];
+        }
+        ListNode head = new ListNode();
+        ListNode p = head;
+        int sum = 0;
+        while (sum != lists.length) {
+            int index = 0;
+            int num = Integer.MAX_VALUE;
+            for (int i = 0; i < lists.length; ++i) {
+                if (lists[i] != null && lists[i].val < num) {
+                    index = i;
+                    num = lists[i].val;
+                }
+            }
+            if (num==Integer.MAX_VALUE){
+                return head;
+            }
+            p.next = lists[index];
+            p = lists[index];
+            lists[index] = lists[index].next;
+            if (lists[index] == null) {
+                ++sum;
+            }
+        }
+        p.next = null;
+        return head.next;
+    }
 
     static void test() {
+
     }
 
     public static void main(String[] args) {

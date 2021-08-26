@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 import program.AntSystem.graph.Graph;
 import program.AntSystem.graph.SubGraphs;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -47,11 +44,11 @@ public class Aco {
 
 
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 100;//最大迭代次数
+    public static final int MAX_ITE = 10;//最大迭代次数
     public static final double T0 = 0.02d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
-    public static final double q0 = 0.1d;//轮盘赌与贪心的阈值 小于该值则采用贪心
+    public static final double q0 = 0.9d;//轮盘赌与贪心的阈值 小于该值则采用贪心
     public static Graph graph;//图数据对象 使用邻接表存储
     public static SubGraphs subGraph;//所有的子图
     public static double[][] pheromone;//信息素矩阵
@@ -61,11 +58,9 @@ public class Aco {
     public static final int w = 5;//全局信息素更新的排序参数
     public static final double W = 0.05d;//速度-流量的参数
     public static Graph allGraph;//整个图
-    //public static double sumTime = 0;//通过的所有时间
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
-    //public static double pathLength = 0d;//通过路径的总长度
     public static Solution globalBestSolution;//全局最优蚂蚁的解
     public static int Sn = 10;//每次迭代产生解的数量
     public static PriorityQueue<Solution> topWAnt;
@@ -169,11 +164,11 @@ public class Aco {
         return -1;
     }
 
-    //车辆-流速公式，目前不合理需要修改
+    //车辆-流速公式
     public static double getVelocity(int start, int end) {
         double density = flow[start][end] / allGraph.vertex.get(start).getWeight(end);
-        return VELOCITY * Math.exp(-1 * W * density);
-        //return VELOCITY;
+        //return VELOCITY * Math.exp(-1 * W * density);
+        return VELOCITY * (1 - flow[start][end] / 50d);
     }
 
     //返回经过这条路径的总长度和总时间，第一项为总时间，第二项而总长度
@@ -228,9 +223,7 @@ public class Aco {
         List<List<Integer>> areaPath = new ArrayList<>();
         for (int i = 0; i < ANT_NUM; ++i) {
             int startNode = startNodeList.get(i);
-            //int startNode = 0;
             int endNode = endNodeList.get(i);
-            //int endNode = 59;
             //List<Integer> oneAreaPath = Dijkstra.dijkstra(graph, area.get(startNode), area.get(endNode));
             List<Integer> oneAreaPath = getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph, startNode, endNode));//分区路径
             List<Integer> oneAntAllPath = new ArrayList<>();//一只蚂蚁所有的路径
@@ -254,10 +247,16 @@ public class Aco {
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 startArea = nextArea;
-                if (!path.get(0).equals(startNodeList.get(0))) {
-                    Integer x=path.remove(0);
+                if (!path.get(0).equals(startNodeList.get(i))) {
+                    Integer x = path.remove(0);
                 }
                 oneAntAllPath.addAll(path);
+            }
+            int lastNode = oneAntAllPath.get(oneAntAllPath.size() - 1);
+            if (endNode != lastNode) {
+                List<Integer> leastPath = antSystemPath(subGraph.subGraphs.get(startArea), lastNode, endNode);
+                Integer x = leastPath.remove(0);
+                oneAntAllPath.addAll(leastPath);
             }
             areaPath.add(oneAreaPath);
             allPath.add(oneAntAllPath);
@@ -524,13 +523,26 @@ public class Aco {
     public static void testFlow() {
         initialGraph();
         Solution solution=runOneAnt();
-        System.out.println(solution.sumTime);
-        System.out.println(solution.sumLength);
-        System.out.println(solution.sumLength/solution.sumTime);
+        logger.info(solution.toString());
+        savePath(solution.path);
     }
 
-    public static void main(String[] args) {
+    public static void testPath() throws IOException {
+        initialGraph();
+        String fileName = "src/main/java/program/AntSystem/subshain/finalPath.txt";
+        List<List<Integer>> allPath = ReadFile.readIntData(fileName);
+        for (List<Integer> path : allPath) {
+            int start = path.get(0);
+            int end = path.get(path.size() - 1);
+            List<Integer> pathByDij = Dijkstra.dijkstra(allGraph, start, end);
+            logger.info("acs"+Arrays.toString(getPathLengthAndTimeByPath(path)));
+            logger.info("dij"+Arrays.toString(getPathLengthAndTimeByPath(pathByDij)));
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
         //testFlow();
-        runACS();
+        //runACS();
+        testPath();
     }
 }
