@@ -680,8 +680,93 @@ public class LeetCode {
         return head.next;
     }
 
-    static void test() {
+    static List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) {
+            return res;
+        }
+        Deque<TreeNode> stack = new LinkedList<>();
+        while (!stack.isEmpty() && root != null) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
+            root = stack.pop();
+            res.add(root.val);
+            root = root.right;
+        }
+        return res;
+    }
 
+    static boolean isValidB(TreeNode node ,long lower,long upper){
+        if (node==null){
+            return true;
+        }
+        if (node.val<lower||node.val>upper){
+            return false;
+        }
+        return isValidB(node.left,lower,node.val)&&isValidB(node,node.val,upper);
+    }
+
+    static boolean isValidBST(TreeNode root) {
+        return isValidB(root,Long.MIN_VALUE,Long.MAX_VALUE);
+    }
+
+    static int[] intersection(int[] nums1,int[] nums2) {
+        Arrays.sort(nums1);
+        Arrays.sort(nums2);
+        int index1 = 0;
+        int index2 = 0;
+        List<Integer> res = new ArrayList<>();
+        while (index1 < nums1.length && index2 < nums2.length) {
+            if (nums1[index1] == nums2[index2]) {
+                int t = nums1[index1];
+                res.add(nums1[index1]);
+                while (index1 < nums1.length && nums1[index1] == t) {
+                    ++index1;
+                }
+                while (index2 < nums2.length && nums2[index2] == t) {
+                    ++index2;
+                }
+            } else {
+                if (nums1[index1] < nums2[index2]) {
+                    ++index1;
+                } else {
+                    ++index2;
+                }
+            }
+        }
+        return res.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    static int ipv4ToInt(String ipv4) {
+        String[] adds = ipv4.split("\\.");
+        int res = 0;
+        for (int i = 0; i < adds.length; ++i) {
+            int t = Integer.parseInt(adds[i]) << (8 * i);
+            res = res | t;
+        }
+        return res;
+    }
+
+    static String intToIpv4(int add) {
+        StringBuilder res = new StringBuilder();
+        final int T = 255;
+        for (int i = 0; i < 4; ++i) {
+            int r = add & T;
+            res.append(r);
+            res.append('.');
+            add = add >> 8;
+        }
+        res.deleteCharAt(res.length() - 1);
+        return res.toString();
+    }
+
+    static void test() {
+        String ip="1.1.1.1";
+        int i = ipv4ToInt(ip);
+        System.out.println(i);
+        System.out.println(intToIpv4(i));
     }
 
     public static void main(String[] args) {
