@@ -762,11 +762,92 @@ public class LeetCode {
         return res.toString();
     }
 
+    static int quickSort(int[] nums,int low,int high) {
+        if (low >= high) {
+            return low;
+        }
+        int i = low;
+        int j = high;
+        int temp = nums[low];
+        while (i < j) {
+            while (i < j && nums[j] >= temp) {
+                --j;
+            }
+            nums[i] = nums[j];
+            while (i < j && nums[i] <= temp) {
+                ++i;
+            }
+            nums[j] = nums[i];
+        }
+        nums[i]=temp;
+        return i;
+    }
+
+    static int findKthLargest(int[] nums,int k) {
+        if (nums.length < k) {
+            return -1;
+        }
+        k = nums.length - k;
+        int low = 0;
+        int high = nums.length - 1;
+        int mid = -1;
+        while (mid != k) {
+            mid = quickSort(nums, low, high);
+            if (mid > k) {
+                high = mid - 1;
+            } else if (mid < k) {
+                low = mid + 1;
+            }
+        }
+        return nums[mid];
+    }
+
+    static int result=0;
+
+    static void dfs(TreeNode root,int val) {
+        if (root == null) {
+            return;
+        } else if (root.left == null && root.right == null) {
+            result += val * 10 + root.val;
+        } else {
+            dfs(root.left, val * 10 + root.val);
+            dfs(root.right, val * 10 + root.val);
+        }
+    }
+
+    static int sumNumbers(TreeNode root){
+        dfs(root,root.val);
+        return result;
+    }
+
+    static ListNode detectCycle(ListNode head) {
+        if (head == null) {
+            return null;
+        }
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null) {
+            slow = slow.next;
+            if (fast.next != null) {
+                fast = fast.next.next;
+            } else {
+                return null;
+            }
+            if (fast == slow) {
+                ListNode p = head;
+                while (p != slow) {
+                    p = p.next;
+                    slow = slow.next;
+                }
+                return p;
+            }
+        }
+        return null;
+    }
+
     static void test() {
-        String ip="1.1.1.1";
-        int i = ipv4ToInt(ip);
-        System.out.println(i);
-        System.out.println(intToIpv4(i));
+        int[] a = {3, 2, 1, 5, 6, 4};
+        System.out.println(findKthLargest(a, 2));
     }
 
     public static void main(String[] args) {
