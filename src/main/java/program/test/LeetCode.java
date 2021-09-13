@@ -845,6 +845,45 @@ public class LeetCode {
         return null;
     }
 
+    static void kTh(TreeNode root,int[] t) {
+        if (root != null) {
+            kTh(root.left, t);
+            if (t[0] == 0) {
+                return;
+            }
+            --t[0];
+            if (t[0] == 1) {
+                t[1] = root.val;
+                return;
+            }
+            kTh(root.right, t);
+        }
+    }
+
+    static int kthSmallest(TreeNode root, int k) {
+        int[] nums = {k, 0};
+        kTh(root, nums);
+        return nums[1];
+    }
+
+    static int maxPathSumResult=Integer.MIN_VALUE;
+
+    static int maxPath(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int left = Math.max(0, maxPath(root.left));
+        int right = Math.max(0, maxPath(root.right));
+        int newPath = left + right + root.val;
+        maxPathSumResult = Math.max(maxPathSumResult, newPath);
+        return root.val + Math.max(left, right);
+    }
+
+    static int maxPathSum(TreeNode root){
+        maxPath(root);
+        return maxPathSumResult;
+    }
+
     static void test() {
         int[] a = {3, 2, 1, 5, 6, 4};
         System.out.println(findKthLargest(a, 2));
