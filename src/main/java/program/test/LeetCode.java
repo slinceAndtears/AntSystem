@@ -884,9 +884,38 @@ public class LeetCode {
         return maxPathSumResult;
     }
 
+    static String removeKDigits(String num, int k) {
+        Deque<Character> stack = new LinkedList<>();
+        int len = num.length();
+        for (int i = 0; i < len; ++i) {
+            char digit = num.charAt(i);
+            while (!stack.isEmpty() && k > 0 && stack.peek() > digit) {
+                stack.pop();
+                --k;
+            }
+            stack.push(digit);
+        }
+        for (int i = 0; i < k; ++i) {
+            stack.pop();
+        }
+        System.out.println(stack);
+        StringBuilder res = new StringBuilder();
+        boolean leadingZero = true;
+        while (!stack.isEmpty()) {
+            char digit = stack.pollLast();
+            System.out.println(digit);
+            if (leadingZero && digit == '0') {
+                continue;
+            }
+            leadingZero = false;
+            res.append(digit);
+        }
+        return res.length() == 0 ? "0" : res.toString();
+    }
+
     static void test() {
-        int[] a = {3, 2, 1, 5, 6, 4};
-        System.out.println(findKthLargest(a, 2));
+        String s="10200";
+        System.out.println(removeKDigits(s,1));
     }
 
     public static void main(String[] args) {
