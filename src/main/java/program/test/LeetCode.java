@@ -913,9 +913,68 @@ public class LeetCode {
         return res.length() == 0 ? "0" : res.toString();
     }
 
+    static int rob1(int[] nums) {
+        int n = nums.length;
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        if (nums.length==1){
+            return nums[0];
+        }
+        int[][] dp = new int[n][2];
+        int max = 0;
+        dp[0][1] = 0;
+        for (int i = 1; i < nums.length; ++i) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1]);
+            dp[i][1] = dp[i - 1][0] + nums[i];
+            max = Math.max(max, Math.max(dp[i][0], dp[i][1]));
+        }
+        dp[0][1] = nums[0];
+        dp[0][0] = 0;
+        for (int i = 1; i < nums.length - 1; ++i) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1]);
+            dp[i][1] = dp[i - 1][0] + nums[i];
+            max = Math.max(Math.max(dp[i][0], dp[i][1]), max);
+        }
+        dp[nums.length - 1][1] = Math.max(dp[nums.length - 2][0], dp[nums.length - 2][1]);
+        max = Math.max(max, Math.max(dp[nums.length - 1][0], dp[nums.length - 1][1]));
+        return max;
+    }
+
+    static int search1(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return nums[low] == target ? low : -1;
+    }
+
+    static int rand7(){
+        Random r=new Random();
+        return r.nextInt(7) + 1;
+    }
+
+    static int rand10() {
+        while (true) {
+            int a = rand7();
+            int b = rand7();
+            int c = a * 7 + b;
+            if (c <= 50) {
+                return c % 10;
+            }
+        }
+    }
+
     static void test() {
-        String s="10200";
-        System.out.println(removeKDigits(s,1));
+        for (int i = 0; i < 10; ++i) {
+            System.out.println(rand7());
+        }
     }
 
     public static void main(String[] args) {

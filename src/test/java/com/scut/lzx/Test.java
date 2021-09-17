@@ -539,7 +539,8 @@ public class Test {
                 --count;
             }
         }
-        public int getCount(){
+
+        public int getCount() {
             return this.count;
         }
     }
@@ -573,8 +574,82 @@ public class Test {
         return unionFind.getCount();
     }
 
+    static int maxSubArray(int[] nums) {
+        int res = nums[0];
+        int max = 0;
+        for (int i = 1; i < nums.length; ++i) {
+            max = Math.max(max + nums[i], max);
+            res = Math.max(res, max);
+        }
+        return res;
+    }
+
+    static List<List<Integer>> permuteResult;
+    static boolean[] tag;
+
+    static void dfs(int[] nums, int cur, List<Integer> t) {
+        if (cur == nums.length) {
+            permuteResult.add(new ArrayList<>(t));
+            return;
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            if (tag[i]) {
+                continue;
+            }
+            t.add(nums[i]);
+            tag[i] = true;
+            dfs(nums, cur + 1, t);
+            tag[i] = false;
+            t.remove(t.size() - 1);
+        }
+    }
+
+    static List<List<Integer>> permute(int[] nums) {
+        permuteResult = new ArrayList<>();
+        tag = new boolean[nums.length];
+        dfs(nums, 0, new ArrayList<>());
+        return permuteResult;
+    }
+
+    static String reverseWords(String s) {
+        StringBuilder res = new StringBuilder();
+        int i = s.length() - 1;
+        while (i >= 0) {
+            if (s.charAt(i) != ' ') {
+                StringBuilder t = new StringBuilder();
+                while (i >= 0 && s.charAt(i) != ' ') {
+                    t.insert(0, s.charAt(i));
+                    --i;
+                }
+                res.append(t);
+                res.append(' ');
+            } else {
+                --i;
+            }
+        }
+        res.deleteCharAt(res.length() - 1);
+        return res.toString();
+    }
+
+    static int rob(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int yes = nums[0];
+        int no = 0;
+        int t = 0;
+        for (int i = 1; i < nums.length; ++i) {
+            t = no;
+            no = Math.max(yes, no);
+            yes = t + nums[i];
+        }
+        return Math.max(yes, no);
+    }
+
     @org.junit.Test
     public void test1() {
-        System.out.println(minDistance("distance","springbok"));
+        int[] a={1,3,2,2,6};
+        heapSort(a);
+        System.out.println(Arrays.toString(a));
     }
 }
