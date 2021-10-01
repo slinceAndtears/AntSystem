@@ -971,10 +971,41 @@ public class LeetCode {
         }
     }
 
-    static void test() {
-        for (int i = 0; i < 10; ++i) {
-            System.out.println(rand7());
+    static void sortColors(int[] nums) {
+        int[] sum = new int[3];
+        for (int i = 0; i < nums.length; ++i) {
+            ++sum[nums[i]];
         }
+        int index = 0;
+        for (int i = 0; i < sum.length; ++i) {
+            for (int j = 0; j < sum[i]; ++j) {
+                nums[index++] = i;
+            }
+        }
+    }
+
+    static List<List<Integer>> combineRes=new ArrayList<>();
+    static void dfs(int n,int k,int cur,List<Integer> tmp) {
+        if (tmp.size() == k) {
+            combineRes.add(tmp);
+            return;
+        }
+        if (n - cur < k - tmp.size()-1) {
+            return;
+        }
+        for (int i = cur; i <= n; ++i) {
+            List<Integer> t = new ArrayList<>(tmp);
+            t.add(i);
+            dfs(n, k, i + 1, t);
+        }
+    }
+    static List<List<Integer>> combine(int n,int k) {
+        dfs(n, k, 1, new ArrayList<>());
+        return combineRes;
+    }
+
+    static void test() {
+        System.out.println(combine(4,2));
     }
 
     public static void main(String[] args) {
