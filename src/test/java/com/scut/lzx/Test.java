@@ -19,7 +19,20 @@ class ListNode {
         this.next = next;
     }
 }
-
+class TreeNode{
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(){}
+    TreeNode(int val){
+        this(val,null,null);
+    }
+    TreeNode(int val, TreeNode left, TreeNode right){
+        this.val=val;
+        this.left=left;
+        this.right=right;
+    }
+}
 public class Test {
     static void quickSort(int[] a, int low, int high) {
         if (low >= high) {
@@ -646,10 +659,279 @@ public class Test {
         return Math.max(yes, no);
     }
 
+    static int lengthOfLIS(int[] nums) {
+        int[] dp = new int[nums.length];
+        int res = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            dp[i] = 1;
+        }
+        for (int i = 1; i < nums.length; ++i) {
+            for (int j = 0; j < i; ++j) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            res = Math.max(dp[i], res);
+        }
+        return res;
+    }
+
+    static int findNthDigit(int n) {
+        long num = n;
+        long size = 1;
+        long max = 9;
+        while (n > 0) {
+            if (n - max * size > 0) {
+                num -= max * size;
+                max *= 10;
+                ++size;
+            } else {
+                long count = num / size;
+                long left = num % size;
+                if (left == 0) {
+                    return (int) (((long) Math.pow(10, size - 1) + count - 1) % 10);
+                } else {
+                    return (int) ((((long) Math.pow(10, size - 1) + count) / ((long) Math.pow(10, (size - left)))) % 10);
+                }
+            }
+        }
+        return 0;
+    }
+
+    static ListNode[] myReverse(ListNode head, ListNode tail) {
+        ListNode h = new ListNode();
+        ListNode t = head;
+        ListNode tai = tail.next;
+        while (head != tai) {
+            ListNode p = head;
+            head = head.next;
+            p.next = h.next;
+            h.next = p;
+        }
+        return new ListNode[]{h.next, t};
+    }
+
+    static ListNode createList(int[] a) {
+        ListNode h = new ListNode(a[0]);
+        ListNode p = h;
+        for (int i = 1; i < a.length; ++i) {
+            ListNode t = new ListNode(a[i]);
+            p.next = t;
+            p = t;
+        }
+        p.next = null;
+        return h;
+    }
+
+    static void show(ListNode h) {
+        while (h != null) {
+            System.out.print(h.val + " ");
+            h = h.next;
+        }
+        System.out.println();
+    }
+
+    static ListNode reverseKGroup(ListNode head, int k) {
+        ListNode h = new ListNode();
+        h.next = head;
+        ListNode p = h;
+        while (head != null) {
+            ListNode tail = head;
+            for (int i = 0; i < k - 1; ++i) {
+                tail = tail.next;
+                if (tail == null) {
+                    return h.next;
+                }
+            }
+            ListNode tmp = tail.next;
+            ListNode[] pairs = myReverse(head, tail);
+            p.next = pairs[0];
+            pairs[1].next = tmp;
+            head = tmp;
+            p = pairs[1];
+        }
+        return h.next;
+    }
+
+    static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || p == root || q == root) {
+            return root;
+        }
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left == null) {
+            return right;
+        }
+        if (right == null) {
+            return left;
+        }
+        return root;
+    }
+
+    static ListNode partition(ListNode head, int x) {
+        ListNode large = new ListNode();
+        ListNode small = new ListNode();
+        ListNode l = large;
+        ListNode s = small;
+        while (head != null) {
+            if (head.val >= x) {
+                l.next = head;
+                l = head;
+            } else {
+                s.next = head;
+                s = head;
+            }
+            head = head.next;
+        }
+        l.next = null;
+        s.next = large.next;
+        return small.next;
+    }
+
+    static int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int min = Integer.MAX_VALUE;
+        int res = 0;
+        for (int i = 0; i < nums.length - 2; ++i) {
+            int low = i + 1;
+            int high = nums.length - 1;
+            while (low < high) {
+                int sum = nums[i] + nums[low] + nums[high];
+                if (min > Math.abs(sum - target)) {
+                    min = Math.abs(sum - target);
+                    res = sum;
+                }
+                if (sum > target) {
+                    --high;
+                } else if (sum < target) {
+                    ++low;
+                } else {
+                    return 0;
+                }
+            }
+        }
+        return res;
+    }
+
+    static List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        for (int i = 0; i < nums.length - 3; ++i) {
+            if (i > 0 && nums[i] == nums[i + 1]) {
+                continue;
+            }
+            for (int j = i + 1; j < nums.length - 2; ++j) {
+                if (j > i + 1 && nums[j] == nums[j - 1]) {
+                    continue;
+                }
+                int low = j + 1;
+                int high = nums.length - 1;
+                while (low < high) {
+                    int sum = nums[i] + nums[j] + nums[low] + nums[high];
+                    if (sum > target) {
+                        --high;
+                    } else if (sum < target) {
+                        ++low;
+                    } else {
+                        res.add(Arrays.asList(nums[i], nums[j], nums[low], nums[high]));
+                        int l = nums[low];
+                        int h = nums[high];
+                        while (low < high && nums[low] == l) {
+                            ++low;
+                        }
+                        while (low < high && nums[high] == h) {
+                            --high;
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    static boolean existRes;
+
+    static void dfs(char[][] board, String word, int x, int y, int cur) {
+        if (cur == word.length()) {
+            existRes = true;
+            return;
+        }
+        if (x < 0 || x > board.length || y < 0 || y < board[x].length || existRes || board[x][y] != word.charAt(cur)) {
+            return;
+        }
+        char t = board[x][y];
+        board[x][y] = '.';
+        dfs(board, word, x + 1, y, cur + 1);
+        dfs(board, word, x - 1, y, cur + 1);
+        dfs(board, word, x, y + 1, cur + 1);
+        dfs(board, word, x, y - 1, cur + 1);
+    }
+
+    static boolean exist(char[][] board, String word) {
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[i].length; ++j) {
+                if (board[i][j] == word.charAt(0)) {
+                    dfs(board, word, i, j, 1);
+                }
+            }
+        }
+        return existRes;
+    }
+
+    static int compareVersion(String version1, String version2) {
+        String[] versions1 = version1.split("\\.");
+        String[] versions2 = version2.split("\\.");
+        int v1 = 0;
+        int v2 = 0;
+        while (v1 < versions1.length || v2 < versions2.length) {
+            int t1 = v1 == versions1.length ? 0 : Integer.valueOf(versions1[v1]);
+            int t2 = v2 == versions2.length ? 0 : Integer.valueOf(versions2[v2]);
+            if (t1 == t2) {
+                ++v1;
+                ++v2;
+            } else if (t1 > t2) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    static boolean findOrder(int numCourses, int[][] prerequisites) {
+        int[] entry = new int[numCourses];
+        boolean[] tag = new boolean[numCourses];
+        for (int i = 0; i < prerequisites.length; ++i) {
+            ++entry[prerequisites[i][0]];
+        }
+        //System.out.println(Arrays.toString(entry));
+        int sum = 0;
+        while (sum < numCourses) {
+            int node = -1;
+            for (int i = 0; i < entry.length; ++i) {
+                if (tag[i] == false && entry[i] == 0) {
+                    node = i;
+                    break;
+                }
+            }
+            if (node == -1) {
+                return false;
+            }
+            tag[node] = true;
+            for (int i = 0; i < prerequisites.length; ++i) {
+                if (prerequisites[i][1] == node) {
+                    --entry[prerequisites[i][0]];
+                }
+            }
+            ++sum;
+        }
+        return true;
+    }
+
     @org.junit.Test
     public void test1() {
-        int[] a={1,3,2,2,6};
-        heapSort(a);
-        System.out.println(Arrays.toString(a));
+        int[][] t = {{1, 0}};
+        boolean order = findOrder(2, t);
+        System.out.println(order);
     }
 }
