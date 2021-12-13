@@ -898,8 +898,9 @@ public class Test {
         return 0;
     }
 
-    static boolean findOrder(int numCourses, int[][] prerequisites) {
+    static int[] findOrder(int numCourses, int[][] prerequisites) {
         int[] entry = new int[numCourses];
+        int[] res = new int[numCourses];
         boolean[] tag = new boolean[numCourses];
         for (int i = 0; i < prerequisites.length; ++i) {
             ++entry[prerequisites[i][0]];
@@ -915,23 +916,145 @@ public class Test {
                 }
             }
             if (node == -1) {
-                return false;
+                return new int[]{};
             }
             tag[node] = true;
+            res[sum++] = node;
             for (int i = 0; i < prerequisites.length; ++i) {
                 if (prerequisites[i][1] == node) {
                     --entry[prerequisites[i][0]];
                 }
             }
-            ++sum;
         }
-        return true;
+        return res;
     }
+
+    static ListNode insertionSortList(ListNode head) {
+        ListNode h = new ListNode();
+        h.next = head;
+        head = head.next;
+        h.next.next = null;
+        while (head != null) {
+            ListNode t = head;
+            head = head.next;
+            ListNode p = h;
+            while (p.next != null && p.next.val < t.val) {
+                p = p.next;
+            }
+            t.next = p.next;
+            p.next = t;
+        }
+        return h.next;
+    }
+
+    static ListNode reverseList(ListNode head){
+        if (head==null||head.next==null){
+            return head;
+        }
+        ListNode h=new ListNode();
+        while (head!=null){
+            ListNode t=head;
+            head=head.next;
+            t.next=h.next;
+            h.next=t;
+        }
+        return h.next;
+    }
+
+    static void reorderList(ListNode head) {
+        if (head==null||head.next==null){
+            return;
+        }
+        ListNode h = new ListNode();
+        h.next = head;
+        ListNode slow = h;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        show(slow);
+        ListNode p = slow;
+        slow = slow.next;
+        show(slow);
+        p.next = null;
+        slow = reverseList(slow);
+        h.next = null;
+        ListNode s = h;
+        while (head != null || slow != null) {
+            if (head!=null){
+                s.next = head;
+                s = head;
+                head = head.next;
+            }
+            if (slow!=null) {
+                s.next = slow;
+                s = slow;
+                slow = slow.next;
+            }
+        }
+        s.next = null;
+        head = h.next;
+    }
+
+    static String largestNumber(int[] nums) {
+        String[] numbers = new String[nums.length];
+        for (int i = 0; i < nums.length; ++i) {
+            numbers[i] = String.valueOf(nums[i]);
+        }
+        Arrays.sort(numbers, (o1, o2) -> (o2 + o1).compareTo(o1 + o2));
+        StringBuilder number = new StringBuilder();
+        for (String s : numbers) {
+            if (s.equals("0") && number.toString().equals("0")) {
+                continue;
+            }
+            number.append(s);
+        }
+        return number.toString();
+    }
+
+    static int search1(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            System.out.println(mid);
+            if (nums[mid] > target) {
+                high = mid - 1;
+            } else if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                return mid;
+            }
+        }
+        return nums[low] == target ? low : -1;
+    }
+
+    static ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode A = headA;
+        ListNode B = headB;
+        while (A != B) {
+            A = A.next == null ? headB : A.next;
+            B = B.next == null ? headA : B.next;
+        }
+        return A;
+    }
+
+    static ListNode middleNode(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
 
     @org.junit.Test
     public void test1() {
-        int[][] t = {{1, 0}};
-        boolean order = findOrder(2, t);
-        System.out.println(order);
+        int[] a = {1};
+        ListNode l=createList(a);
+        reorderList(l);
     }
 }

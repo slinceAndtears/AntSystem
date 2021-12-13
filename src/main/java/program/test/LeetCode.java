@@ -1004,6 +1004,32 @@ public class LeetCode {
         return combineRes;
     }
 
+    static String addBinary(String a, String b) {
+        int indexa = a.length() - 1;
+        int indexb = b.length() - 1;
+        int jump = 0;
+        StringBuilder res = new StringBuilder();
+        while (indexa >= 0 || indexb >= 0) {
+            int result = 0;
+            System.out.println(jump);
+            int ta = indexa < 0 ? 0 : a.charAt(indexa) - '0';
+            int tb = indexb < 0 ? 0 : b.charAt(indexb) - '0';
+            result = (jump + ta + tb) % 2;
+            if (ta + tb + jump >= 2) {
+                jump = 1;
+            } else {
+                jump = 0;
+            }
+            res.insert(0,result);
+            --indexa;
+            --indexb;
+        }
+        if (jump!=0){
+            res.insert(0,jump);
+        }
+        return res.toString();
+    }
+
     static void test() {
         System.out.println(combine(4,2));
     }
