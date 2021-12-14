@@ -1011,7 +1011,6 @@ public class LeetCode {
         StringBuilder res = new StringBuilder();
         while (indexa >= 0 || indexb >= 0) {
             int result = 0;
-            System.out.println(jump);
             int ta = indexa < 0 ? 0 : a.charAt(indexa) - '0';
             int tb = indexb < 0 ? 0 : b.charAt(indexb) - '0';
             result = (jump + ta + tb) % 2;
@@ -1028,6 +1027,23 @@ public class LeetCode {
             res.insert(0,jump);
         }
         return res.toString();
+    }
+
+    static int singleNumber(int[] nums) {
+        int[] counts = new int[32];
+        for (int num : nums) {
+            for (int i = 0; i < 32; ++i) {
+                counts[i] += num & 1;
+                num >>>= 1;
+            }
+        }
+        int res = 0;
+        int m = 3;
+        for (int i = 0; i < 32; ++i) {
+            res <<= 1;
+            res |= nums[31 - i] % m;
+        }
+        return res;
     }
 
     static void test() {
