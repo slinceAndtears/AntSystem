@@ -82,20 +82,11 @@ public class Aco {
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
-        globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(),0);
-        topWAnt = new PriorityQueue<>(w - 1, new Comparator<Solution>() {
-            @Override
-            public int compare(Solution o1, Solution o2) {
-                if (o1.sumTime < o2.sumTime) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            }
-        });
-        area=new ArrayList<>();
-        List<List<Integer>> t =ReadFile.readIntData("src/main/java/program/AntSystem/subshain/area.txt");
-        for (List<Integer> x:t){
+        globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0);
+        topWAnt = new PriorityQueue<>(w - 1, (o1, o2) -> o1.sumTime < o2.sumTime ? 1 : -1);
+        area = new ArrayList<>();
+        List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/subshain/area.txt");
+        for (List<Integer> x : t) {
             area.add(x.get(0));
         }
     }
