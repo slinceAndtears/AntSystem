@@ -42,6 +42,9 @@ import java.util.*;
  *  添加每段路径的耗时，新建一个SolutionWithPathTime 用于专门存放
  *  修改PriorityQueue中的Compare ，改成lambda表达式
  *
+ *  2022-02-13
+ *   新增的北京地图，有38个点没有边连接
+ *
  * */
 public class Aco {
     private static final Logger logger= LoggerFactory.getLogger(Aco.class);

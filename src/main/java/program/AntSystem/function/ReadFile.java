@@ -152,12 +152,12 @@ public class ReadFile {
 
     //每个点的坐标都乘以100 如果坐标是0 ，那么怎么办，分区图，是采用如何以单向图导入
     public static void handleData() {
-        List<List<Integer>> area = readIntData("src/main/java/program/AntSystem/subshain/area.txt");
-        List<List<Integer>> link = readIntData("src/main/java/program/AntSystem/subshain/link.txt");
-        List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/subshain/coordinate.txt");
+        List<List<Integer>> area = readIntData("src/main/java/program/AntSystem/beijing/area.txt");
+        List<List<Integer>> link = readIntData("src/main/java/program/AntSystem/beijing/ways.txt");
+        List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/beijing/cordinate.txt");
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/subshain/finalLink.txt"));
+            writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/beijing/cordinate.txt"));
             for (int i = 0; i < link.size(); ++i) {
                 StringBuilder res = new StringBuilder();
                 int start_node = link.get(i).get(0);
