@@ -132,11 +132,24 @@ public class Dijkstra {
     }
 
     public static void test() {
-        initGraph();
-        System.out.println("总时间"+getSumTime());
-        System.out.println("总路径"+pathLength);
-        System.out.println("平均速度"+(pathLength/getSumTime()));
+        //initGraph();
+        //System.out.println("总时间"+getSumTime());
+        //System.out.println("总路径"+pathLength);
+        //System.out.println("平均速度"+(pathLength/getSumTime()));
         //List<Integer> path=dijkstra(staticGraph,178,189);
+        Graph graph = new Graph();
+        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+        ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
+        for (int i = 1; i < 2123; ++i) {
+            for (int j = i + 1; j <= 2123; ++j) {
+                if (graph.vertex.containsKey(i) && graph.vertex.containsKey(j)) {
+                    List<Integer> dijkstra = dijkstra(graph, i, j);
+                    logger.info("start node is: " + i);
+                    logger.info("end node is: " + j);
+                    logger.info("path length is" + dijkstra.size());
+                }
+            }
+        }
     }
 
     public static void test1() {
