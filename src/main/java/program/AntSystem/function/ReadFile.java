@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ReadFile {
 
-    private static final Logger logger= LoggerFactory.getLogger(ReadFile.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReadFile.class);
 
     //权值为double类型,由一开始的int改的
     public static List<List<Double>> readFile(String fileName) {
@@ -106,7 +106,7 @@ public class ReadFile {
             graph.addVertex(end_node);
 
             graph.vertex.get(start_node).addNbr(end_node, weight);
-            graph.vertex.get(end_node).addNbr(start_node,weight);
+            graph.vertex.get(end_node).addNbr(start_node, weight);
             if (subGraphs.subGraphs.get(start_area) == null) {
                 subGraphs.subGraphs.put(start_area, new SubGraph(start_area));
             }
@@ -117,7 +117,7 @@ public class ReadFile {
             subGraphs.subGraphs.get(end_area).addVertex(end_node);
             if (start_area == end_area) {
                 subGraphs.subGraphs.get(start_area).vertex.get(start_node).addNbr(end_node, weight);
-                subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node,weight);
+                subGraphs.subGraphs.get(start_area).vertex.get(end_node).addNbr(start_node, weight);
             }
             //在此处可以导入分区图
 /*            if (!area.vertex.containsKey(start_area)) {
@@ -176,8 +176,8 @@ public class ReadFile {
         } catch (IOException e) {
             logger.error("write file failure");
             e.printStackTrace();
-        }finally {
-            if (writer!=null){
+        } finally {
+            if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {

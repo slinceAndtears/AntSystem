@@ -9,18 +9,18 @@ import java.util.List;
 
 public class DataHandler {
     public static void main(String[] args) {
-        List<List<Double>> node=ReadFile.readFile("src/program/AntSystem/friedrichshain/testPath.txt");
+        List<List<Double>> node = ReadFile.readFile("src/program/AntSystem/friedrichshain/testPath.txt");
         Collections.sort(node, new Comparator<List<Double>>() {
             @Override
             public int compare(List<Double> o1, List<Double> o2) {
                 return o1.get(0).compareTo(o2.get(0));
             }
         });
-        BufferedWriter writer=null;
+        BufferedWriter writer = null;
         try {
-            writer=new BufferedWriter(new FileWriter("src/program/AntSystem/friedrichshain/res.txt"));
-            for (List<Double> t:node){
-                StringBuilder res=new StringBuilder();
+            writer = new BufferedWriter(new FileWriter("src/program/AntSystem/friedrichshain/res.txt"));
+            for (List<Double> t : node) {
+                StringBuilder res = new StringBuilder();
                 res.append(t.get(0));
                 res.append(" ");
                 res.append(t.get(1));
@@ -29,7 +29,7 @@ public class DataHandler {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 writer.close();
             } catch (IOException e) {

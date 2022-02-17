@@ -9,7 +9,7 @@ public class SubGraphs {
 
     public SubGraphs() {
         subGraphs = new HashMap<>();
-        areaGraph=new Graph();
+        areaGraph = new Graph();
     }
 
     public void addSubGraph(int area) {

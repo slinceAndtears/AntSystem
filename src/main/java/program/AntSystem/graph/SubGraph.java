@@ -12,6 +12,7 @@ public class SubGraph extends Graph {
         this.area = a;
         connect = new HashMap<>();
     }
+
     //分区之间联通的点
     public Map<Integer, List<Integer>> connect;
 }

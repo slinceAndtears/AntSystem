@@ -53,7 +53,7 @@ import java.util.*;
  *   终点区域集合为97
  * */
 public class Aco {
-    private static final Logger logger= LoggerFactory.getLogger(Aco.class);
+    private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
     public static final int ANT_NUM = 100;//蚂蚁数量
@@ -104,12 +104,12 @@ public class Aco {
         }
     }
 
-    public static int nextStep(int now_node){
-        return nextStep(graph,now_node,null);
+    public static int nextStep(int now_node) {
+        return nextStep(graph, now_node, null);
     }
 
     //蚂蚁根据当前顶点选择下一节点
-    public static int nextStep(Graph graph,int now_node,Map<Integer,Integer> level) {
+    public static int nextStep(Graph graph, int now_node, Map<Integer, Integer> level) {
         if (graph == null || !graph.vertex.containsKey(now_node)) {
             logger.error(String.format("graph is null or graph do not contains now_node %s", now_node));
             throw new IllegalArgumentException(String.format("图为空或者图不包含起始节点%s", now_node));
@@ -127,8 +127,8 @@ public class Aco {
         }
         //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         if (nbr.size() == 0) {
-            logger.error(String.format("起点%s没有路可以走",now_node));
-            throw  new RuntimeException(String.format("起点%s没有路可以走",now_node));
+            logger.error(String.format("起点%s没有路可以走", now_node));
+            throw new RuntimeException(String.format("起点%s没有路可以走", now_node));
             //return -1;//如果没有路可以走
         }
         double[] state = new double[nbr.size()];//邻居的转移信息
@@ -186,27 +186,27 @@ public class Aco {
         for (int i = 1; i < path.size(); ++i) {
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
-            sumLength+= allGraph.vertex.get(start).getWeight(path.get(i));
+            sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
             sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
             start = path.get(i);
         }
-        return new double[]{sumTime,sumLength};
+        return new double[]{sumTime, sumLength};
     }
 
-    public static double[] getPathLengthAndTimeByPath(List<Integer> path,SolutionWithPathTime solution,int antNum){
+    public static double[] getPathLengthAndTimeByPath(List<Integer> path, SolutionWithPathTime solution, int antNum) {
         double sumLength = 0d;
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
-            sumLength+= allGraph.vertex.get(start).getWeight(path.get(i));
-            double time= allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
-            sumTime +=time;
+            sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
+            double time = allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            sumTime += time;
             solution.pathTime.get(antNum).add(time);
             start = path.get(i);
         }
-        return new double[]{sumTime,sumLength};
+        return new double[]{sumTime, sumLength};
     }
 
     //局部信息素的更新
@@ -215,17 +215,17 @@ public class Aco {
     }
 
     //利用蚁群算法，选出一条完整的路径
-    public static List<Integer> antSystemPath(Graph graph,int start,int end){
-        if (graph==null||!graph.vertex.containsKey(start)||!graph.vertex.containsKey(end)){
-            logger.error(String.format("graph is null or graph does not contains start node %s or end node %s",start,end));
+    public static List<Integer> antSystemPath(Graph graph, int start, int end) {
+        if (graph == null || !graph.vertex.containsKey(start) || !graph.vertex.containsKey(end)) {
+            logger.error(String.format("graph is null or graph does not contains start node %s or end node %s", start, end));
             throw new IllegalArgumentException(String.format("graph is null or graph does" +
-                    " not contains start node %s or end node %s",start,end));
+                    " not contains start node %s or end node %s", start, end));
         }
-        List<Integer> path=new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
         path.add(start);
-        Map<Integer,Integer> level=BFS.bfdWithEnd(graph,end);
-        while (start!=end){
-            start=nextStep(graph,start,level);
+        Map<Integer, Integer> level = BFS.bfdWithEnd(graph, end);
+        while (start != end) {
+            start = nextStep(graph, start, level);
             path.add(start);
         }
         return path;
@@ -233,7 +233,7 @@ public class Aco {
 
     /**
      * 一只蚂蚁走完全部的路程 分区之间用迪杰斯特拉算法确定。
-     * */
+     */
     public static SolutionWithPathTime runOneAnt() {
         Random r = new Random();
         double sumTime = 0d;
@@ -242,7 +242,7 @@ public class Aco {
         SolutionWithPathTime solution = new SolutionWithPathTime();
         List<List<Integer>> allPath = new ArrayList<>();
         List<List<Integer>> areaPath = new ArrayList<>();
-        solution.pathTime=new ArrayList<>();
+        solution.pathTime = new ArrayList<>();
         for (int i = 0; i < ANT_NUM; ++i) {
             int startNode = startNodeList.get(i);
             int endNode = endNodeList.get(i);
@@ -309,7 +309,7 @@ public class Aco {
             localBest[i] = topWAnt.poll();
         }
         for (int i = 1; i <= w - 1; ++i) {
-            t = (w - i) * (1 / localBest[i-1].sumTime) + w * (1/globalBestSolution.sumTime);
+            t = (w - i) * (1 / localBest[i - 1].sumTime) + w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
         for (List<Integer> ap : globalBestSolution.areaPath) {
@@ -343,11 +343,11 @@ public class Aco {
     }
 
     //根据最短路径获取分区之间的路径
-    public static List<Integer> getAreaPathByDijkstra(List<Integer> path){
-        List<Integer> areaPath=new ArrayList<>();
-        for (Integer x:path){
-            int a=area.get(x);
-            if (areaPath.size()==0||a!=areaPath.get(areaPath.size()-1)){
+    public static List<Integer> getAreaPathByDijkstra(List<Integer> path) {
+        List<Integer> areaPath = new ArrayList<>();
+        for (Integer x : path) {
+            int a = area.get(x);
+            if (areaPath.size() == 0 || a != areaPath.get(areaPath.size() - 1)) {
                 areaPath.add(a);
             }
         }
@@ -418,7 +418,7 @@ public class Aco {
                     now_node = connectNextArea.get(r.nextInt(connectNextArea.size()));
                     path.add(now_node);
                 }
-                double[] timeAntLength=getPathLengthAndTimeByPath(path);
+                double[] timeAntLength = getPathLengthAndTimeByPath(path);
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 //List返回的都是Integer对象，所以需要使用equals来进行比较
@@ -473,7 +473,7 @@ public class Aco {
             for (int j = 0; j < Sn; ++j) {
                 //Solution t = runOneAnt();
                 SolutionWithPathTime t = runOneAnt();
-                logger.info(String.format("第%s轮迭代第%s个解结果为%s",i,j,t.toString()));
+                logger.info(String.format("第%s轮迭代第%s个解结果为%s", i, j, t.toString()));
                 //随时更新全局最优解
                 if (t.sumTime < globalBestSolution.sumTime) {
                     globalBestSolution = t;
@@ -483,8 +483,8 @@ public class Aco {
                     topWAnt.poll();
                 }
                 //对流量进行清空
-                for (int[] x:flow){
-                    Arrays.fill(x,0);
+                for (int[] x : flow) {
+                    Arrays.fill(x, 0);
                 }
             }
             //求出top w个解，然后对这些解经过的变和全局最优蚂蚁经过的边释放信息素
@@ -542,15 +542,15 @@ public class Aco {
     }
 
     //输出信息素的方法
-    public static void showPhe(){
-        for (double[] x:pheromone){
+    public static void showPhe() {
+        for (double[] x : pheromone) {
             System.out.println(Arrays.toString(x));
         }
     }
 
     public static void testFlow() {
         initialGraph();
-        Solution solution=runOneAnt();
+        Solution solution = runOneAnt();
         logger.info(solution.toString());
         savePath(solution.path);
     }
@@ -563,7 +563,7 @@ public class Aco {
             int start = path.get(0);
             int end = path.get(path.size() - 1);
             List<Integer> pathByDij = Dijkstra.dijkstra(allGraph, start, end);
-            logger.info("acs"+Arrays.toString(getPathLengthAndTimeByPath(path)));
+            logger.info("acs" + Arrays.toString(getPathLengthAndTimeByPath(path)));
         }
     }
 
