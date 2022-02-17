@@ -65,7 +65,7 @@ public class Dijkstra {
         //根据pre数组来求出经过的路径
         path.add(end);
         int t = end;
-        while (t != start) {
+        while (t != start && !pre.isEmpty()) {
             t = pre.get(t);
             path.add(0, t);
         }
@@ -139,16 +139,20 @@ public class Dijkstra {
         //List<Integer> path=dijkstra(staticGraph,178,189);
         Graph graph = new Graph();
         String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
-        ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
-        for (int i = 1; i < 2123; ++i) {
-            for (int j = i + 1; j <= 2123; ++j) {
-                if (graph.vertex.containsKey(i) && graph.vertex.containsKey(j)) {
-                    List<Integer> dijkstra = dijkstra(graph, i, j);
-                    logger.info("start node is: " + i);
-                    logger.info("end node is: " + j);
-                    logger.info("path length is" + dijkstra.size());
-                }
-            }
+        SubGraphs subGraphs = new SubGraphs();
+        ReadFile.initialSubGraph(graph, subGraphs, fileName);
+        Set<Integer> start = subGraphs.subGraphs.get(11).vertex.keySet();
+        List<Integer> startNodeList = new ArrayList<>(start);
+        Set<Integer> end = subGraphs.subGraphs.get(97).vertex.keySet();
+        List<Integer> endNodeList = new ArrayList<>(end);
+        List<Integer> started = new ArrayList<>();
+        List<Integer> ended = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 100; ++i) {
+            int s = random.nextInt(startNodeList.size());
+            int e = random.nextInt(endNodeList.size());
+            started.add(startNodeList.get(s));
+            end.add(endNodeList.get(e));
         }
     }
 
