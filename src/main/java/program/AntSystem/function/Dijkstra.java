@@ -25,7 +25,7 @@ public class Dijkstra {
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
-    public static double pathLength=0d;
+    public static double pathLength = 0d;
 
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -92,7 +92,7 @@ public class Dijkstra {
         }
     }
 
-    public static double getVelocity(int start, int end){
+    public static double getVelocity(int start, int end) {
         double density = flow[start][end] / staticGraph.vertex.get(start).getWeight(end);
         //double velocity = VELOCITY * Math.exp(-1 * W * density);
         double velocity = VELOCITY * (1 - flow[start][end] / 50d);
@@ -131,7 +131,7 @@ public class Dijkstra {
         return sumTime;
     }
 
-    public static void test() {
+    public static void getStartEndNode() {
         //initGraph();
         //System.out.println("总时间"+getSumTime());
         //System.out.println("总路径"+pathLength);
@@ -141,19 +141,23 @@ public class Dijkstra {
         String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
         SubGraphs subGraphs = new SubGraphs();
         ReadFile.initialSubGraph(graph, subGraphs, fileName);
-        Set<Integer> start = subGraphs.subGraphs.get(11).vertex.keySet();
-        List<Integer> startNodeList = new ArrayList<>(start);
-        Set<Integer> end = subGraphs.subGraphs.get(97).vertex.keySet();
-        List<Integer> endNodeList = new ArrayList<>(end);
-        List<Integer> started = new ArrayList<>();
-        List<Integer> ended = new ArrayList<>();
+        int startArea = 11;
+        int endArea = 97;
+        List<Integer> startNodeList = new ArrayList<>(subGraphs.subGraphs.get(startArea).vertex.keySet());
+        List<Integer> endNodeList = new ArrayList<>(subGraphs.subGraphs.get(endArea).vertex.keySet());
         Random random = new Random();
+        StringBuilder startNode = new StringBuilder();
+        StringBuilder endNode = new StringBuilder();
         for (int i = 0; i < 100; ++i) {
             int s = random.nextInt(startNodeList.size());
             int e = random.nextInt(endNodeList.size());
-            started.add(startNodeList.get(s));
-            end.add(endNodeList.get(e));
+            startNode.append(startNodeList.get(s));
+            startNode.append(' ');
+            endNode.append(endNodeList.get(e));
+            endNode.append(' ');
         }
+        System.out.println(startNode);
+        System.out.println(endNode);
     }
 
     public static void test1() {
@@ -163,6 +167,6 @@ public class Dijkstra {
     }
 
     public static void main(String[] args) {
-        test();
+        test1();
     }
 }

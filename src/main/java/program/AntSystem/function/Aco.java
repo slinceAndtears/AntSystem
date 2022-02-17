@@ -81,7 +81,7 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
-        String fileName = "src/main/java/program/AntSystem/subshain/finalLink.txt";
+        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
@@ -91,14 +91,14 @@ public class Aco {
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
-        fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
+        fileName = "src/main/java/program/AntSystem/beijing/startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
         globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0);
         topWAnt = new PriorityQueue<>(w - 1, (o1, o2) -> o1.sumTime < o2.sumTime ? 1 : -1);
         area = new ArrayList<>();
-        List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/subshain/area.txt");
+        List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/beijing/area.txt");
         for (List<Integer> x : t) {
             area.add(x.get(0));
         }
@@ -492,7 +492,7 @@ public class Aco {
             System.out.println(globalBestSolution);
         }
         //保存路径
-        savePath(globalBestSolution.path);
+        //savePath(globalBestSolution.path);
     }
 
     //在起点终点区域内随机生成起点和终点
@@ -569,7 +569,7 @@ public class Aco {
 
     public static void main(String[] args) throws IOException {
         //testFlow();
-        //runACS();
-        testPath();
+        runACS();
+        //testPath();
     }
 }
