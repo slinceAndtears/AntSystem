@@ -54,6 +54,10 @@ import java.util.*;
  *  2022-02-17
  *      目前存在的一个问题：由于有38个点完全没有边。同时目前图的导入是根据边来导入的。所以在导入图的时候，这些点都无法导入进去
  *      导致点的数量减小，需要在图的导入地方作出改进？？ 或者重新导入这些点
+ *   2022-02-19
+ *      删除上述没有边的点。
+ *      起点区域更改为96
+ *      终点区域更改为63
  * */
 public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
@@ -81,6 +85,20 @@ public class Aco {
     public static int Sn = 10;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
+    public static Set<Integer> guerNode ;
+
+    public static void detectGuerNode() {
+        guerNode = new HashSet<>();
+        for (int i = 0; i < 100; ++i) {
+            Graph graph = subGraph.subGraphs.get(i);
+            Set<Integer> nodes = graph.vertex.keySet();
+            for (Integer n : nodes) {
+                if (graph.vertex.get(n).getAllNbr().size() == 0) {
+                    guerNode.add(n);
+                }
+            }
+        }
+    }
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
@@ -123,16 +141,26 @@ public class Aco {
         } else {
             nbr = new ArrayList<>();
             for (Integer x : graph.vertex.get(now_node).getAllNbr()) {
-                if (level.get(x) < level.get(now_node)) {
-                    nbr.add(x);
+                try {
+                    if (level.get(x) < level.get(now_node)) {
+                        nbr.add(x);
+                    }
+                }catch (Exception e){
+                    logger.error("graph node list is {}", graph.getAllVertex());
+                    logger.error("now node is: {}, x is {}", now_node, x);
+                    logger.error("level is {}", level);
+                    throw new RuntimeException();
                 }
             }
         }
         //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         if (nbr.size() == 0) {
             logger.error(String.format("起点%s没有路可以走", now_node));
+
             throw new RuntimeException(String.format("起点%s没有路可以走", now_node));
             //return -1;//如果没有路可以走
+        } else if (nbr.size() == 1) {
+            return nbr.get(0);
         }
         double[] state = new double[nbr.size()];//邻居的转移信息
         double n_ij = 0d;
@@ -141,7 +169,11 @@ public class Aco {
         Random r = new Random();//随机数实现轮盘赌
         for (int i = 0; i < nbr.size(); ++i) {
             int density = flow[now_node][nbr.get(i)] == 0 ? 1 : flow[now_node][nbr.get(i)];
-            n_ij = 1d / (graph.vertex.get(now_node).getWeight(nbr.get(i)) * density);
+            double weight = graph.vertex.get(now_node).getWeight(nbr.get(i));
+            if (weight < 1e-6) {
+                continue;
+            }
+            n_ij = 1d / (weight * density);
             t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
             state[i] = t_ij * Math.pow(n_ij, B);
             sum += state[i];
@@ -250,7 +282,15 @@ public class Aco {
             int startNode = startNodeList.get(i);
             int endNode = endNodeList.get(i);
             //List<Integer> oneAreaPath = Dijkstra.dijkstra(graph, area.get(startNode), area.get(endNode));
-            List<Integer> oneAreaPath = getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph, startNode, endNode));//分区路径
+            List<Integer> oneAreaPath=new ArrayList<>();
+            try {
+                oneAreaPath = getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph, startNode, endNode));//分区路径
+            }catch (Exception e){
+                logger.error("start Node is {}",startNode);
+                logger.error("end Node is {}",endNode);
+                throw new RuntimeException();
+            }
+
             List<Integer> oneAntAllPath = new ArrayList<>();//一只蚂蚁所有的路径
             solution.pathTime.add(new ArrayList<>());
             int startArea = oneAreaPath.get(0);
@@ -396,6 +436,10 @@ public class Aco {
                     next_area = nextStep(now_area);//根据蚁群算法挑选出下一个区域
                     //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
                     List<Integer> connect = getConnectNode(now_area, next_area);
+                    if (connect.size()==0){
+                        logger.error("connected node sum is 0, now area is");
+                        throw new IllegalArgumentException("");
+                    }
                     next_node = connect.get(r.nextInt(connect.size()));
                 } else {
                     next_node = end_node;
@@ -570,9 +614,27 @@ public class Aco {
         }
     }
 
+    static void detectNodeLink(){
+        for (int i=1;i<=2088;++i){
+            if (!allGraph.vertex.keySet().contains(i)){
+                System.out.println(i);
+            }
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         //testFlow();
-        runACS();
+        initialGraph();
+        //runOneAnt();
+        Graph graph = subGraph.subGraphs.get(44);
+        List<Integer> allVertex = graph.getAllVertex();
+        logger.info("path is {}",Dijkstra.dijkstra(graph,1409,653));
+/*        for (int i = 0; i < allVertex.size() - 1; ++i) {
+            for (int j = i + 1; j < allVertex.size(); ++j) {
+                logger.info("start node is {},end node is{}, path length is {}",allVertex.get(i),allVertex.get(j),
+                        Dijkstra.dijkstra(graph, allVertex.get(i), allVertex.get(j)));
+            }
+        }*/
         //testPath();
     }
 }

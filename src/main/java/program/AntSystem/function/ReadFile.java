@@ -157,14 +157,14 @@ public class ReadFile {
         List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/beijing/cordinate.txt");
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/beijing/cordinate.txt"));
+            writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/beijing/finalLink.txt"));
             for (int i = 0; i < link.size(); ++i) {
                 StringBuilder res = new StringBuilder();
                 int start_node = link.get(i).get(0);
                 int end_node = link.get(i).get(1);
-                int start_area = area.get(start_node).get(0);
-                int end_area = area.get(end_node).get(0);
-                double weight = distance(coordinate.get(start_node), coordinate.get(end_node));
+                int start_area = area.get(start_node - 1).get(0);
+                int end_area = area.get(end_node - 1).get(0);
+                double weight = distance(coordinate.get(start_node - 1), coordinate.get(end_node - 1)) * 1000;
                 res.append(start_node).append(' ');
                 res.append(start_area).append(' ');
                 res.append(end_node).append(' ');

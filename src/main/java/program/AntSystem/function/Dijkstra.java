@@ -66,6 +66,9 @@ public class Dijkstra {
         path.add(end);
         int t = end;
         while (t != start && !pre.isEmpty()) {
+            if (flag.get(t) == 0) {
+                throw new RuntimeException("graph is not link");
+            }
             t = pre.get(t);
             path.add(0, t);
         }
@@ -77,13 +80,13 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        String fileName = "src/main/java/program/AntSystem/subshain/finalLink.txt";
+        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
         graph = new Graph();
         staticGraph = new Graph();
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
         ReadFile.initialSubGraph(staticGraph, new SubGraphs(), fileName);
         flow = new int[graph.nodeNum][graph.nodeNum];
-        fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
+        fileName = "src/main/java/program/AntSystem/beijing/startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
