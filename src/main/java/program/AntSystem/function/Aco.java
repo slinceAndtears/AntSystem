@@ -626,9 +626,7 @@ public class Aco {
         //testFlow();
         initialGraph();
         //runOneAnt();
-        Graph graph = subGraph.subGraphs.get(44);
-        List<Integer> allVertex = graph.getAllVertex();
-        logger.info("path is {}",Dijkstra.dijkstra(graph,1409,653));
+        detectNodeLink();
 /*        for (int i = 0; i < allVertex.size() - 1; ++i) {
             for (int j = i + 1; j < allVertex.size(); ++j) {
                 logger.info("start node is {},end node is{}, path length is {}",allVertex.get(i),allVertex.get(j),
