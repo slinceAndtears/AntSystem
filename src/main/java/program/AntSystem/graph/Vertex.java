@@ -32,4 +32,11 @@ public class Vertex {
         }
         return res;
     }
+
+    @Override
+    public String toString() {
+        return "Vertex{" +
+                "id=" + id +
+                '}';
+    }
 }

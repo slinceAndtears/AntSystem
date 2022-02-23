@@ -67,6 +67,7 @@ public class Dijkstra {
         int t = end;
         while (t != start && !pre.isEmpty()) {
             if (flag.get(t) == 0) {
+                logger.error("start node is {}, end node is {}", start, end);
                 throw new RuntimeException("graph is not link");
             }
             t = pre.get(t);

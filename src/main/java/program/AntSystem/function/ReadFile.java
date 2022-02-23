@@ -154,7 +154,7 @@ public class ReadFile {
     public static void handleData() {
         List<List<Integer>> area = readIntData("src/main/java/program/AntSystem/beijing/area.txt");
         List<List<Integer>> link = readIntData("src/main/java/program/AntSystem/beijing/ways.txt");
-        List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/beijing/cordinate.txt");
+        List<List<Double>> coordinate = readFile("src/main/java/program/AntSystem/beijing/coordinate.txt");
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter("src/main/java/program/AntSystem/beijing/finalLink.txt"));
