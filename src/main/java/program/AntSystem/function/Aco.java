@@ -82,7 +82,7 @@ public class Aco {
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
-    public static Solution globalBestSolution;//全局最优蚂蚁的解
+    public static List<Solution> globalBestSolution;//全局最优蚂蚁的解
     public static int Sn = 10;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
@@ -119,7 +119,7 @@ public class Aco {
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
         globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0);
-        topWAnt = new PriorityQueue<>(w - 1, (o1, o2) -> o1.sumTime < o2.sumTime ? 1 : -1);
+        topWAnt = new PriorityQueue<>(ANT_NUM, (o1, o2) -> o1.sumTime < o2.sumTime && o1.sumLength<o2.sumLength ? 1 : -1);
         area = new ArrayList<>();
         List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/beijing/area.txt");
         for (List<Integer> x : t) {
@@ -344,31 +344,55 @@ public class Aco {
         return solution;
     }
 
+    public static boolean judgePareto(Solution[] curBest,Solution curAnt) {
+    	int cur_len = curBest.length;
+    	for (int i=0;i<cur_len;++i) {
+    		if(curBest[i].sumLength>curAnt.sumLength && curBest[i].sumTime>curAnt.sumTime) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
+
     /**
      * 全局信息素更新，每跑完一代之后执行 一次将优先队列中的solution出队，然后全局更新
      * 需要重复更新吗，首先计算出需要更新的数量 所以我的解 只用更新区域图就可以了
      * 其他路径的信息素，直接蒸发 p了？？
      **/
     public static void update() {
-        double t = 0d;
+        
         boolean[][] tag = new boolean[pheromone.length][pheromone.length];//用于标志是否有路径走过
         Solution[] localBest = new Solution[topWAnt.size()];
         //将局部最优蚂蚁出队，获取
+        int real_size = 0;
         for (int i = localBest.length - 1; i >= 0; --i) {
-            localBest[i] = topWAnt.poll();
+        	Solution tmp_sol = topWAnt.poll();
+        	if(!judgePareto(localBest,tmp_sol)) {
+        		// 已经不是帕累托解
+        		break;
+        	}
+        	real_size++;
+            localBest[i] = tmp_sol;
         }
-        for (int i = 1; i <= w - 1; ++i) {
-            t = (w - i) * (1 / localBest[i - 1].sumTime) + w * (1 / globalBestSolution.sumTime);
+        double t = 0d;
+        for (int i = 1; i <= real_size; ++i) {
+        	//t[i] =  (1 / localBest[i - 1].sumTime);
+            t =  (1 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
-        for (List<Integer> ap : globalBestSolution.areaPath) {
-            int start = ap.get(0);
-            for (int i = 1; i < ap.size(); ++i) {
-                pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t;
-                tag[start][ap.get(i)] = true;
-                start = ap.get(i);
-            }
+        for (Solution g_ant:globalBestSolution) {
+            for (List<Integer> ap : g_ant.areaPath) {
+                int start = ap.get(0);
+                for (int i = 1; i < ap.size(); ++i) {
+                    pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
+                    				+(1 / getGloablBestAvgTime(globalBestSolution));
+                    tag[start][ap.get(i)] = true;
+                    start = ap.get(i);
+                }
+            }       	
         }
+
         //局部最优蚂蚁走过的变进行信息素更新
         for (int i = 0; i < localBest.length; ++i) {
             List<List<Integer>> path = localBest[i].areaPath;//
@@ -516,7 +540,36 @@ public class Aco {
             }
         }
     }
-
+    public static boolean judgeGlobal(List<Solution> globalBest, Solution cur_sol) {
+    	
+    	for(int i=0; i<globalBest.size(); ++i) {
+    		if(cur_sol.sumLength <= globalBest.get(i).sumLength
+    				&& cur_sol.sumTime <= globalBest.get(i).sumTime) {
+    			// 被支配直接返回 因为集合中不会有其他被cur_sol支配的
+    			return false;
+    		}
+    		if(cur_sol.sumLength > globalBest.get(i).sumLength
+    				&& cur_sol.sumTime > globalBest.get(i).sumTime) {
+    			globalBest.remove(i);
+    		}
+    	}
+    	globalBest.add(cur_sol);
+    	return true;
+    }
+    public static double getGloablBestAvgLength(List<Solution> globalBest) {
+    	double sum_len = 0d;
+    	for(Solution ant:globalBest) {
+    		sum_len += ant.sumLength;
+    	}
+    	return sum_len/globalBest.size();
+    }
+    public static double getGloablBestAvgTime(List<Solution> globalBest) {
+    	double sum_time = 0d;
+    	for(Solution ant:globalBest) {
+    		sum_time += ant.sumTime;
+    	}
+    	return sum_time/globalBest.size();
+    }
     //目前路径对象的各种复制都使用的是浅拷贝，感觉解建立之后不会改变
     public static void runACS() {
         //总迭代次数
@@ -528,13 +581,15 @@ public class Aco {
                 SolutionWithPathTime t = runOneAnt();
                 logger.info(String.format("第%s轮迭代第%s个解结果为%s", i, j, t.toString()));
                 //随时更新全局最优解
-                if (t.sumTime < globalBestSolution.sumTime) {
-                    globalBestSolution = t;
-                }
+                
+                /*if (t.sumTime < globalBestSolution.sumTime) {
+                    globalBestSolution.add(t);
+                }*/
+                judgeGlobal(globalBestSolution,t);
                 topWAnt.offer(t);
-                if (topWAnt.size() == w) {
+                /*if (topWAnt.size() == w) {
                     topWAnt.poll();
-                }
+                }*/
                 //对流量进行清空
                 for (int[] x : flow) {
                     Arrays.fill(x, 0);
@@ -542,10 +597,10 @@ public class Aco {
             }
             //求出top w个解，然后对这些解经过的变和全局最优蚂蚁经过的边释放信息素
             update();
-            logger.info("{}",globalBestSolution.sumTime);
+            //logger.info("{}",globalBestSolution.sumTime);
         }
         //保存路径
-        savePath(globalBestSolution.path);
+        // savePath(globalBestSolution.path);
     }
 
     //在起点终点区域内随机生成起点和终点
@@ -754,6 +809,11 @@ public class Aco {
             }
         }
     }
+    static void outPraeto() {
+    	for(Solution s:globalBestSolution) {
+    		logger.info("{}",s);
+    	}
+    }
 
     public static void main(String[] args) throws IOException {
         //testFlow();
@@ -766,6 +826,7 @@ public class Aco {
         }*/
         SolutionWithPathTime solutionWithPathTime = runOneAnt();
         logger.info("path is {}", solutionWithPathTime.path);
+        outPraeto();
         //System.out.println(startNodeList);
         //detectNodeLink();
         //List<Integer> allVertex=allGraph.getAllVertex();
