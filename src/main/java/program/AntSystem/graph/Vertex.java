@@ -33,6 +33,11 @@ public class Vertex {
         return res;
     }
 
+    public boolean removeNbr(int nbr){
+        neighbors.remove(nbr);
+        return true;
+    }
+
     @Override
     public String toString() {
         return "Vertex{" +

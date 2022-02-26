@@ -164,7 +164,7 @@ public class ReadFile {
                 int end_node = link.get(i).get(1);
                 int start_area = area.get(start_node - 1).get(0);
                 int end_area = area.get(end_node - 1).get(0);
-                double weight = distance(coordinate.get(start_node - 1), coordinate.get(end_node - 1)) * 1000;
+                double weight = distance(coordinate.get(start_node - 1), coordinate.get(end_node - 1)) * 10000;
                 res.append(start_node).append(' ');
                 res.append(start_area).append(' ');
                 res.append(end_node).append(' ');
