@@ -77,7 +77,7 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 0.1d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 0.05d;//速度-流量的参数
+    public static final double W = 0.01d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
@@ -87,6 +87,7 @@ public class Aco {
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
     public static Set<Integer> guerNode;
+    public static final int MAX_FLOW = 20;
 
     public static void detectGuerNode() {
         guerNode = new HashSet<>();
@@ -143,7 +144,7 @@ public class Aco {
             nbr = new ArrayList<>();
             for (Integer x : graph.vertex.get(now_node).getAllNbr()) {
                 try {
-                    if (level.get(x) < level.get(now_node)) {
+                    if (level.get(x) < level.get(now_node) && flow[now_node][x] < MAX_FLOW) {
                         nbr.add(x);
                     }
                 } catch (Exception e) {
@@ -156,7 +157,7 @@ public class Aco {
         }
         //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         if (nbr.size() == 0) {
-            logger.error(String.format("起点%s没有路可以走", now_node));
+            logger.error("起点为 {} 没有路可以走", now_node);
 
             throw new RuntimeException(String.format("起点%s没有路可以走", now_node));
             //return -1;//如果没有路可以走
@@ -207,8 +208,8 @@ public class Aco {
     //车辆-流速公式
     public static double getVelocity(int start, int end) {
         double density = flow[start - 1][end - 1] / allGraph.vertex.get(start).getWeight(end);
-        //return VELOCITY * Math.exp(-1 * W * density);
-        return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
+        return VELOCITY * Math.exp(-1 * W * density);
+        //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
 
     //返回经过这条路径的总长度和总时间，第一项为总时间，第二项而总长度
@@ -648,7 +649,6 @@ public class Aco {
                 if (!tmp.contains(nodeLists.get(i))) {
                     int node = nodeLists.get(i);
                     List<Integer> nodes = new ArrayList<>(BFS.bfsWithStart(graph, node).keySet());
-
                     for (int j = 0; j < linkNum; ++j) {
                         int r1 = nodes1.get(r.nextInt(nodes1.size()));
                         int r2 = nodes.get(r.nextInt(nodes.size()));
@@ -657,16 +657,18 @@ public class Aco {
                         graph.vertex.get(r1).addNbr(r2, 1);
                         graph.vertex.get(r2).addNbr(r1, 1);
                     }
-
                 }
+                break;
             }
+            start = graph.getAllVertex().get(r.nextInt(nodeNum));
             bfsNum = BFS.bfdWithEnd(graph, start).size();
+            integerIntegerMap = BFS.bfdWithEnd(graph, start);
         }
     }
 
     static void detectNodeLink() {
-        int nodeSum = 2088;
-        String fileName = "src/main/java/program/AntSystem/beijing/coordinate.txt";
+        int nodeSum = 3340;
+/*        String fileName = "src/main/java/program/AntSystem/beijing/coordinate.txt";
         List<List<Double>> cor = ReadFile.readFile(fileName);
         double[][] distance = new double[nodeSum + 1][nodeSum + 1];
         for (int i = 1; i < nodeSum; ++i) {
@@ -675,15 +677,15 @@ public class Aco {
                 distance[i][j] = dis;
                 distance[j][i] = dis;
             }
-        }
+        }*/
         int sum = 0;
-/*        for (int i = 1; i <= nodeSum; ++i) {
+        for (int i = 1; i <= nodeSum; ++i) {
             if (!allGraph.vertex.keySet().contains(i)) {
                 ++sum;
                 System.out.println(i);
             }
-        }*/
-        for (int i = 1; i <= nodeSum; ++i) {
+        }
+/*        for (int i = 1; i <= nodeSum; ++i) {
             //logger.info("node {} link sum is {}", i, allGraph.vertex.get(i).getAllNbr().size());
             if (allGraph.vertex.get(i).getAllNbr().size() < 4) {
                 int linkSum = 4 - allGraph.vertex.get(i).getAllNbr().size();
@@ -708,21 +710,18 @@ public class Aco {
                 }
             }
         }
-        //logger.info("guer Node sum is {}", sum);
+        logger.info("guer Node sum is {}", sum);*/
     }
 
     static void detectSubGraphNodeLink() {
-        int blockSum = 1;
+        int blockSum = 33;
         for (int i = 0; i < blockSum; ++i) {
             SubGraph subGraph = Aco.subGraph.subGraphs.get(i);
             List<Integer> nodeList = subGraph.getAllVertex();
             Map<Integer, Integer> integerIntegerMap = BFS.bfsWithStart(subGraph, nodeList.get(0));
-            System.out.println(integerIntegerMap);
-            System.out.println(nodeList);
-            /*
-            for (int j=0;j<nodeList.size()-1;++i){
-                for ()
-            }*/
+            logger.info("---------------------");
+            logger.info("node num is {}", subGraph.nodeNum);
+            logger.info("bfs num is {}", integerIntegerMap.size());
         }
     }
 
@@ -743,26 +742,33 @@ public class Aco {
         System.out.println("failure OD sum is" + failure);
     }
 
+    static void showGraph(Graph graph) {
+        List<Integer> nodes = graph.getAllVertex();
+        for (int i = 0; i < nodes.size(); ++i) {
+            int node=nodes.get(i);
+            List<Integer> nbrs=graph.vertex.get(node).getAllNbr();
+            for (int j=0;j<nbrs.size();++j){
+                int nbr=nbrs.get(j);
+                System.out.println(node+" "+nbr);
+                graph.vertex.get(nbr).removeNbr(node);
+            }
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         //testFlow();
         initialGraph();
-        runACS();
+        //detectSubGraphNodeLink();
+        //showGraph(subGraph.subGraphs.get(0));
+        /*for (int i=0;i<33;++i){
+            Graph graph=subGraph.subGraphs.get(i);
+            addLinks(graph);
+        }*/
+        SolutionWithPathTime solutionWithPathTime = runOneAnt();
+        logger.info("path is {}", solutionWithPathTime.path);
         //System.out.println(startNodeList);
         //detectNodeLink();
         //List<Integer> allVertex=allGraph.getAllVertex();
         //testPath();
-    }
-}
-
-class AddNode {
-    double distance;
-    int nodeId;
-
-    public AddNode() {
-    }
-
-    public AddNode(double distance, int nodeId) {
-        this.distance = distance;
-        this.nodeId = nodeId;
     }
 }
