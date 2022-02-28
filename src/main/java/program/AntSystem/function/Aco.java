@@ -59,14 +59,17 @@ import java.util.*;
  *      删除上述没有边的点。
  *      起点区域更改为96
  *      终点区域更改为63
+ *
+ *   2022-02-27
+ *      调整为多目标蚁群—— by scottishi@tencent.com
  * */
 public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 10;//最大迭代次数
-    public static final double T0 = 0.02d;//初始信息素含量
+    public static final int MAX_ITE = 50;//最大迭代次数
+    public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
     public static final double q0 = 0.9d;//轮盘赌与贪心的阈值 小于该值则采用贪心
@@ -75,15 +78,15 @@ public class Aco {
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 0.1d;//蚂蚁的速度
+    public static final double VELOCITY = 1d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 0.001d;//速度-流量的参数
+    public static final double W = 2.7d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static List<Solution> globalBestSolution;//全局最优蚂蚁的解
-    public static int Sn = 10;//每次迭代产生解的数量
+    public static int Sn = 50;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
     public static Set<Integer> guerNode;
@@ -120,7 +123,7 @@ public class Aco {
         endNodeList = nodes.get(1);
         //globalBestSolution = new ArrayList<>(new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0));
         globalBestSolution = new ArrayList<>();
-        topWAnt = new PriorityQueue<>(ANT_NUM, (o1, o2) -> o1.sumTime < o2.sumTime && o1.sumLength<o2.sumLength ? 1 : -1);
+        topWAnt = new PriorityQueue<>(ANT_NUM, (o1, o2) -> o1.sumTime > o2.sumTime && o1.sumLength > o2.sumLength ? 1 : -1);
         area = new ArrayList<>();
         List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/beijing/area.txt");
         for (List<Integer> x : t) {
@@ -156,9 +159,10 @@ public class Aco {
                 }
             }
         }
+        //logger.info("start node is {},nbr size is {}",now_node, nbr.size());
         //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         if (nbr.size() == 0) {
-            logger.error("起点为 {} 没有路可以走", now_node);
+            logger.error("起点为 {} 没有路可以走, level is {}, graph is {}", now_node, level, graph);
 
             throw new RuntimeException(String.format("起点%s没有路可以走", now_node));
             //return -1;//如果没有路可以走
@@ -177,7 +181,9 @@ public class Aco {
                 continue;
             }
             n_ij = 1d / (weight * density);
-            t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
+            //t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
+            // 暂时修改 不知道为什么如上写 信息素直接使用即可
+            t_ij = pheromone[now_node][nbr.get(i)];
             state[i] = t_ij * Math.pow(n_ij, B);
             sum += state[i];
         }
@@ -208,8 +214,14 @@ public class Aco {
 
     //车辆-流速公式
     public static double getVelocity(int start, int end) {
-        double density = flow[start - 1][end - 1] / allGraph.vertex.get(start).getWeight(end);
-        return VELOCITY * Math.exp(-1 * W * density);
+        double weight = allGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6) {
+            return VELOCITY;
+        }
+        double density = flow[start - 1][end - 1] / weight;
+        double v = VELOCITY * Math.exp(-1 * W * density);
+        //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
+        return v;
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
 
@@ -266,7 +278,22 @@ public class Aco {
             start = nextStep(graph, start, level);
             path.add(start);
         }
+        pathPheUpdate(path);
         return path;
+    }
+
+    //对一条路径的信息素进行局部更新
+    public static void pathPheUpdate(List<Integer> path) {
+        if (path == null || path.size() == 0) {
+            throw new RuntimeException("");
+        }
+        int start = path.get(0);
+        int end = 0;
+        for (int i = 1; i < path.size(); ++i) {
+            end = path.get(i);
+            localPheUpdate(start, end);
+            start = end;
+        }
     }
 
     /**
@@ -351,7 +378,7 @@ public class Aco {
             if (curBest[i] == null) {
                 continue;
             }
-            if (curBest[i].sumLength > curAnt.sumLength && curBest[i].sumTime > curAnt.sumTime) {
+            if (curBest[i].sumLength < curAnt.sumLength && curBest[i].sumTime < curAnt.sumTime) {
                 return false;
             }
         }
@@ -383,7 +410,7 @@ public class Aco {
         double t = 0d;
         for (int i = 1; i <= real_size; ++i) {
         	//t[i] =  (1 / localBest[i - 1].sumTime);
-            t =  (1 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
+            t =  (1000000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
         for (Solution g_ant:globalBestSolution) {
@@ -391,7 +418,8 @@ public class Aco {
                 int start = ap.get(0);
                 for (int i = 1; i < ap.size(); ++i) {
                     pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
-                    				+(1 / getGlobalBestAvgTime(globalBestSolution));
+                    				+(1 / (getGlobalBestAvgTime(globalBestSolution)/1000000*
+                                             getGlobalBestAvgLength(globalBestSolution)/100000) );
                     tag[start][ap.get(i)] = true;
                     start = ap.get(i);
                 }
@@ -399,7 +427,8 @@ public class Aco {
         }
 
         //局部最优蚂蚁走过的变进行信息素更新
-        for (int i = 0; i < localBest.length; ++i) {
+        // 更新注 此处修改不需要局部最优更新  2022/02/27
+        /*for (int i = 0; i < localBest.length; ++i) {
             if (localBest[i] == null) {
                 continue;
             }
@@ -412,7 +441,8 @@ public class Aco {
                     start = ap.get(j);
                 }
             }
-        }
+        }*/
+
         //剩下边信息素蒸发
         for (int i = 0; i < pheromone.length; ++i) {
             for (int j = 0; j < pheromone[i].length; ++j) {
@@ -551,13 +581,13 @@ public class Aco {
     public static boolean judgeGlobal(List<Solution> globalBest, Solution cur_sol) {
     	
     	for(int i=0; i<globalBest.size(); ++i) {
-    		if(cur_sol.sumLength <= globalBest.get(i).sumLength
-    				&& cur_sol.sumTime <= globalBest.get(i).sumTime) {
+    		if(cur_sol.sumLength >= globalBest.get(i).sumLength
+    				&& cur_sol.sumTime >= globalBest.get(i).sumTime) {
     			// 被支配直接返回 因为集合中不会有其他被cur_sol支配的
     			return false;
     		}
-    		if(cur_sol.sumLength > globalBest.get(i).sumLength
-    				&& cur_sol.sumTime > globalBest.get(i).sumTime) {
+    		if(cur_sol.sumLength < globalBest.get(i).sumLength
+    				&& cur_sol.sumTime < globalBest.get(i).sumTime) {
     			globalBest.remove(i);
     		}
     	}
