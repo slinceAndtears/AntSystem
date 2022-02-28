@@ -68,7 +68,7 @@ public class Aco {
 
 
     public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 50;//最大迭代次数
+    public static final int MAX_ITE = 20;//最大迭代次数
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -80,17 +80,17 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 1d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 2.7d;//速度-流量的参数
+    public static final double W = 2.0d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static List<Solution> globalBestSolution;//全局最优蚂蚁的解
-    public static int Sn = 50;//每次迭代产生解的数量
+    public static int Sn = 12;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
     public static Set<Integer> guerNode;
-    public static final int MAX_FLOW = 20;
+    public static final int MAX_FLOW = 40;
 
     public static void detectGuerNode() {
         guerNode = new HashSet<>();
@@ -224,7 +224,19 @@ public class Aco {
         return v;
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
-
+    //车辆-流速公式-T模式
+    public static double getVelocity(int start, int end, double cur_time) {
+        double weight = allGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6) {
+            return VELOCITY;
+        }
+        double density = flow[start - 1][end - 1] / weight;
+        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time/1e5));
+        //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
+        return v;
+        //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
+    }
+    
     //返回经过这条路径的总长度和总时间，第一项为总时间，第二项而总长度
     public static double[] getPathLengthAndTimeByPath(List<Integer> path) {
         if (path == null || path.size() == 0) {
@@ -234,6 +246,7 @@ public class Aco {
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
+        	// 注 此处可用两种速度计算方式
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
@@ -243,7 +256,7 @@ public class Aco {
         return new double[]{sumTime, sumLength};
     }
 
-    public static double[] getPathLengthAndTimeByPath(List<Integer> path, SolutionWithPathTime solution, int antNum) {
+    public static double[] getPathLengthAndTimeByPath(List<Integer> path, SolutionWithPathTime solution, int antNum, double cur_time) {
         double sumLength = 0d;
         double sumTime = 0d;
         int start = path.get(0);
@@ -341,7 +354,7 @@ public class Aco {
                 startNode = conn.get(r.nextInt(conn.size()));
                 path.add(startNode);
                 //double[] timeAntLength = getPathLengthAndTimeByPath(path);
-                double[] timeAntLength = getPathLengthAndTimeByPath(path, solution, i);
+                double[] timeAntLength = getPathLengthAndTimeByPath(path, solution, i, sumTime);
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 startArea = nextArea;
@@ -356,7 +369,7 @@ public class Aco {
             int lastNode = oneAntAllPath.get(oneAntAllPath.size() - 1);
             if (endNode != lastNode) {
                 List<Integer> lastPath = antSystemPath(subGraph.subGraphs.get(startArea), lastNode, endNode);
-                double[] timeAntLength = getPathLengthAndTimeByPath(lastPath, solution, i);
+                double[] timeAntLength = getPathLengthAndTimeByPath(lastPath, solution, i, sumTime);
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 Integer x = lastPath.remove(0);
@@ -410,7 +423,7 @@ public class Aco {
         double t = 0d;
         for (int i = 1; i <= real_size; ++i) {
         	//t[i] =  (1 / localBest[i - 1].sumTime);
-            t =  (1000000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
+            t =  (100000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
         for (Solution g_ant:globalBestSolution) {
@@ -418,7 +431,7 @@ public class Aco {
                 int start = ap.get(0);
                 for (int i = 1; i < ap.size(); ++i) {
                     pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
-                    				+(1 / (getGlobalBestAvgTime(globalBestSolution)/1000000*
+                    				+(1 / (getGlobalBestAvgTime(globalBestSolution)/100000*
                                              getGlobalBestAvgLength(globalBestSolution)/100000) );
                     tag[start][ap.get(i)] = true;
                     start = ap.get(i);
@@ -580,7 +593,7 @@ public class Aco {
     }
     public static boolean judgeGlobal(List<Solution> globalBest, Solution cur_sol) {
     	
-    	for(int i=0; i<globalBest.size(); ++i) {
+    	/*for(int i=0; i<globalBest.size(); ++i) {
     		if(cur_sol.sumLength >= globalBest.get(i).sumLength
     				&& cur_sol.sumTime >= globalBest.get(i).sumTime) {
     			// 被支配直接返回 因为集合中不会有其他被cur_sol支配的
@@ -589,6 +602,18 @@ public class Aco {
     		if(cur_sol.sumLength < globalBest.get(i).sumLength
     				&& cur_sol.sumTime < globalBest.get(i).sumTime) {
     			globalBest.remove(i);
+    		}
+    	}*/
+    	Iterator<Solution> it = globalBest.iterator();
+    	while(it.hasNext()) {
+    		Solution tmp = it.next();
+    		if(cur_sol.sumLength >= tmp.sumLength
+    				&&cur_sol.sumTime >= tmp.sumTime) {
+    			return false;
+    		}
+    		if(cur_sol.sumLength < tmp.sumLength
+    				&& cur_sol.sumTime < tmp.sumTime) {
+    			it.remove();
     		}
     	}
     	globalBest.add(cur_sol);
