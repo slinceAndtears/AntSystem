@@ -96,7 +96,7 @@ public class Dijkstra {
             Arrays.fill(flow[i], 1);
         }
     }
-    
+
     public static double getVelocity(int start, int end) {
         double weight = staticGraph.vertex.get(start).getWeight(end);
         if (weight < 1e-6) {
@@ -107,28 +107,29 @@ public class Dijkstra {
         //double velocity = VELOCITY * (1 - flow[start][end] / 50d);
         return velocity;
     }
-    public static double getVelocity(int start, int end,double cur_time) {
+
+    public static double getVelocity(int start, int end, double cur_time) {
         double weight = staticGraph.vertex.get(start).getWeight(end);
         if (weight < 1e-6) {
             return VELOCITY;
         }
         double density = flow[start - 1][end - 1] / weight;
-        double velocity = VELOCITY * Math.exp(-1 * W * density * (cur_time/1e5));
+        double velocity = VELOCITY * Math.exp(-1 * W * density * (cur_time / 1e5));
         //double velocity = VELOCITY * (1 - flow[start][end] / 50d);
         return velocity;
     }
 
     public static void changeWeight(int start, int end) {
         //double density = flow[start][end] / graph.vertex.get(start).getWeight(end);
-         double velocity = getVelocity(start, end);
+        double velocity = getVelocity(start, end);
         //时间应该是权值没有变化过的来除
         double time = staticGraph.vertex.get(start).getWeight(end) / velocity;
         double weight = time * VELOCITY;
         graph.vertex.get(start).addNbr(end, weight);
     }
 
-    public static double getTime(int start, int end,double cur_time) {
-        double velocity = getVelocity(start, end,cur_time);
+    public static double getTime(int start, int end, double cur_time) {
+        double velocity = getVelocity(start, end, cur_time);
         return staticGraph.vertex.get(start).getWeight(end) / velocity;
     }
 
@@ -140,8 +141,8 @@ public class Dijkstra {
             List<Integer> path = dijkstra(graph, start, end);//迪杰斯特拉算法挑选路径
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
-            	// 此处调整速度的计算方程
-                sumTime += getTime(s, path.get(j),sumTime);
+                // 此处调整速度的计算方程
+                sumTime += getTime(s, path.get(j), sumTime);
                 pathLength += staticGraph.vertex.get(s).getWeight(path.get(j));
                 //changeWeight(s, path.get(j)); 核心
                 ++flow[s - 1][path.get(j) - 1];
@@ -186,7 +187,7 @@ public class Dijkstra {
         }*/
         initGraph();
         double sumTime = getSumTime();
-        System.out.println(sumTime+" "+pathLength);
+        System.out.println(sumTime + " " + pathLength);
         //System.out.println(startNodeList.size());
     }
 
