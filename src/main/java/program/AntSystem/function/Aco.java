@@ -226,6 +226,7 @@ public class Aco {
         return v;
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
+
     //车辆-流速公式-T模式
     public static double getVelocity(int start, int end, double cur_time) {
         double weight = allGraph.vertex.get(start).getWeight(end);
@@ -233,12 +234,12 @@ public class Aco {
             return VELOCITY;
         }
         double density = flow[start - 1][end - 1] / weight;
-        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time/1e5));
+        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time / 1e5));
         //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
         return v;
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
-    
+
     //返回经过这条路径的总长度和总时间，第一项为总时间，第二项而总长度
     public static double[] getPathLengthAndTimeByPath(List<Integer> path) {
         if (path == null || path.size() == 0) {
@@ -248,7 +249,7 @@ public class Aco {
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
-        	// 注 此处可用两种速度计算方式
+            // 注 此处可用两种速度计算方式
             double velocity = getVelocity(start, path.get(i));
             ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
@@ -387,7 +388,7 @@ public class Aco {
         return solution;
     }
 
-    public static boolean judgePareto(Solution[] curBest,Solution curAnt) {
+    public static boolean judgePareto(Solution[] curBest, Solution curAnt) {
         int cur_len = curBest.length;
         for (int i = 0; i < cur_len; ++i) {
             if (curBest[i] == null) {
@@ -399,7 +400,7 @@ public class Aco {
         }
         return true;
     }
-    
+
 
     /**
      * 全局信息素更新，每跑完一代之后执行 一次将优先队列中的solution出队，然后全局更新
@@ -407,38 +408,39 @@ public class Aco {
      * 其他路径的信息素，直接蒸发 p了？？
      **/
     public static void update() {
-        
+
         boolean[][] tag = new boolean[pheromone.length][pheromone.length];//用于标志是否有路径走过
         Solution[] localBest = new Solution[topWAnt.size()];
         //将局部最优蚂蚁出队，获取
         int real_size = 0;
-        for (int i = 0; i < localBest.length ; ++i) {
-        	Solution tmp_sol = topWAnt.poll();
-        	if(!judgePareto(localBest,tmp_sol)) {
-        		// 已经不是帕累托解
-        		break;
-        	}
+        for (int i = 0; i < localBest.length; ++i) {
+            Solution tmp_sol = topWAnt.poll();
+            if (!judgePareto(localBest, tmp_sol)) {
+                // 已经不是帕累托解
+                break;
+            }
 
             localBest[real_size] = tmp_sol;
             real_size++;
         }
         double t = 0d;
         for (int i = 1; i <= real_size; ++i) {
-        	//t[i] =  (1 / localBest[i - 1].sumTime);
-            t =  (100000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
+            //t[i] =  (1 / localBest[i - 1].sumTime);
+            t = (100000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
-        for (Solution g_ant:globalBestSolution) {
+        for (Solution g_ant : globalBestSolution) {
             for (List<Integer> ap : g_ant.areaPath) {
                 int start = ap.get(0);
                 for (int i = 1; i < ap.size(); ++i) {
                     pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
                     				+(1 / (getGlobalBestAvgTime(globalBestSolution)/timeOffset*
                                              getGlobalBestAvgLength(globalBestSolution)/lengthOffset) );
+
                     tag[start][ap.get(i)] = true;
                     start = ap.get(i);
                 }
-            }       	
+            }
         }
 
         //局部最优蚂蚁走过的变进行信息素更新
@@ -593,6 +595,7 @@ public class Aco {
             }
         }
     }
+
     public static boolean judgeGlobal(List<Solution> globalBest, Solution cur_sol) {
     	
     	/*for(int i=0; i<globalBest.size(); ++i) {
@@ -606,35 +609,38 @@ public class Aco {
     			globalBest.remove(i);
     		}
     	}*/
-    	Iterator<Solution> it = globalBest.iterator();
-    	while(it.hasNext()) {
-    		Solution tmp = it.next();
-    		if(cur_sol.sumLength >= tmp.sumLength
-    				&&cur_sol.sumTime >= tmp.sumTime) {
-    			return false;
-    		}
-    		if(cur_sol.sumLength < tmp.sumLength
-    				&& cur_sol.sumTime < tmp.sumTime) {
-    			it.remove();
-    		}
-    	}
-    	globalBest.add(cur_sol);
-    	return true;
+        Iterator<Solution> it = globalBest.iterator();
+        while (it.hasNext()) {
+            Solution tmp = it.next();
+            if (cur_sol.sumLength >= tmp.sumLength
+                    && cur_sol.sumTime >= tmp.sumTime) {
+                return false;
+            }
+            if (cur_sol.sumLength < tmp.sumLength
+                    && cur_sol.sumTime < tmp.sumTime) {
+                it.remove();
+            }
+        }
+        globalBest.add(cur_sol);
+        return true;
     }
+
     public static double getGlobalBestAvgLength(List<Solution> globalBest) {
-    	double sum_len = 0d;
-    	for(Solution ant:globalBest) {
-    		sum_len += ant.sumLength;
-    	}
-    	return sum_len/globalBest.size();
+        double sum_len = 0d;
+        for (Solution ant : globalBest) {
+            sum_len += ant.sumLength;
+        }
+        return sum_len / globalBest.size();
     }
+
     public static double getGlobalBestAvgTime(List<Solution> globalBest) {
-    	double sum_time = 0d;
-    	for(Solution ant:globalBest) {
-    		sum_time += ant.sumTime;
-    	}
-    	return sum_time/globalBest.size();
+        double sum_time = 0d;
+        for (Solution ant : globalBest) {
+            sum_time += ant.sumTime;
+        }
+        return sum_time / globalBest.size();
     }
+
     //目前路径对象的各种复制都使用的是浅拷贝，感觉解建立之后不会改变
     public static void runACS() {
         //总迭代次数
@@ -643,15 +649,19 @@ public class Aco {
             //没轮迭代产生Sn个解，然后挑选出top个解，释放信息素
             for (int j = 0; j < Sn; ++j) {
                 //Solution t = runOneAnt();
-                SolutionWithPathTime t = runOneAnt();
-                logger.info(String.format("第%s轮迭代第%s个解结果为%s", i, j, t.toString()));
+                try {
+                    SolutionWithPathTime t = runOneAnt();
+                    logger.info("第{}轮迭代第{}个解结果为{}", i, j, t);
+                    judgeGlobal(globalBestSolution, t);
+                    topWAnt.offer(t);
+                } catch (Exception e) {
+                    logger.error("第{}轮迭代第{}个解异常，异常为{}", i, j, e);
+                }
                 //随时更新全局最优解
                 
                 /*if (t.sumTime < globalBestSolution.sumTime) {
                     globalBestSolution.add(t);
                 }*/
-                judgeGlobal(globalBestSolution,t);
-                topWAnt.offer(t);
                 /*if (topWAnt.size() == w) {
                     topWAnt.poll();
                 }*/
@@ -866,19 +876,20 @@ public class Aco {
     static void showGraph(Graph graph) {
         List<Integer> nodes = graph.getAllVertex();
         for (int i = 0; i < nodes.size(); ++i) {
-            int node=nodes.get(i);
-            List<Integer> nbrs=graph.vertex.get(node).getAllNbr();
-            for (int j=0;j<nbrs.size();++j){
-                int nbr=nbrs.get(j);
-                System.out.println(node+" "+nbr);
+            int node = nodes.get(i);
+            List<Integer> nbrs = graph.vertex.get(node).getAllNbr();
+            for (int j = 0; j < nbrs.size(); ++j) {
+                int nbr = nbrs.get(j);
+                System.out.println(node + " " + nbr);
                 graph.vertex.get(nbr).removeNbr(node);
             }
         }
     }
+
     static void outPraeto() {
-    	for(Solution s:globalBestSolution) {
-    		logger.info("{}",s);
-    	}
+        for (Solution s : globalBestSolution) {
+            logger.info("{}", s);
+        }
     }
 
     public static void main(String[] args) throws IOException {
