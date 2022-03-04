@@ -67,8 +67,8 @@ public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
-    public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 20;//最大迭代次数
+    public static final int ANT_NUM = 200;//蚂蚁数量
+    public static final int MAX_ITE = 50;//最大迭代次数
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -78,9 +78,9 @@ public class Aco {
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 1d;//蚂蚁的速度
+    public static final double VELOCITY = 20d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 2.0d;//速度-流量的参数
+    public static final double W = 1.36d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
@@ -91,7 +91,9 @@ public class Aco {
     public static List<Integer> area;
     public static Set<Integer> guerNode;
     public static final int MAX_FLOW = 40;
-
+    public static double timeOffset = 1e4;
+    public static double lengthOffset = 1e5;
+    
     public static void detectGuerNode() {
         guerNode = new HashSet<>();
         for (int i = 0; i < 100; ++i) {
@@ -432,8 +434,9 @@ public class Aco {
                 int start = ap.get(0);
                 for (int i = 1; i < ap.size(); ++i) {
                     pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
-                            + (1 / (getGlobalBestAvgTime(globalBestSolution) / 100000 *
-                            getGlobalBestAvgLength(globalBestSolution) / 100000));
+                    				+(1 / (getGlobalBestAvgTime(globalBestSolution)/timeOffset*
+                                             getGlobalBestAvgLength(globalBestSolution)/lengthOffset) );
+
                     tag[start][ap.get(i)] = true;
                     start = ap.get(i);
                 }

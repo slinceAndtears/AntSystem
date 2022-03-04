@@ -14,18 +14,19 @@ import java.util.*;
  * */
 public class Dijkstra {
     private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
-    private static final int ANT_NUM = 100;
+    private static final int ANT_NUM = 200;
     private static Graph graph;
     //private static double INCREASE = 0.2d;
     //private static final int START = 223;
     //private static final int END = 129;
-    private static final double VELOCITY = 1d;
+    private static final double VELOCITY = 20d;
     private static int[][] flow;
-    public static final double W = 2.0d;//速度-流量的参数
+    public static final double W = 1.36d;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength = 0d;
+    public static double timeOffset = 1e4;
 
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -114,7 +115,9 @@ public class Dijkstra {
             return VELOCITY;
         }
         double density = flow[start - 1][end - 1] / weight;
-        double velocity = VELOCITY * Math.exp(-1 * W * density * (cur_time / 1e5));
+
+        double velocity = VELOCITY * Math.exp(-1 * W * density * (cur_time/timeOffset));
+
         //double velocity = VELOCITY * (1 - flow[start][end] / 50d);
         return velocity;
     }
@@ -187,7 +190,9 @@ public class Dijkstra {
         }*/
         initGraph();
         double sumTime = getSumTime();
-        System.out.println(sumTime + " " + pathLength);
+
+        System.out.println(sumTime + " " + pathLength + " " + pathLength/sumTime);
+
         //System.out.println(startNodeList.size());
     }
 
