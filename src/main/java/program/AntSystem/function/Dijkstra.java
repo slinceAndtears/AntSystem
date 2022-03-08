@@ -14,19 +14,19 @@ import java.util.*;
  * */
 public class Dijkstra {
     private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
-    private static final int ANT_NUM = 200;
+    private static final int ANT_NUM = 100;
     private static Graph graph;
     //private static double INCREASE = 0.2d;
     //private static final int START = 223;
     //private static final int END = 129;
     private static final double VELOCITY = 20d;
     private static int[][] flow;
-    public static final double W = 1.36d;//速度-流量的参数
+    public static final double W = 0.73d;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength = 0d;
-    public static double timeOffset = 1e4;
+    public static double timeOffset = 1e2;
 
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -139,13 +139,16 @@ public class Dijkstra {
     public static double getSumTime() {
         double sumTime = 0d;
         for (int i = 0; i < ANT_NUM; ++i) {
+        	double this_sum_time = 0.0;
             int start = startNodeList.get(i);
             int end = endNodeList.get(i);
             List<Integer> path = dijkstra(graph, start, end);//迪杰斯特拉算法挑选路径
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
                 // 此处调整速度的计算方程
-                sumTime += getTime(s, path.get(j), sumTime);
+                double cost = getTime(s, path.get(j), this_sum_time);
+                this_sum_time += cost;
+                sumTime += cost;
                 pathLength += staticGraph.vertex.get(s).getWeight(path.get(j));
                 //changeWeight(s, path.get(j)); 核心
                 ++flow[s - 1][path.get(j) - 1];
