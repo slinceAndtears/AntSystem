@@ -578,7 +578,7 @@ public class Aco {
 
     //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
-        String fileName = "src/main/java/program/AntSystem/subshain/finalPath.txt";
+        String fileName = filePath + "finalPath.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -705,7 +705,7 @@ public class Aco {
             start.add(startList.get(r.nextInt(startList.size())));
             end.add(endList.get(r.nextInt(endList.size())));
         }
-        String fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
+        String fileName = Aco.filePath + "startend.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -854,7 +854,7 @@ public class Aco {
     }
 
     static void detectSubGraphNodeLink() {
-        int blockSum = 33;
+        int blockSum = subGraph.subGraphs.size();
         for (int i = 0; i < blockSum; ++i) {
             SubGraph subGraph = Aco.subGraph.subGraphs.get(i);
             List<Integer> nodeList = subGraph.getAllVertex();
@@ -920,18 +920,53 @@ public class Aco {
         return sum;
     }
 
+    static void multiKWay(Graph graph) {
+        final int c = 15;
+        int partitionNum = 14;
+        Random r = new Random();
+        while (graph.nodeNum > c * partitionNum) {
+            List<Integer> allVertex = graph.getAllVertex();
+            int[] label = new int[allVertex.size()];
+            boolean[] tag = new boolean[allVertex.size()];
+            int labelNum = 0;
+            for (int i = 0; i < allVertex.size(); ++i) {
+                int vertex = allVertex.get(i);
+                if (!tag[vertex]) {//如果没有标记
+                    //获取所有邻居
+                    List<Integer> allNbr = graph.vertex.get(vertex).getAllNbr();
+                    List<Integer> unLabelNbr = new ArrayList<>();
+                    //遍历所有邻居，找出未标记的邻居，加入list中
+                    for (Integer x : allNbr) {
+                        if (!tag[x]) {
+                            unLabelNbr.add(x);
+                        }
+                    }
+                    //随机挑选出一个邻居 共同标记
+                    int nbr = unLabelNbr.get(r.nextInt(unLabelNbr.size()));
+                    label[vertex] = labelNum;
+                    label[nbr] = labelNum;
+                    ++labelNum;
+                }
+            }
+            //整合为一个新的图
+            Graph newGraph=new Graph();
+
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         //testFlow();
     	
         initialGraph();
-        
+        System.out.println(Dijkstra.dijkstra(allGraph,1365,1458));
+        //multiKWay(null);
         //detectSubGraphNodeLink();
         //showGraph(subGraph.subGraphs.get(0));
 		/*
 		 * for (int i=0;i<subGraph.subGraphs.size();++i){ Graph
 		 * graph=subGraph.subGraphs.get(i); addLinks(graph); }
 		 */
-        runACS();
+        //runACS();
         //outPraeto();
         //System.out.println(startNodeList);
         //detectNodeLink();
