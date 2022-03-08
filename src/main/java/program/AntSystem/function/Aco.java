@@ -771,7 +771,7 @@ public class Aco {
     }
 
 
-    static void addLinks(Graph graph) {
+    static List<int[]> addLinks(Graph graph) {
         int nodeNum = graph.nodeNum;
         int start = graph.getAllVertex().get(0);
         List<Integer> nodeLists = graph.getAllVertex();
@@ -779,7 +779,7 @@ public class Aco {
         final int linkNum = 2;
         Random r = new Random();
         int bfsNum = integerIntegerMap.size();
-        //System.out.println(bfsNum);
+        List<int[]> links = new ArrayList<>();
         while (nodeNum != bfsNum) {
             Set<Integer> tmp = integerIntegerMap.keySet();
             List<Integer> nodes1 = new ArrayList<>(tmp);
@@ -790,7 +790,8 @@ public class Aco {
                     for (int j = 0; j < linkNum; ++j) {
                         int r1 = nodes1.get(r.nextInt(nodes1.size()));
                         int r2 = nodes.get(r.nextInt(nodes.size()));
-                        System.out.println(r1 + " " + r2);
+                        //System.out.println(r1 + " " + r2);
+                        links.add(new int[]{r1, r2});
                         //添加到子图里面
                         graph.vertex.get(r1).addNbr(r2, 1);
                         graph.vertex.get(r2).addNbr(r1, 1);
@@ -802,6 +803,7 @@ public class Aco {
             bfsNum = BFS.bfdWithEnd(graph, start).size();
             integerIntegerMap = BFS.bfdWithEnd(graph, start);
         }
+        return links;
     }
 
     static void detectNodeLink() {
