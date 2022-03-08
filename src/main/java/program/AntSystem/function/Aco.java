@@ -67,7 +67,7 @@ public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
-    public static final int ANT_NUM = 200;//蚂蚁数量
+    public static final int ANT_NUM = 100;//蚂蚁数量
     public static final int MAX_ITE = 50;//最大迭代次数
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
@@ -80,7 +80,7 @@ public class Aco {
     public static int[][] flow;//流量矩阵
     public static final double VELOCITY = 20d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 1.36d;//速度-流量的参数
+    public static final double W = 0.73d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
@@ -91,7 +91,7 @@ public class Aco {
     public static List<Integer> area;
     public static Set<Integer> guerNode;
     public static final int MAX_FLOW = 40;
-    public static double timeOffset = 1e4;
+    public static double timeOffset = 1e2;
     public static double lengthOffset = 1e5;
     
     public static void detectGuerNode() {
@@ -109,6 +109,8 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
+    	// 此处生成finallink.txt
+    	ReadFile.main(null);
         String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
@@ -186,7 +188,9 @@ public class Aco {
             //t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
             // 暂时修改 不知道为什么如上写 信息素直接使用即可
             t_ij = pheromone[now_node][nbr.get(i)];
-            state[i] = t_ij * Math.pow(n_ij, B);
+            state[i] = t_ij * Math.pow(n_ij, 
+            		
+            		B);
             sum += state[i];
         }
         double q = r.nextDouble();
@@ -250,10 +254,13 @@ public class Aco {
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
             // 注 此处可用两种速度计算方式
-            double velocity = getVelocity(start, path.get(i));
+        	//double this_sum_time = 0.0;
+            double velocity = getVelocity(start, path.get(i),sumTime);
             ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
-            sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            double cost = allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            sumTime += cost;
+            //this_sum_time
             start = path.get(i);
         }
         return new double[]{sumTime, sumLength};
@@ -769,7 +776,7 @@ public class Aco {
         int start = graph.getAllVertex().get(0);
         List<Integer> nodeLists = graph.getAllVertex();
         Map<Integer, Integer> integerIntegerMap = BFS.bfdWithEnd(graph, start);
-        final int linkNum = 1;
+        final int linkNum = 2;
         Random r = new Random();
         int bfsNum = integerIntegerMap.size();
         //System.out.println(bfsNum);
@@ -894,13 +901,15 @@ public class Aco {
 
     public static void main(String[] args) throws IOException {
         //testFlow();
+    	
         initialGraph();
+        
         //detectSubGraphNodeLink();
         //showGraph(subGraph.subGraphs.get(0));
-        /*for (int i=0;i<33;++i){
-            Graph graph=subGraph.subGraphs.get(i);
-            addLinks(graph);
-        }*/
+		/*
+		 * for (int i=0;i<subGraph.subGraphs.size();++i){ Graph
+		 * graph=subGraph.subGraphs.get(i); addLinks(graph); }
+		 */
         runACS();
         //outPraeto();
         //System.out.println(startNodeList);
