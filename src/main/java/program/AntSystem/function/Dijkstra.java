@@ -165,7 +165,7 @@ public class Dijkstra {
         //System.out.println("平均速度"+(pathLength/getSumTime()));
         //List<Integer> path=dijkstra(staticGraph,178,189);
         Graph graph = new Graph();
-        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+        String fileName = Aco.filePath + "finalLink.txt";
         SubGraphs subGraphs = new SubGraphs();
         ReadFile.initialSubGraph(graph, subGraphs, fileName);
         int startArea = 11;

@@ -66,14 +66,14 @@ import java.util.*;
 public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
-
+    public static final String filePath = "src/main/java/program/AntSystem/beijing/";
     public static final int ANT_NUM = 100;//蚂蚁数量
     public static final int MAX_ITE = 50;//最大迭代次数
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
     public static final double q0 = 0.9d;//轮盘赌与贪心的阈值 小于该值则采用贪心
-    public static Graph graph;//图数据对象 使用邻接表存储
+    public static Graph graph;//分区组成的图
     public static SubGraphs subGraph;//所有的子图
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
@@ -111,7 +111,7 @@ public class Aco {
     public static void initialGraph() {
     	// 此处生成finallink.txt
     	ReadFile.main(null);
-        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+        String fileName = filePath + "finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
@@ -121,7 +121,7 @@ public class Aco {
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
-        fileName = "src/main/java/program/AntSystem/beijing/startend.txt";
+        fileName = filePath + "startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
@@ -129,7 +129,7 @@ public class Aco {
         globalBestSolution = new ArrayList<>();
         topWAnt = new PriorityQueue<>(ANT_NUM, (o1, o2) -> o1.sumTime > o2.sumTime && o1.sumLength > o2.sumLength ? 1 : -1);
         area = new ArrayList<>();
-        List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/beijing/area.txt");
+        List<List<Integer>> t = ReadFile.readIntData(filePath + "area.txt");
         for (List<Integer> x : t) {
             area.add(x.get(0));
         }
@@ -899,6 +899,25 @@ public class Aco {
         for (Solution s : globalBestSolution) {
             logger.info("{}", s);
         }
+    }
+
+    static int getGraphLinkSum(Graph graph) {
+        List<Integer> allVertex = graph.getAllVertex();
+        int sum = 0;
+        for (int i = 0; i < allVertex.size(); ++i) {
+            Integer vertex = allVertex.get(i);
+            sum += graph.vertex.get(vertex).getAllNbr().size();
+        }
+        return sum / 2;
+    }
+
+    static int getAllSubGraphLinkSum() {
+        int sum = 0;
+        int areaNum = subGraph.subGraphs.size();
+        for (int i = 0; i < areaNum; ++i) {
+            sum += getGraphLinkSum(subGraph.subGraphs.get(i));
+        }
+        return sum;
     }
 
     public static void main(String[] args) throws IOException {
