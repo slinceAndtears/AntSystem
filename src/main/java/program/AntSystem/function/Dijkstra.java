@@ -14,19 +14,19 @@ import java.util.*;
  * */
 public class Dijkstra {
     private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
-    private static final int ANT_NUM = 100;
+    private static final int ANT_NUM = Aco.ANT_NUM;
     private static Graph graph;
     //private static double INCREASE = 0.2d;
     //private static final int START = 223;
     //private static final int END = 129;
-    private static final double VELOCITY = 20d;
+    private static final double VELOCITY = Aco.VELOCITY;
     private static int[][] flow;
-    public static final double W = 0.73d;//速度-流量的参数
+    public static final double W = Aco.W;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength = 0d;
-    public static double timeOffset = 1e2;
+    public static double timeOffset = Aco.timeOffset;
 
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -69,7 +69,7 @@ public class Dijkstra {
         while (t != start && !pre.isEmpty()) {
             if (flag.get(t) == 0) {
                 logger.error("start node is {}, end node is {}", start, end);
-                logger.error("{}", pre);
+                logger.error("{}", t);
                 throw new RuntimeException("graph is not link");
             }
             t = pre.get(t);
@@ -83,6 +83,7 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
+    	ReadFile.main(null);
         String fileName = Aco.filePath + "finalLink.txt";
         graph = new Graph();
         staticGraph = new Graph();
