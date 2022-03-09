@@ -66,7 +66,7 @@ import java.util.*;
 public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
-    public static final String filePath = "src/main/java/program/AntSystem/beijing/";
+
 
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
@@ -89,12 +89,36 @@ public class Aco {
     public static Set<Integer> guerNode;
     public static final int MAX_FLOW = 40;
     
+    public static final String filePath = "src/main/java/program/AntSystem/beijing-7/";
     public static final int MAX_ITE = 50;//最大迭代次数
     public static final int ANT_NUM = 150;//蚂蚁数量   
-    public static final double W = 0.73d;//速度-流量的参数
-    public static final double VELOCITY = 20d;//蚂蚁的速度
-    public static double timeOffset = 1e2;
+    public static final double W = 0.25d;//速度-流量的参数
+    public static final double VELOCITY = 40d;//蚂蚁的速度
+    public static double timeOffset = 1e1;
     public static double lengthOffset = 1e5;
+    
+    public static void main(String[] args) throws IOException {
+        //testFlow();
+    	
+        initialGraph();
+        
+        //detectSubGraphNodeLink();
+        //showGraph(subGraph.subGraphs.get(0));
+		
+//		  for (int i=0;i<subGraph.subGraphs.size();++i){ 
+//			  Graph graph=subGraph.subGraphs.get(i); 
+//		  addLinks(graph); }
+		 
+        //runACS();
+        Greddy.main(null);
+        Dijkstra.test1();
+        
+        //outPraeto();
+        //System.out.println(startNodeList);
+        //detectNodeLink();
+        //List<Integer> allVertex=allGraph.getAllVertex();
+        //testPath();
+    }
     
     public static void detectGuerNode() {
         guerNode = new HashSet<>();
@@ -922,23 +946,4 @@ public class Aco {
         return sum;
     }
 
-    public static void main(String[] args) throws IOException {
-        //testFlow();
-    	
-        initialGraph();
-        
-        //detectSubGraphNodeLink();
-        //showGraph(subGraph.subGraphs.get(0));
-		
-//		  for (int i=0;i<subGraph.subGraphs.size();++i){ 
-//			  Graph graph=subGraph.subGraphs.get(i); 
-//		  addLinks(graph); }
-		 
-        runACS();
-        //outPraeto();
-        //System.out.println(startNodeList);
-        //detectNodeLink();
-        //List<Integer> allVertex=allGraph.getAllVertex();
-        //testPath();
-    }
 }
