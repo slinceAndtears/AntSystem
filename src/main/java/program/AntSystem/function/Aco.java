@@ -67,8 +67,7 @@ public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
     public static final String filePath = "src/main/java/program/AntSystem/beijing/";
-    public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 50;//最大迭代次数
+
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -78,9 +77,7 @@ public class Aco {
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 20d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 0.73d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
@@ -91,6 +88,11 @@ public class Aco {
     public static List<Integer> area;
     public static Set<Integer> guerNode;
     public static final int MAX_FLOW = 40;
+    
+    public static final int MAX_ITE = 50;//最大迭代次数
+    public static final int ANT_NUM = 150;//蚂蚁数量   
+    public static final double W = 0.73d;//速度-流量的参数
+    public static final double VELOCITY = 20d;//蚂蚁的速度
     public static double timeOffset = 1e2;
     public static double lengthOffset = 1e5;
     
@@ -110,7 +112,7 @@ public class Aco {
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
     	// 此处生成finallink.txt
-    	ReadFile.main(null);
+    	//ReadFile.main(null);
         String fileName = filePath + "finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
@@ -238,7 +240,7 @@ public class Aco {
             return VELOCITY;
         }
         double density = flow[start - 1][end - 1] / weight;
-        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time / 1e5));
+        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time / timeOffset));
         //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
         return v;
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
@@ -790,7 +792,7 @@ public class Aco {
                     for (int j = 0; j < linkNum; ++j) {
                         int r1 = nodes1.get(r.nextInt(nodes1.size()));
                         int r2 = nodes.get(r.nextInt(nodes.size()));
-                        //System.out.println(r1 + " " + r2);
+                        System.out.println(r1 + " " + r2);
                         links.add(new int[]{r1, r2});
                         //添加到子图里面
                         graph.vertex.get(r1).addNbr(r2, 1);
@@ -927,10 +929,11 @@ public class Aco {
         
         //detectSubGraphNodeLink();
         //showGraph(subGraph.subGraphs.get(0));
-		/*
-		 * for (int i=0;i<subGraph.subGraphs.size();++i){ Graph
-		 * graph=subGraph.subGraphs.get(i); addLinks(graph); }
-		 */
+		
+//		  for (int i=0;i<subGraph.subGraphs.size();++i){ 
+//			  Graph graph=subGraph.subGraphs.get(i); 
+//		  addLinks(graph); }
+		 
         runACS();
         //outPraeto();
         //System.out.println(startNodeList);

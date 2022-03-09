@@ -11,16 +11,16 @@ import java.util.*;
 
 public class Greddy{
     private static final Logger logger = LoggerFactory.getLogger(Greddy.class);
-    private static final int ANT_NUM = 100;
+    private static final int ANT_NUM = Aco.ANT_NUM;
     private static Graph graph;
-    private static final double VELOCITY = 20d;
+    private static final double VELOCITY = Aco.VELOCITY;
     private static int[][] flow;
-    public static final double W = 0.8d;//速度-流量的参数
+    public static final double W = Aco.W;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength = 0d;
-    public static double timeOffset = 1e2;
+    public static double timeOffset = Aco.timeOffset;
     
     public static void initGraph() {
         String fileName = Aco.filePath + "finalLink.txt";
@@ -104,7 +104,10 @@ public class Greddy{
         int final_id = -1;
         for(int i=0; i<nbr.size();++i) {
         	double tmp_vel = testVelocity(now_node,nbr.get(i),cur_time);
-        	if(tmp_vel>final_vel) final_id = nbr.get(i);
+        	if(tmp_vel>final_vel) {
+        		final_vel = tmp_vel;
+        		final_id = nbr.get(i);
+        			}
         }
         return final_id;
     }
@@ -145,7 +148,7 @@ public class Greddy{
         for(int i=0; i<nbr.size();++i) {
         	int cur_node = nbr.get(i);
         	double tmp_len = graph.vertex.get(now_node).getWeight(cur_node);
-        	if(tmp_len<final_len) final_id = nbr.get(i);
+        	if(tmp_len<final_len) {final_id = nbr.get(i); final_len = tmp_len;}
         }
         return final_id;
     }
@@ -163,11 +166,12 @@ public class Greddy{
             	int pre = start;
                 start = nextStepByVel(graph, start, level,sumTime);
                 path.add(start);
+                ++flow[pre - 1][start - 1];
                 double cost = getTime(pre,start,this_sum_time);
                 this_sum_time += cost;
                 sumTime += cost;
             }
-            logger.info("VGreddy_od {} with path {}",i,path);
+            //logger.info("VGreddy_od {} with path {}",i,path);
         }
         return sumTime; 	
     }
@@ -185,11 +189,13 @@ public class Greddy{
             	int pre = start;
                 start = nextStepByLen(graph, start, level);
                 path.add(start);
+                ++flow[pre - 1][start - 1];
+                //++flow[pre - 1][start - 1];
                 double cost = getTime(pre,start,this_sum_time);
                 this_sum_time += cost;
                 sumTime += cost;
             }
-            logger.info("LGreddy_od {} with path {}",i,path);
+            //logger.info("LGreddy_od {} with path {}",i,path);
         }
     	return sumTime;
     }
@@ -199,6 +205,10 @@ public class Greddy{
     	double v_sumtime = VGreddy();
     	System.out.println("VGreddy: sumTime->" + v_sumtime+ " sumLength->" + pathLength + " velocity->" + pathLength/v_sumtime);
     	// length 在 getTime中更新
+    	flow = new int[graph.nodeNum][graph.nodeNum];
+        for (int i = 0; i < flow.length; ++i) {
+            Arrays.fill(flow[i], 1);
+        }
     	pathLength = 0.0;
     	double l_sumtime = LGreddy();
     	System.out.println("LGreddy: sumTime->" + l_sumtime+ " sumLength->" + pathLength + " velocity->" + pathLength/l_sumtime);
