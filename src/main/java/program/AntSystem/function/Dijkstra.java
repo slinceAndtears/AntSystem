@@ -90,7 +90,7 @@ public class Dijkstra {
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
         ReadFile.initialSubGraph(staticGraph, new SubGraphs(), fileName);
         flow = new int[graph.nodeNum][graph.nodeNum];
-        fileName = Aco.filePath+"startend.txt";
+        fileName = Aco.filePath + "startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
@@ -201,8 +201,8 @@ public class Dijkstra {
     }
 
     public static void main(String[] args) {
-        test1();
-//    	initGraph();
-//        dijkstra(graph,1365,1458);
+        //test1();
+        initGraph();
+
     }
 }
