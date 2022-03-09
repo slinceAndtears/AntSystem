@@ -148,7 +148,7 @@ public class Greddy{
         for(int i=0; i<nbr.size();++i) {
         	int cur_node = nbr.get(i);
         	double tmp_len = graph.vertex.get(now_node).getWeight(cur_node);
-        	if(tmp_len<final_len) {final_id = nbr.get(i); final_len = tmp_len;}
+        	if(tmp_len<final_len) {final_id = cur_node; final_len = tmp_len;}
         }
         return final_id;
     }
@@ -203,7 +203,8 @@ public class Greddy{
     public static void main(String[] args) {
     	initGraph();
     	double v_sumtime = VGreddy();
-    	System.out.println("VGreddy: sumTime->" + v_sumtime+ " sumLength->" + pathLength + " velocity->" + pathLength/v_sumtime);
+    	System.out.println("VGreddy: sumTime->" + "  sumLength->" + "  velocity->");
+    	System.out.println(v_sumtime +" "+ pathLength +" " + pathLength/v_sumtime);
     	// length 在 getTime中更新
     	flow = new int[graph.nodeNum][graph.nodeNum];
         for (int i = 0; i < flow.length; ++i) {
@@ -211,6 +212,7 @@ public class Greddy{
         }
     	pathLength = 0.0;
     	double l_sumtime = LGreddy();
-    	System.out.println("LGreddy: sumTime->" + l_sumtime+ " sumLength->" + pathLength + " velocity->" + pathLength/l_sumtime);
+    	System.out.println("LGreddy: sumTime->" + "  sumLength->" + "  velocity->");
+    	System.out.println(l_sumtime + " " + pathLength + " " + pathLength/l_sumtime);
     }
 }

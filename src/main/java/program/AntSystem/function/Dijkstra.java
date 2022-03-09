@@ -16,9 +16,6 @@ public class Dijkstra {
     private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
     private static final int ANT_NUM = Aco.ANT_NUM;
     private static Graph graph;
-    //private static double INCREASE = 0.2d;
-    //private static final int START = 223;
-    //private static final int END = 129;
     private static final double VELOCITY = Aco.VELOCITY;
     private static int[][] flow;
     public static final double W = Aco.W;//速度-流量的参数
@@ -189,9 +186,6 @@ public class Dijkstra {
     }
 
     public static void test1() {
-        /*for (int i = 1; i < 100; ++i) {
-            logger.info(i + "  " + VELOCITY * (1 - i / 100d));
-        }*/
         initGraph();
         double sumTime = getSumTime();
 
@@ -201,8 +195,6 @@ public class Dijkstra {
     }
 
     public static void main(String[] args) {
-        //test1();
-        initGraph();
-
+        test1();
     }
 }
