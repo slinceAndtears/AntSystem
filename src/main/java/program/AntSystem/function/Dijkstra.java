@@ -87,7 +87,7 @@ public class Dijkstra {
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
         ReadFile.initialSubGraph(staticGraph, new SubGraphs(), fileName);
         flow = new int[graph.nodeNum][graph.nodeNum];
-        fileName = Aco.filePath+"startend.txt";
+        fileName = Aco.filePath + "startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
