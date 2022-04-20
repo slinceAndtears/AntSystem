@@ -7,8 +7,7 @@ import program.AntSystem.graph.SubGraph;
 import program.AntSystem.graph.SubGraphs;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ReadFile {
 
@@ -187,6 +186,107 @@ public class ReadFile {
         }
     }
 
+    public static void fromCorAndWaysToGraph() {
+        List<List<Integer>> ways = readIntData(Aco.filePath + "ways.txt");
+        List<List<Double>> cor = readFile(Aco.filePath + "coordinate.txt");
+        System.out.println(ways.size());
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(Aco.filePath + "graph.txt"));
+            for (int i = 0; i < ways.size(); ++i) {
+                StringBuilder res = new StringBuilder();
+                int start = ways.get(i).get(0);
+                int end = ways.get(i).get(1);
+                res.append(start).append(' ');
+                res.append(end).append(' ');
+                res.append(distance(cor.get(start - 1), cor.get(end - 1)) * 100000);
+                writer.write(res.toString());
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (writer!=null){
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static void fromPartitionToArea() {
+        List<List<Integer>> area = readIntData(Aco.filePath + "finalPath.txt");
+        System.out.println(area.size());
+        int sum = 0;
+        for (int i = 0; i < area.size(); ++i) {
+            if (area.get(i).get(0) == -1) {
+                ++sum;
+            } else {
+                area.get(i).add(sum);
+            }
+        }
+        area.sort((o1,o2)->o1.get(0)-o2.get(0));
+        BufferedWriter writer = null;
+        try {
+            int s = 0;
+            writer = new BufferedWriter(new FileWriter(Aco.filePath + "area.txt"));
+            for (int i = 0; i < area.size(); ++i) {
+                if (area.get(i).get(0) != -1) {
+                    int t = area.get(i).get(1);
+                    writer.write(String.valueOf(t));
+                    writer.write("\n");
+                }else {
+                    ++s;
+                }
+            }
+            System.out.println(s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static void divideDataByRange() {
+        final int L = 6;
+        String fileName = Aco.filePath + "finalPath.txt";
+        List<List<Double>> lists = readFile(fileName);
+        Map<Double, Integer> tmp = new TreeMap<>((o1, o2) -> o1 > o2 ? 1 : -1);
+        for (int i = 0; i < lists.size(); ++i) {
+            double sum = 0;
+            for (Double x : lists.get(i)) {
+                sum += x;
+            }
+            tmp.put(sum, i);
+        }
+        int avg = (int) Math.ceil(lists.size() / L);
+        int[] label = new int[lists.size()];
+        int[] sum = new int[L];
+        int i = 0;
+        for (Map.Entry<Double, Integer> e : tmp.entrySet()) {
+            int index = 0;
+            int rank = e.getValue();
+            while (rank > avg) {
+                rank -= avg;
+                ++index;
+            }
+            label[i++] = index;
+            sum[index] += 1;
+        }
+        for (i = 0; i < label.length; ++i) {
+            System.out.println(label[i]);
+        }
+        System.out.println(Arrays.toString(sum));
+    }
+
     public static void main(String[] args) {
         /*List<List<Double>> coordinate=readFile(Aco.filePath + "coordinate.txt");
         System.out.println(coordinate.get(7));
@@ -194,5 +294,6 @@ public class ReadFile {
         System.out.println(coordinate.get(9));
         System.out.println(distance(coordinate.get(8),coordinate.get(9)));*/
         handleData();
+        //fromPartitionToArea();
     }
 }

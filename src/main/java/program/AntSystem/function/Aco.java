@@ -67,7 +67,7 @@ public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
-
+    //DPSO  4107nodes 41 areas
     public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
@@ -83,41 +83,43 @@ public class Aco {
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static List<Solution> globalBestSolution;//全局最优蚂蚁的解
-    public static int Sn = 12;//每次迭代产生解的数量
+    public static int Sn = 15;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
     public static Set<Integer> guerNode;
     public static final int MAX_FLOW = 40;
     
-    public static final String filePath = "src/main/java/program/AntSystem/beijing-7/";
-    public static final int MAX_ITE = 50;//最大迭代次数
-    public static final int ANT_NUM = 150;//蚂蚁数量   
-    public static final double W = 0.25d;//速度-流量的参数
+    public static final String filePath = "src/main/java/program/AntSystem/beijing/";
+    public static final int MAX_ITE = 30;//最大迭代次数
+    public static final int ANT_NUM = 150;//蚂蚁数量
+    public static final double W = 3.5d;//速度-流量的参数
     public static final double VELOCITY = 40d;//蚂蚁的速度
+    public static final double minVel = 0.1;
     public static double timeOffset = 1e1;
     public static double lengthOffset = 1e5;
     
     public static void main(String[] args) throws IOException {
-        //testFlow();
-    	
         initialGraph();
-        
+        //addSubGraphLinks();
+        //final int ways = 4528;
+        //System.out.println(ways - getAllSubGraphLinkSum());
         //detectSubGraphNodeLink();
         //showGraph(subGraph.subGraphs.get(0));
-		
-//		  for (int i=0;i<subGraph.subGraphs.size();++i){ 
-//			  Graph graph=subGraph.subGraphs.get(i); 
-//		  addLinks(graph); }
-		 
+        //addLinks(allGraph);
+        for (int i=0;i<startNodeList.size();++i){
+            System.out.println(getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph,startNodeList.get(i),endNodeList.get(i))));
+        }
+
         //runACS();
-        Greddy.main(null);
-        Dijkstra.test1();
-        
         //outPraeto();
-        //System.out.println(startNodeList);
         //detectNodeLink();
-        //List<Integer> allVertex=allGraph.getAllVertex();
-        //testPath();
+    }
+
+    public static void addSubGraphLinks() {
+        for (int i = 0; i < subGraph.subGraphs.size(); ++i) {
+            Graph graph = subGraph.subGraphs.get(i);
+            addLinks(graph);
+        }
     }
     
     public static void detectGuerNode() {
@@ -135,15 +137,15 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
-    	// 此处生成finallink.txt
-    	//ReadFile.main(null);
+        // 此处生成finallink.txt
+        ReadFile.handleData();
         String fileName = filePath + "finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
         graph = subGraph.areaGraph;
-        pheromone = new double[allGraph.nodeNum][allGraph.nodeNum];
-        flow = new int[allGraph.nodeNum][allGraph.nodeNum];
+        pheromone = new double[allGraph.nodeNum + 1][allGraph.nodeNum + 1];
+        flow = new int[allGraph.nodeNum + 1][allGraph.nodeNum + 1];
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
@@ -260,13 +262,14 @@ public class Aco {
     //车辆-流速公式-T模式
     public static double getVelocity(int start, int end, double cur_time) {
         double weight = allGraph.vertex.get(start).getWeight(end);
-        if (weight < 1e-6) {
+        if (weight < 1e-6||start==end) {
             return VELOCITY;
         }
-        double density = flow[start - 1][end - 1] / weight;
+        double density = flow[start][end] / weight;
         double v = VELOCITY * Math.exp(-1 * W * density * (cur_time / timeOffset));
         //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
-        return v;
+        //return v > minVel ? v : minVel;
+        return Math.max(v, minVel);
         //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
 
@@ -297,8 +300,8 @@ public class Aco {
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
-            double velocity = getVelocity(start, path.get(i));
-            ++flow[start - 1][path.get(i) - 1];
+            double velocity = getVelocity(start, path.get(i), sumTime);
+            ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
             double time = allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
             sumTime += time;
@@ -400,7 +403,7 @@ public class Aco {
                 oneAntAllPath.addAll(path);
             }
             if (oneAntAllPath.size() == 0) {
-                continue;
+                oneAntAllPath.addAll(antSystemPath(subGraph.subGraphs.get(area.get(startNode-1)),startNode,endNode));
             }
             int lastNode = oneAntAllPath.get(oneAntAllPath.size() - 1);
             if (endNode != lastNode) {
@@ -413,6 +416,9 @@ public class Aco {
             }
             areaPath.add(oneAreaPath);
             allPath.add(oneAntAllPath);
+            //double[] timeAndPath = getPathLengthAndTimeByPath(oneAntAllPath, solution, i, sumTime);
+            //sumTime += timeAndPath[0];
+            //sumLength += timeAndPath[1];
         }
         solution.sumTime = sumTime;
         solution.path = allPath;
