@@ -28,4 +28,12 @@ public class Graph {
         }
         return res;
     }
+
+    @Override
+    public String toString() {
+        return "Graph{" +
+                "vertex=" + vertex +
+                ", nodeNum=" + nodeNum +
+                '}';
+    }
 }

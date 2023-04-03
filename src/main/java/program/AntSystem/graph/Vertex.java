@@ -1,5 +1,8 @@
 package program.AntSystem.graph;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +12,17 @@ public class Vertex {
     public int id;//当前顶点的id值
     Map<Integer, Double> neighbors;//该点的邻居以及对应的权值
 
+    private static final Logger logger = LoggerFactory.getLogger(Vertex.class);
+
     public Vertex(int i) {
         id = i;
         neighbors = new HashMap<>();
     }
 
     public void addNbr(int id, double weight) {//添加一个邻居
+        if (neighbors.containsKey(id)) {
+            //logger.error("边已经存在start node is {},end node is {}", this.id, id);
+        }
         neighbors.put(id, weight);
     }
 
@@ -31,5 +39,17 @@ public class Vertex {
             res.add(x.getKey());
         }
         return res;
+    }
+
+    public boolean removeNbr(int nbr){
+        neighbors.remove(nbr);
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Vertex{" +
+                "id=" + id +
+                '}';
     }
 }

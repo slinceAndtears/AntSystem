@@ -14,18 +14,16 @@ import java.util.*;
  * */
 public class Dijkstra {
     private static final Logger logger = LoggerFactory.getLogger(Dijkstra.class);
-    private static final int ANT_NUM = 100;
+    private static final int ANT_NUM = Aco.ANT_NUM;
     private static Graph graph;
-    //private static double INCREASE = 0.2d;
-    //private static final int START = 223;
-    //private static final int END = 129;
-    private static final double VELOCITY = 0.1d;
+    private static final double VELOCITY = Aco.VELOCITY;
     private static int[][] flow;
-    public static final double W = 0.05d;//速度-流量的参数
+    public static final double W = Aco.W;//速度-流量的参数
     public static Graph staticGraph;
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
     public static double pathLength = 0d;
+    public static double timeOffset = Aco.timeOffset;
 
     public static List<Integer> dijkstra(Graph graph, int start, int end) {
         Map<Integer, Integer> pre = new HashMap<>();
@@ -67,6 +65,8 @@ public class Dijkstra {
         int t = end;
         while (t != start && !pre.isEmpty()) {
             if (flag.get(t) == 0) {
+                logger.error("start node is {}, end node is {}", start, end);
+                logger.error("{}", t);
                 throw new RuntimeException("graph is not link");
             }
             t = pre.get(t);
@@ -80,13 +80,14 @@ public class Dijkstra {
     }
 
     public static void initGraph() {
-        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+    	ReadFile.main(null);
+        String fileName = Aco.filePath + "finalLink.txt";
         graph = new Graph();
         staticGraph = new Graph();
         ReadFile.initialSubGraph(graph, new SubGraphs(), fileName);
         ReadFile.initialSubGraph(staticGraph, new SubGraphs(), fileName);
         flow = new int[graph.nodeNum][graph.nodeNum];
-        fileName = "src/main/java/program/AntSystem/beijing/startend.txt";
+        fileName = Aco.filePath + "startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
@@ -96,9 +97,26 @@ public class Dijkstra {
     }
 
     public static double getVelocity(int start, int end) {
-        double density = flow[start][end] / staticGraph.vertex.get(start).getWeight(end);
-        //double velocity = VELOCITY * Math.exp(-1 * W * density);
-        double velocity = VELOCITY * (1 - flow[start][end] / 50d);
+        double weight = staticGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6) {
+            return VELOCITY;
+        }
+        double density = flow[start - 1][end - 1] / weight;
+        double velocity = VELOCITY * Math.exp(-1 * W * density);
+        //double velocity = VELOCITY * (1 - flow[start][end] / 50d);
+        return velocity;
+    }
+
+    public static double getVelocity(int start, int end, double cur_time) {
+        double weight = staticGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6) {
+            return VELOCITY;
+        }
+        double density = flow[start - 1][end - 1] / weight;
+
+        double velocity = VELOCITY * Math.exp(-1 * W * density * (cur_time/timeOffset));
+
+        //double velocity = VELOCITY * (1 - flow[start][end] / 50d);
         return velocity;
     }
 
@@ -111,23 +129,27 @@ public class Dijkstra {
         graph.vertex.get(start).addNbr(end, weight);
     }
 
-    public static double getTime(int start, int end) {
-        double velocity = getVelocity(start, end);
+    public static double getTime(int start, int end, double cur_time) {
+        double velocity = getVelocity(start, end, cur_time);
         return staticGraph.vertex.get(start).getWeight(end) / velocity;
     }
 
     public static double getSumTime() {
         double sumTime = 0d;
         for (int i = 0; i < ANT_NUM; ++i) {
+        	double this_sum_time = 0.0;
             int start = startNodeList.get(i);
             int end = endNodeList.get(i);
             List<Integer> path = dijkstra(graph, start, end);//迪杰斯特拉算法挑选路径
             int s = path.get(0);
             for (int j = 1; j < path.size(); ++j) {
-                sumTime += getTime(s, path.get(j));
+                // 此处调整速度的计算方程
+                double cost = getTime(s, path.get(j), this_sum_time);
+                this_sum_time += cost;
+                sumTime += cost;
                 pathLength += staticGraph.vertex.get(s).getWeight(path.get(j));
-                changeWeight(s, path.get(j));
-                ++flow[s][path.get(j)];
+                //changeWeight(s, path.get(j)); 核心
+                ++flow[s - 1][path.get(j) - 1];
                 s = path.get(j);
             }
         }
@@ -141,7 +163,7 @@ public class Dijkstra {
         //System.out.println("平均速度"+(pathLength/getSumTime()));
         //List<Integer> path=dijkstra(staticGraph,178,189);
         Graph graph = new Graph();
-        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+        String fileName = Aco.filePath + "finalLink.txt";
         SubGraphs subGraphs = new SubGraphs();
         ReadFile.initialSubGraph(graph, subGraphs, fileName);
         int startArea = 11;
@@ -164,9 +186,12 @@ public class Dijkstra {
     }
 
     public static void test1() {
-        for (int i = 1; i < 100; ++i) {
-            logger.info(i + "  " + VELOCITY * (1 - i / 100d));
-        }
+        initGraph();
+        double sumTime = getSumTime();
+
+        System.out.println(sumTime + " " + pathLength + " " + pathLength/sumTime);
+
+        //System.out.println(startNodeList.size());
     }
 
     public static void main(String[] args) {

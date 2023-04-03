@@ -3,6 +3,7 @@ package program.AntSystem.function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import program.AntSystem.graph.Graph;
+import program.AntSystem.graph.SubGraph;
 import program.AntSystem.graph.SubGraphs;
 
 import java.io.*;
@@ -58,35 +59,69 @@ import java.util.*;
  *      删除上述没有边的点。
  *      起点区域更改为96
  *      终点区域更改为63
+ *
+ *   2022-02-27
+ *      调整为多目标蚁群—— by scottishi@tencent.com
  * */
 public class Aco {
     private static final Logger logger = LoggerFactory.getLogger(Aco.class);
 
 
-    public static final int ANT_NUM = 100;//蚂蚁数量
-    public static final int MAX_ITE = 10;//最大迭代次数
-    public static final double T0 = 0.02d;//初始信息素含量
+    //DPSO  4107nodes 41 areas
+    public static final double T0 = 0.6d;//初始信息素含量
     public static final double B = -2d;//启发式信息计算公式中的参数β 目前分区图的路径是根据连接点设置的，所以路径越长，选择概率越大
     public static final double C = 0.2d;//全局信息素更新的参数
     public static final double q0 = 0.9d;//轮盘赌与贪心的阈值 小于该值则采用贪心
-    public static Graph graph;//图数据对象 使用邻接表存储
+    public static Graph graph;//分区组成的图
     public static SubGraphs subGraph;//所有的子图
     public static double[][] pheromone;//信息素矩阵
     public static double phe = 0.6d;//局部信息素更新的参数
     public static int[][] flow;//流量矩阵
-    public static final double VELOCITY = 0.1d;//蚂蚁的速度
     public static final int w = 5;//全局信息素更新的排序参数
-    public static final double W = 0.05d;//速度-流量的参数
     public static Graph allGraph;//整个图
     public static double p = 0.5d;//全局信息素更新的参数
     public static List<Integer> startNodeList;
     public static List<Integer> endNodeList;
-    public static Solution globalBestSolution;//全局最优蚂蚁的解
-    public static int Sn = 10;//每次迭代产生解的数量
+    public static List<Solution> globalBestSolution;//全局最优蚂蚁的解
+    public static int Sn = 15;//每次迭代产生解的数量
     public static PriorityQueue<SolutionWithPathTime> topWAnt;
     public static List<Integer> area;
-    public static Set<Integer> guerNode ;
+    public static Set<Integer> guerNode;
+    public static final int MAX_FLOW = 40;
+    
+    public static final String filePath = "src/main/java/program/AntSystem/beijing/";
+    public static final int MAX_ITE = 30;//最大迭代次数
+    public static final int ANT_NUM = 150;//蚂蚁数量
+    public static final double W = 3.5d;//速度-流量的参数
+    public static final double VELOCITY = 40d;//蚂蚁的速度
+    public static final double minVel = 0.1;
+    public static double timeOffset = 1e1;
+    public static double lengthOffset = 1e5;
+    
+    public static void main(String[] args) throws IOException {
+        initialGraph();
+        //addSubGraphLinks();
+        //final int ways = 4528;
+        //System.out.println(ways - getAllSubGraphLinkSum());
+        //detectSubGraphNodeLink();
+        //showGraph(subGraph.subGraphs.get(0));
+        //addLinks(allGraph);
+        for (int i=0;i<startNodeList.size();++i){
+            System.out.println(getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph,startNodeList.get(i),endNodeList.get(i))));
+        }
 
+        //runACS();
+        //outPraeto();
+        //detectNodeLink();
+    }
+
+    public static void addSubGraphLinks() {
+        for (int i = 0; i < subGraph.subGraphs.size(); ++i) {
+            Graph graph = subGraph.subGraphs.get(i);
+            addLinks(graph);
+        }
+    }
+    
     public static void detectGuerNode() {
         guerNode = new HashSet<>();
         for (int i = 0; i < 100; ++i) {
@@ -102,24 +137,27 @@ public class Aco {
 
     //从文件中导入图 然后初始化信息素和流量矩阵,目前需要对分区图进行处理，以免出现来回走的情况，
     public static void initialGraph() {
-        String fileName = "src/main/java/program/AntSystem/beijing/finalLink.txt";
+        // 此处生成finallink.txt
+        ReadFile.handleData();
+        String fileName = filePath + "finalLink.txt";
         subGraph = new SubGraphs();
         allGraph = new Graph();
         ReadFile.initialSubGraph(allGraph, subGraph, fileName);
         graph = subGraph.areaGraph;
-        pheromone = new double[allGraph.nodeNum][allGraph.nodeNum];
-        flow = new int[allGraph.nodeNum][allGraph.nodeNum];
+        pheromone = new double[allGraph.nodeNum + 1][allGraph.nodeNum + 1];
+        flow = new int[allGraph.nodeNum + 1][allGraph.nodeNum + 1];
         for (int i = 0; i < pheromone.length; ++i) {
             Arrays.fill(pheromone[i], T0);
         }
-        fileName = "src/main/java/program/AntSystem/beijing/startend.txt";
+        fileName = filePath + "startend.txt";
         List<List<Integer>> nodes = ReadFile.readIntData(fileName);
         startNodeList = nodes.get(0);
         endNodeList = nodes.get(1);
-        globalBestSolution = new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0);
-        topWAnt = new PriorityQueue<>(w - 1, (o1, o2) -> o1.sumTime < o2.sumTime ? 1 : -1);
+        //globalBestSolution = new ArrayList<>(new Solution(new ArrayList<>(), Integer.MAX_VALUE, new ArrayList<>(), 0));
+        globalBestSolution = new ArrayList<>();
+        topWAnt = new PriorityQueue<>(ANT_NUM, (o1, o2) -> o1.sumTime > o2.sumTime && o1.sumLength > o2.sumLength ? 1 : -1);
         area = new ArrayList<>();
-        List<List<Integer>> t = ReadFile.readIntData("src/main/java/program/AntSystem/beijing/area.txt");
+        List<List<Integer>> t = ReadFile.readIntData(filePath + "area.txt");
         for (List<Integer> x : t) {
             area.add(x.get(0));
         }
@@ -142,10 +180,10 @@ public class Aco {
             nbr = new ArrayList<>();
             for (Integer x : graph.vertex.get(now_node).getAllNbr()) {
                 try {
-                    if (level.get(x) < level.get(now_node)) {
+                    if (level.get(x) < level.get(now_node) && flow[now_node][x] < MAX_FLOW) {
                         nbr.add(x);
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     logger.error("graph node list is {}", graph.getAllVertex());
                     logger.error("now node is: {}, x is {}", now_node, x);
                     logger.error("level is {}", level);
@@ -153,9 +191,10 @@ public class Aco {
                 }
             }
         }
+        //logger.info("start node is {},nbr size is {}",now_node, nbr.size());
         //掉在此处，利用分层，来筛选掉部分数据，，同层之间怎么办,先不做限制试试，权值还没有导入
         if (nbr.size() == 0) {
-            logger.error(String.format("起点%s没有路可以走", now_node));
+            logger.error("起点为 {} 没有路可以走, level is {}, graph is {}", now_node, level, graph);
 
             throw new RuntimeException(String.format("起点%s没有路可以走", now_node));
             //return -1;//如果没有路可以走
@@ -174,8 +213,12 @@ public class Aco {
                 continue;
             }
             n_ij = 1d / (weight * density);
-            t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
-            state[i] = t_ij * Math.pow(n_ij, B);
+            //t_ij = (1 - C) * pheromone[now_node][nbr.get(i)] + C * T0;
+            // 暂时修改 不知道为什么如上写 信息素直接使用即可
+            t_ij = pheromone[now_node][nbr.get(i)];
+            state[i] = t_ij * Math.pow(n_ij, 
+            		
+            		B);
             sum += state[i];
         }
         double q = r.nextDouble();
@@ -205,9 +248,29 @@ public class Aco {
 
     //车辆-流速公式
     public static double getVelocity(int start, int end) {
-        double density = flow[start][end] / allGraph.vertex.get(start).getWeight(end);
-        //return VELOCITY * Math.exp(-1 * W * density);
-        return VELOCITY * (1 - flow[start][end] / 50d);
+        double weight = allGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6) {
+            return VELOCITY;
+        }
+        double density = flow[start - 1][end - 1] / weight;
+        double v = VELOCITY * Math.exp(-1 * W * density);
+        //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
+        return v;
+        //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
+    }
+
+    //车辆-流速公式-T模式
+    public static double getVelocity(int start, int end, double cur_time) {
+        double weight = allGraph.vertex.get(start).getWeight(end);
+        if (weight < 1e-6||start==end) {
+            return VELOCITY;
+        }
+        double density = flow[start][end] / weight;
+        double v = VELOCITY * Math.exp(-1 * W * density * (cur_time / timeOffset));
+        //logger.info("start node is {}, end node is {}, density is {} ,velocity is {}", start, end, density, v);
+        //return v > minVel ? v : minVel;
+        return Math.max(v, minVel);
+        //return VELOCITY * (1 - flow[start - 1][end - 1] / 50d);
     }
 
     //返回经过这条路径的总长度和总时间，第一项为总时间，第二项而总长度
@@ -219,21 +282,25 @@ public class Aco {
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
-            double velocity = getVelocity(start, path.get(i));
+            // 注 此处可用两种速度计算方式
+        	//double this_sum_time = 0.0;
+            double velocity = getVelocity(start, path.get(i),sumTime);
             ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
-            sumTime += allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            double cost = allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
+            sumTime += cost;
+            //this_sum_time
             start = path.get(i);
         }
         return new double[]{sumTime, sumLength};
     }
 
-    public static double[] getPathLengthAndTimeByPath(List<Integer> path, SolutionWithPathTime solution, int antNum) {
+    public static double[] getPathLengthAndTimeByPath(List<Integer> path, SolutionWithPathTime solution, int antNum, double cur_time) {
         double sumLength = 0d;
         double sumTime = 0d;
         int start = path.get(0);
         for (int i = 1; i < path.size(); ++i) {
-            double velocity = getVelocity(start, path.get(i));
+            double velocity = getVelocity(start, path.get(i), sumTime);
             ++flow[start][path.get(i)];
             sumLength += allGraph.vertex.get(start).getWeight(path.get(i));
             double time = allGraph.vertex.get(start).getWeight(path.get(i)) / velocity;
@@ -252,7 +319,7 @@ public class Aco {
     //利用蚁群算法，选出一条完整的路径
     public static List<Integer> antSystemPath(Graph graph, int start, int end) {
         if (graph == null || !graph.vertex.containsKey(start) || !graph.vertex.containsKey(end)) {
-            logger.error(String.format("graph is null or graph does not contains start node %s or end node %s", start, end));
+            logger.error("graph is null or graph does not contains start node {} or end node {},graph is {}", start, end, graph);
             throw new IllegalArgumentException(String.format("graph is null or graph does" +
                     " not contains start node %s or end node %s", start, end));
         }
@@ -263,7 +330,22 @@ public class Aco {
             start = nextStep(graph, start, level);
             path.add(start);
         }
+        pathPheUpdate(path);
         return path;
+    }
+
+    //对一条路径的信息素进行局部更新
+    public static void pathPheUpdate(List<Integer> path) {
+        if (path == null || path.size() == 0) {
+            throw new RuntimeException("");
+        }
+        int start = path.get(0);
+        int end = 0;
+        for (int i = 1; i < path.size(); ++i) {
+            end = path.get(i);
+            localPheUpdate(start, end);
+            start = end;
+        }
     }
 
     /**
@@ -282,12 +364,13 @@ public class Aco {
             int startNode = startNodeList.get(i);
             int endNode = endNodeList.get(i);
             //List<Integer> oneAreaPath = Dijkstra.dijkstra(graph, area.get(startNode), area.get(endNode));
-            List<Integer> oneAreaPath=new ArrayList<>();
+            List<Integer> oneAreaPath = new ArrayList<>();
             try {
                 oneAreaPath = getAreaPathByDijkstra(Dijkstra.dijkstra(allGraph, startNode, endNode));//分区路径
-            }catch (Exception e){
-                logger.error("start Node is {}",startNode);
-                logger.error("end Node is {}",endNode);
+            } catch (Exception e) {
+                logger.error("第 {} 只蚂蚁", i);
+                logger.error("start Node is {}", startNode);
+                logger.error("end Node is {}", endNode);
                 throw new RuntimeException();
             }
 
@@ -310,7 +393,7 @@ public class Aco {
                 startNode = conn.get(r.nextInt(conn.size()));
                 path.add(startNode);
                 //double[] timeAntLength = getPathLengthAndTimeByPath(path);
-                double[] timeAntLength = getPathLengthAndTimeByPath(path, solution, i);
+                double[] timeAntLength = getPathLengthAndTimeByPath(path, solution, i, sumTime);
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 startArea = nextArea;
@@ -319,10 +402,13 @@ public class Aco {
                 }
                 oneAntAllPath.addAll(path);
             }
+            if (oneAntAllPath.size() == 0) {
+                oneAntAllPath.addAll(antSystemPath(subGraph.subGraphs.get(area.get(startNode-1)),startNode,endNode));
+            }
             int lastNode = oneAntAllPath.get(oneAntAllPath.size() - 1);
             if (endNode != lastNode) {
                 List<Integer> lastPath = antSystemPath(subGraph.subGraphs.get(startArea), lastNode, endNode);
-                double[] timeAntLength = getPathLengthAndTimeByPath(lastPath, solution, i);
+                double[] timeAntLength = getPathLengthAndTimeByPath(lastPath, solution, i, sumTime);
                 sumTime += timeAntLength[0];
                 sumLength += timeAntLength[1];
                 Integer x = lastPath.remove(0);
@@ -330,6 +416,9 @@ public class Aco {
             }
             areaPath.add(oneAreaPath);
             allPath.add(oneAntAllPath);
+            //double[] timeAndPath = getPathLengthAndTimeByPath(oneAntAllPath, solution, i, sumTime);
+            //sumTime += timeAndPath[0];
+            //sumLength += timeAndPath[1];
         }
         solution.sumTime = sumTime;
         solution.path = allPath;
@@ -338,33 +427,67 @@ public class Aco {
         return solution;
     }
 
+    public static boolean judgePareto(Solution[] curBest, Solution curAnt) {
+        int cur_len = curBest.length;
+        for (int i = 0; i < cur_len; ++i) {
+            if (curBest[i] == null) {
+                continue;
+            }
+            if (curBest[i].sumLength < curAnt.sumLength && curBest[i].sumTime < curAnt.sumTime) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     /**
      * 全局信息素更新，每跑完一代之后执行 一次将优先队列中的solution出队，然后全局更新
      * 需要重复更新吗，首先计算出需要更新的数量 所以我的解 只用更新区域图就可以了
      * 其他路径的信息素，直接蒸发 p了？？
      **/
     public static void update() {
-        double t = 0d;
+
         boolean[][] tag = new boolean[pheromone.length][pheromone.length];//用于标志是否有路径走过
         Solution[] localBest = new Solution[topWAnt.size()];
         //将局部最优蚂蚁出队，获取
-        for (int i = localBest.length - 1; i >= 0; --i) {
-            localBest[i] = topWAnt.poll();
+        int real_size = 0;
+        for (int i = 0; i < localBest.length; ++i) {
+            Solution tmp_sol = topWAnt.poll();
+            if (!judgePareto(localBest, tmp_sol)) {
+                // 已经不是帕累托解
+                break;
+            }
+
+            localBest[real_size] = tmp_sol;
+            real_size++;
         }
-        for (int i = 1; i <= w - 1; ++i) {
-            t = (w - i) * (1 / localBest[i - 1].sumTime) + w * (1 / globalBestSolution.sumTime);
+        double t = 0d;
+        for (int i = 1; i <= real_size; ++i) {
+            //t[i] =  (1 / localBest[i - 1].sumTime);
+            t = (100000 / localBest[i - 1].sumTime); //+ w * (1 / globalBestSolution.sumTime);
         }
         //全局最优蚂蚁进行信息素更新进行全局信息素更新
-        for (List<Integer> ap : globalBestSolution.areaPath) {
-            int start = ap.get(0);
-            for (int i = 1; i < ap.size(); ++i) {
-                pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t;
-                tag[start][ap.get(i)] = true;
-                start = ap.get(i);
+        for (Solution g_ant : globalBestSolution) {
+            for (List<Integer> ap : g_ant.areaPath) {
+                int start = ap.get(0);
+                for (int i = 1; i < ap.size(); ++i) {
+                    pheromone[start][ap.get(i)] = (1 - p) * pheromone[start][ap.get(i)] + t
+                    				+(1 / (getGlobalBestAvgTime(globalBestSolution)/timeOffset*
+                                             getGlobalBestAvgLength(globalBestSolution)/lengthOffset) );
+
+                    tag[start][ap.get(i)] = true;
+                    start = ap.get(i);
+                }
             }
         }
+
         //局部最优蚂蚁走过的变进行信息素更新
-        for (int i = 0; i < localBest.length; ++i) {
+        // 更新注 此处修改不需要局部最优更新  2022/02/27
+        /*for (int i = 0; i < localBest.length; ++i) {
+            if (localBest[i] == null) {
+                continue;
+            }
             List<List<Integer>> path = localBest[i].areaPath;//
             for (List<Integer> ap : path) {
                 int start = ap.get(0);
@@ -374,7 +497,8 @@ public class Aco {
                     start = ap.get(j);
                 }
             }
-        }
+        }*/
+
         //剩下边信息素蒸发
         for (int i = 0; i < pheromone.length; ++i) {
             for (int j = 0; j < pheromone[i].length; ++j) {
@@ -389,7 +513,7 @@ public class Aco {
     public static List<Integer> getAreaPathByDijkstra(List<Integer> path) {
         List<Integer> areaPath = new ArrayList<>();
         for (Integer x : path) {
-            int a = area.get(x);
+            int a = area.get(x - 1);
             if (areaPath.size() == 0 || a != areaPath.get(areaPath.size() - 1)) {
                 areaPath.add(a);
             }
@@ -436,7 +560,7 @@ public class Aco {
                     next_area = nextStep(now_area);//根据蚁群算法挑选出下一个区域
                     //List<Integer> connect = subGraph.subGraphs.get(now_area).connect.get(next_area);
                     List<Integer> connect = getConnectNode(now_area, next_area);
-                    if (connect.size()==0){
+                    if (connect.size() == 0) {
                         logger.error("connected node sum is 0, now area is");
                         throw new IllegalArgumentException("");
                     }
@@ -486,7 +610,7 @@ public class Aco {
 
     //将路径保存至txt文件
     public static void savePath(List<List<Integer>> allPath) {
-        String fileName = "src/main/java/program/AntSystem/subshain/finalPath.txt";
+        String fileName = filePath + "finalPath.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -511,6 +635,51 @@ public class Aco {
         }
     }
 
+    public static boolean judgeGlobal(List<Solution> globalBest, Solution cur_sol) {
+    	
+    	/*for(int i=0; i<globalBest.size(); ++i) {
+    		if(cur_sol.sumLength >= globalBest.get(i).sumLength
+    				&& cur_sol.sumTime >= globalBest.get(i).sumTime) {
+    			// 被支配直接返回 因为集合中不会有其他被cur_sol支配的
+    			return false;
+    		}
+    		if(cur_sol.sumLength < globalBest.get(i).sumLength
+    				&& cur_sol.sumTime < globalBest.get(i).sumTime) {
+    			globalBest.remove(i);
+    		}
+    	}*/
+        Iterator<Solution> it = globalBest.iterator();
+        while (it.hasNext()) {
+            Solution tmp = it.next();
+            if (cur_sol.sumLength >= tmp.sumLength
+                    && cur_sol.sumTime >= tmp.sumTime) {
+                return false;
+            }
+            if (cur_sol.sumLength < tmp.sumLength
+                    && cur_sol.sumTime < tmp.sumTime) {
+                it.remove();
+            }
+        }
+        globalBest.add(cur_sol);
+        return true;
+    }
+
+    public static double getGlobalBestAvgLength(List<Solution> globalBest) {
+        double sum_len = 0d;
+        for (Solution ant : globalBest) {
+            sum_len += ant.sumLength;
+        }
+        return sum_len / globalBest.size();
+    }
+
+    public static double getGlobalBestAvgTime(List<Solution> globalBest) {
+        double sum_time = 0d;
+        for (Solution ant : globalBest) {
+            sum_time += ant.sumTime;
+        }
+        return sum_time / globalBest.size();
+    }
+
     //目前路径对象的各种复制都使用的是浅拷贝，感觉解建立之后不会改变
     public static void runACS() {
         //总迭代次数
@@ -519,16 +688,22 @@ public class Aco {
             //没轮迭代产生Sn个解，然后挑选出top个解，释放信息素
             for (int j = 0; j < Sn; ++j) {
                 //Solution t = runOneAnt();
-                SolutionWithPathTime t = runOneAnt();
-                logger.info(String.format("第%s轮迭代第%s个解结果为%s", i, j, t.toString()));
+                try {
+                    SolutionWithPathTime t = runOneAnt();
+                    logger.info("第{}轮迭代第{}个解结果为{}", i, j, t);
+                    judgeGlobal(globalBestSolution, t);
+                    topWAnt.offer(t);
+                } catch (Exception e) {
+                    logger.error("第{}轮迭代第{}个解异常，异常为{}", i, j, e);
+                }
                 //随时更新全局最优解
-                if (t.sumTime < globalBestSolution.sumTime) {
-                    globalBestSolution = t;
-                }
-                topWAnt.offer(t);
-                if (topWAnt.size() == w) {
+                
+                /*if (t.sumTime < globalBestSolution.sumTime) {
+                    globalBestSolution.add(t);
+                }*/
+                /*if (topWAnt.size() == w) {
                     topWAnt.poll();
-                }
+                }*/
                 //对流量进行清空
                 for (int[] x : flow) {
                     Arrays.fill(x, 0);
@@ -536,10 +711,11 @@ public class Aco {
             }
             //求出top w个解，然后对这些解经过的变和全局最优蚂蚁经过的边释放信息素
             update();
-            System.out.println(globalBestSolution);
+            outPraeto();
+            //logger.info("{}",globalBestSolution.sumTime);
         }
         //保存路径
-        //savePath(globalBestSolution.path);
+        // savePath(globalBestSolution.path);
     }
 
     //在起点终点区域内随机生成起点和终点
@@ -561,7 +737,7 @@ public class Aco {
             start.add(startList.get(r.nextInt(startList.size())));
             end.add(endList.get(r.nextInt(endList.size())));
         }
-        String fileName = "src/main/java/program/AntSystem/subshain/startend.txt";
+        String fileName = Aco.filePath + "startend.txt";
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(fileName));
@@ -614,8 +790,66 @@ public class Aco {
         }
     }
 
+    static double distance(List<Double> d1, List<Double> d2) {
+        double sum = 0d;
+        if (d1.size() != d2.size()) {
+            logger.error("d1 :{}, d2: {}  size is not equal", d1, d2);
+            throw new RuntimeException("d1  d2  size is not equal");
+        }
+        for (int i = 0; i < d1.size(); ++i) {
+            sum += (d1.get(i) - d2.get(i)) * (d1.get(i) - d2.get(i));
+        }
+        return Math.sqrt(sum);
+    }
+
+
+    static List<int[]> addLinks(Graph graph) {
+        int nodeNum = graph.nodeNum;
+        int start = graph.getAllVertex().get(0);
+        List<Integer> nodeLists = graph.getAllVertex();
+        Map<Integer, Integer> integerIntegerMap = BFS.bfdWithEnd(graph, start);
+        final int linkNum = 2;
+        Random r = new Random();
+        int bfsNum = integerIntegerMap.size();
+        List<int[]> links = new ArrayList<>();
+        while (nodeNum != bfsNum) {
+            Set<Integer> tmp = integerIntegerMap.keySet();
+            List<Integer> nodes1 = new ArrayList<>(tmp);
+            for (int i = 0; i < nodeLists.size(); ++i) {
+                if (!tmp.contains(nodeLists.get(i))) {
+                    int node = nodeLists.get(i);
+                    List<Integer> nodes = new ArrayList<>(BFS.bfsWithStart(graph, node).keySet());
+                    for (int j = 0; j < linkNum; ++j) {
+                        int r1 = nodes1.get(r.nextInt(nodes1.size()));
+                        int r2 = nodes.get(r.nextInt(nodes.size()));
+                        System.out.println(r1 + " " + r2);
+                        links.add(new int[]{r1, r2});
+                        //添加到子图里面
+                        graph.vertex.get(r1).addNbr(r2, 1);
+                        graph.vertex.get(r2).addNbr(r1, 1);
+                    }
+                }
+                break;
+            }
+            start = graph.getAllVertex().get(r.nextInt(nodeNum));
+            bfsNum = BFS.bfdWithEnd(graph, start).size();
+            integerIntegerMap = BFS.bfdWithEnd(graph, start);
+        }
+        return links;
+    }
+
     static void detectNodeLink() {
         int nodeSum = 3340;
+/*        String fileName = "src/main/java/program/AntSystem/beijing/coordinate.txt";
+        List<List<Double>> cor = ReadFile.readFile(fileName);
+        double[][] distance = new double[nodeSum + 1][nodeSum + 1];
+        for (int i = 1; i < nodeSum; ++i) {
+            for (int j = i + 1; j <= nodeSum; ++j) {
+                double dis = distance(cor.get(i - 1), cor.get(j - 1)) * 1000;
+                distance[i][j] = dis;
+                distance[j][i] = dis;
+            }
+        }*/
         int sum = 0;
         for (int i = 1; i <= nodeSum; ++i) {
             if (!allGraph.vertex.keySet().contains(i)) {
@@ -623,20 +857,134 @@ public class Aco {
                 System.out.println(i);
             }
         }
-        logger.info("guer Node sum is {}", sum);
+/*        for (int i = 1; i <= nodeSum; ++i) {
+            //logger.info("node {} link sum is {}", i, allGraph.vertex.get(i).getAllNbr().size());
+            if (allGraph.vertex.get(i).getAllNbr().size() < 4) {
+                int linkSum = 4 - allGraph.vertex.get(i).getAllNbr().size();
+                PriorityQueue<AddNode> queue = new PriorityQueue<>(linkSum, (o1, o2) -> {
+                    if (o1.distance > o2.distance) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+                for (int j = 1; j <= nodeSum; ++j) {
+                    if (j != i) {
+                        queue.offer(new AddNode(distance[i][j], j));
+                        if (queue.size() > linkSum) {
+                            queue.poll();
+                        }
+                    }
+                }
+                for (int j = 0; j < queue.size(); ++j) {
+                    int end = queue.poll().nodeId;
+                    System.out.println(i + " " + end);
+                }
+            }
+        }
+        logger.info("guer Node sum is {}", sum);*/
     }
 
-    public static void main(String[] args) throws IOException {
-        //testFlow();
-        initialGraph();
-        //runOneAnt();
-        detectNodeLink();
-/*        for (int i = 0; i < allVertex.size() - 1; ++i) {
-            for (int j = i + 1; j < allVertex.size(); ++j) {
-                logger.info("start node is {},end node is{}, path length is {}",allVertex.get(i),allVertex.get(j),
-                        Dijkstra.dijkstra(graph, allVertex.get(i), allVertex.get(j)));
-            }
-        }*/
-        //testPath();
+    static void detectSubGraphNodeLink() {
+        int blockSum = subGraph.subGraphs.size();
+        for (int i = 0; i < blockSum; ++i) {
+            SubGraph subGraph = Aco.subGraph.subGraphs.get(i);
+            List<Integer> nodeList = subGraph.getAllVertex();
+            Map<Integer, Integer> integerIntegerMap = BFS.bfsWithStart(subGraph, nodeList.get(0));
+            logger.info("---------------------");
+            logger.info("node num is {}", subGraph.nodeNum);
+            logger.info("bfs num is {}", integerIntegerMap.size());
+        }
     }
+
+    static void detectStartEndNode() {
+        int success = 0;
+        int failure = 0;
+        for (int i = 0; i < startNodeList.size(); ++i) {
+            try {
+                logger.info("start node is {},end node is {}, path length is {}", startNodeList.get(i), endNodeList.get(i),
+                        Dijkstra.dijkstra(allGraph, startNodeList.get(i), endNodeList.get(i)));
+                ++success;
+            } catch (Exception e) {
+                ++failure;
+            }
+
+        }
+        System.out.println("success OD sum is" + success);
+        System.out.println("failure OD sum is" + failure);
+    }
+
+    static void showGraph(Graph graph) {
+        List<Integer> nodes = graph.getAllVertex();
+        for (int i = 0; i < nodes.size(); ++i) {
+            int node = nodes.get(i);
+            List<Integer> nbrs = graph.vertex.get(node).getAllNbr();
+            for (int j = 0; j < nbrs.size(); ++j) {
+                int nbr = nbrs.get(j);
+                System.out.println(node + " " + nbr);
+                graph.vertex.get(nbr).removeNbr(node);
+            }
+        }
+    }
+
+    static void outPraeto() {
+        for (Solution s : globalBestSolution) {
+            logger.info("{}", s);
+        }
+    }
+
+    static int getGraphLinkSum(Graph graph) {
+        List<Integer> allVertex = graph.getAllVertex();
+        int sum = 0;
+        for (int i = 0; i < allVertex.size(); ++i) {
+            Integer vertex = allVertex.get(i);
+            sum += graph.vertex.get(vertex).getAllNbr().size();
+        }
+        return sum / 2;
+    }
+
+    static int getAllSubGraphLinkSum() {
+        int sum = 0;
+        int areaNum = subGraph.subGraphs.size();
+        for (int i = 0; i < areaNum; ++i) {
+            sum += getGraphLinkSum(subGraph.subGraphs.get(i));
+        }
+        return sum;
+    }
+
+    static void multiKWay(Graph graph) {
+        final int c = 15;
+        int partitionNum = 14;
+        Random r = new Random();
+        while (graph.nodeNum > c * partitionNum) {
+            List<Integer> allVertex = graph.getAllVertex();
+            int[] label = new int[allVertex.size()];
+            boolean[] tag = new boolean[allVertex.size()];
+            int labelNum = 0;
+            for (int i = 0; i < allVertex.size(); ++i) {
+                int vertex = allVertex.get(i);
+                if (!tag[vertex]) {//如果没有标记
+                    //获取所有邻居
+                    List<Integer> allNbr = graph.vertex.get(vertex).getAllNbr();
+                    List<Integer> unLabelNbr = new ArrayList<>();
+                    //遍历所有邻居，找出未标记的邻居，加入list中
+                    for (Integer x : allNbr) {
+                        if (!tag[x]) {
+                            unLabelNbr.add(x);
+                        }
+                    }
+                    //随机挑选出一个邻居 共同标记
+                    int nbr = unLabelNbr.get(r.nextInt(unLabelNbr.size()));
+                    label[vertex] = labelNum;
+                    label[nbr] = labelNum;
+                    ++labelNum;
+                }
+            }
+            //整合为一个新的图
+            Graph newGraph=new Graph();
+
+        }
+    }
+
+
 }
