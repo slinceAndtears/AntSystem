@@ -99,6 +99,36 @@ public class leetcode {
         return res;
     }
 
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode head = new ListNode();
+        ListNode p = head;
+        while (list1 != null || list2 != null) {
+            if (list2 == null || (list1 != null && list1.val < list2.val)) {
+                p.next = list1;
+                p = list1;
+                list1 = list1.next;
+            } else {
+                p.next = list2;
+                p = list2;
+                list2 = list2.next;
+            }
+        }
+        p.next = null;
+        return head.next;
+    }
+
+    public int hammingDistance(int x, int y) {
+        int res = 0;
+        while (x != 0 || y != 0) {
+            if (x % 2 == y % 2) {
+                ++res;
+            }
+            x = x / 2;
+            y = y / 2;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
@@ -119,6 +149,22 @@ class TreeNode {
         this.val = val;
         this.left = left;
         this.right = right;
+    }
+}
+class ListNode {
+    int val;
+    ListNode next;
+
+    ListNode() {
+    }
+
+    ListNode(int val) {
+        this.val = val;
+    }
+
+    ListNode(int val, ListNode next) {
+        this.val = val;
+        this.next = next;
     }
 }
 
