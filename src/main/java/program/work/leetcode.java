@@ -129,6 +129,37 @@ public class leetcode {
         return res;
     }
 
+    public int maxArea(int[] height) {
+        int max = 0;
+        int left = 0;
+        int right = height.length - 1;
+        while (left < right) {
+            max = Math.max(max, (right - left) * Math.min(height[left], height[right]));
+            if (height[left] > height[right]) {
+                --right;
+            } else {
+                ++left;
+            }
+        }
+        return max;
+    }
+
+    public boolean isSymmetric(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        return isSymmetricDfs(root.left, root.right);
+    }
+    public boolean isSymmetricDfs(TreeNode left, TreeNode right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        if (left.val!=right.val) {
+            return false;
+        }
+        return isSymmetricDfs(left.left, right.right) && isSymmetricDfs(left.right, right.left);
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
