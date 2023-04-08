@@ -160,6 +160,66 @@ public class leetcode {
         return isSymmetricDfs(left.left, right.right) && isSymmetricDfs(left.right, right.left);
     }
 
+    public int maxProfit(int[] prices) {
+        int res = 0;
+        if (prices.length < 2) {
+            return 0;
+        }
+        int minPrice = prices[0];
+        for (int i = 1; i < prices.length; ++i) {
+            res = Math.max(res, prices[i] - minPrice);
+            minPrice = Math.min(minPrice, prices[i]);
+        }
+        return res;
+    }
+
+    public int singleNumber(int[] nums) {
+        int res = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            res = res ^ nums[i];
+        }
+        return res;
+    }
+
+    public static String expand(String s,int left,int right) {
+        if (left >= 0 && right < s.length() && s.charAt(left) != s.charAt(right)) {
+            return "";
+        }
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            --left;
+            ++right;
+        }
+        return s.substring(left + 1, right);
+    }
+    public static String longestPalindrome(String s) {
+        String res = "";
+        for (int i = 0; i < s.length(); ++i) {
+            String one = expand(s, i, i);
+            String two = expand(s, i, i + 1);
+            String max = one.length() > two.length() ? one : two;
+            res = res.length() > max.length() ? res : max;
+        }
+        return res;
+    }
+    //二维数组
+    public static int lengthOfLIS(int[] nums) {
+        int[] dp = new int[nums.length];
+        int res = 1;
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < nums.length; ++i) {
+            int max = 1;
+            for (int j = 0; j < i; ++j) {
+                if (nums[i] > nums[j]) {
+                    max = Math.max(max, dp[j] + 1);
+                }
+            }
+            dp[i] = max;
+            res = Math.max(res, dp[i]);
+        }
+        System.out.println(Arrays.toString(dp));
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
