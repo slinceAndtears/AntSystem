@@ -24,8 +24,8 @@ public class leetcode {
      * 0 1
      * 1 1
      * 2 2
-     * */
-    public static int climbStairs (int n) {
+     */
+    public static int climbStairs(int n) {
         int pre = 1;
         int now = 1;
         int next = 1;
@@ -53,10 +53,10 @@ public class leetcode {
     }
 
     public static int maxDepth(TreeNode root) {
-        if (root==null) {
+        if (root == null) {
             return 0;
         }
-        return Math.max(maxDepth(root.left), maxDepth(root.right)) +1;
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
     public static List<List<Integer>> threeSum(int[] nums) {
@@ -86,11 +86,11 @@ public class leetcode {
                 } else {
                     res.add(Arrays.asList(k, nums[left], nums[right]));
                     ++left;
-                    while (left<right &&nums[left]==nums[left-1]){
+                    while (left < right && nums[left] == nums[left - 1]) {
                         ++left;
                     }
                     --right;
-                    while (left<right && nums[right]==nums[right+1]){
+                    while (left < right && nums[right] == nums[right + 1]) {
                         --right;
                     }
                 }
@@ -150,11 +150,12 @@ public class leetcode {
         }
         return isSymmetricDfs(root.left, root.right);
     }
+
     public boolean isSymmetricDfs(TreeNode left, TreeNode right) {
         if (left == null || right == null) {
             return false;
         }
-        if (left.val!=right.val) {
+        if (left.val != right.val) {
             return false;
         }
         return isSymmetricDfs(left.left, right.right) && isSymmetricDfs(left.right, right.left);
@@ -181,7 +182,7 @@ public class leetcode {
         return res;
     }
 
-    public static String expand(String s,int left,int right) {
+    public static String expand(String s, int left, int right) {
         if (left >= 0 && right < s.length() && s.charAt(left) != s.charAt(right)) {
             return "";
         }
@@ -191,6 +192,7 @@ public class leetcode {
         }
         return s.substring(left + 1, right);
     }
+
     public static String longestPalindrome(String s) {
         String res = "";
         for (int i = 0; i < s.length(); ++i) {
@@ -201,6 +203,7 @@ public class leetcode {
         }
         return res;
     }
+
     //二维数组
     public static int lengthOfLIS(int[] nums) {
         int[] dp = new int[nums.length];
@@ -217,6 +220,108 @@ public class leetcode {
             res = Math.max(res, dp[i]);
         }
         System.out.println(Arrays.toString(dp));
+        return res;
+    }
+
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode first = head;
+        ListNode next = head;
+        for (int i = 0; i < n; ++i) {
+            first = first.next;
+        }
+        //排除删除第一个节点的特殊情况
+        if (first == null) {
+            return head.next;
+        }
+        while (first.next != null) {
+            first = first.next;
+            next = next.next;
+        }
+        next.next = next.next.next;
+        return head;
+    }
+
+    public List<String> res = new ArrayList<>();
+
+    public void dfs(String digits, StringBuilder tmp, int index) {
+        if (index == digits.length()) {
+            res.add(tmp.toString());
+            return;
+        }
+        if (digits.charAt(index) == '2') {
+            dfs(digits, new StringBuilder(tmp).append('a'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('b'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('c'), index + 1);
+        } else if (digits.charAt(index) == '3') {
+            dfs(digits, new StringBuilder(tmp).append('d'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('e'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('f'), index + 1);
+        } else if (digits.charAt(index) == '4') {
+            dfs(digits, new StringBuilder(tmp).append('g'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('h'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('i'), index + 1);
+        } else if (digits.charAt(index) == '5') {
+            dfs(digits, new StringBuilder(tmp).append('j'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('k'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('l'), index + 1);
+        } else if (digits.charAt(index) == '6') {
+            dfs(digits, new StringBuilder(tmp).append('m'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('n'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('o'), index + 1);
+        } else if (digits.charAt(index) == '7') {
+            dfs(digits, new StringBuilder(tmp).append('p'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('q'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('r'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('s'), index + 1);
+        } else if (digits.charAt(index) == '8') {
+            dfs(digits, new StringBuilder(tmp).append('t'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('u'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('v'), index + 1);
+        } else if (digits.charAt(index) == '9') {
+            dfs(digits, new StringBuilder(tmp).append('w'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('x'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('y'), index + 1);
+            dfs(digits, new StringBuilder(tmp).append('z'), index + 1);
+        }
+    }
+
+    public List<String> letterCombinations(String digits) {
+        dfs(digits, new StringBuilder(), 0);
+        return res;
+    }
+
+    public int maxSubArray(int[] nums) {
+        int sum = 0;
+        int res = Integer.MIN_VALUE;
+        for (int i = 0; i < nums.length; ++i) {
+            sum += nums[i];
+            res = Math.max(res, sum);
+            if (sum < 0) {
+                sum = 0;
+            }
+        }
+        return res;
+    }
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            List<Integer> level = new ArrayList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; ++i) {
+                root = queue.poll();
+                level.add(root.val);
+                if (root.left!=null) {
+                    queue.offer(root.left);
+                }
+                if (root.right!=null) {
+                    queue.offer(root.right);
+                }
+            }
+            res.add(level);
+        }
         return res;
     }
 
