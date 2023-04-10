@@ -325,6 +325,53 @@ public class leetcode {
         return res;
     }
 
+    public List<String> generateParenthesisRes = new ArrayList<>();
+
+    public void dfs(int left, int right, StringBuilder tmp) {
+        if (left == 0 && right == 0) {
+            generateParenthesisRes.add(tmp.toString());
+            return;
+        }
+        if (left == 0) {
+            dfs(left, right - 1, new StringBuilder(tmp).append(')'));
+        } else if (left == right) {
+            dfs(left - 1, right, new StringBuilder(tmp).append('('));
+        } else {
+            dfs(left - 1, right, new StringBuilder(tmp).append('('));
+            dfs(left, right - 1, new StringBuilder(tmp).append(')'));
+        }
+    }
+
+    public List<String> generateParenthesis(int n) {
+        dfs(n,n,new StringBuilder());
+        return generateParenthesisRes;
+    }
+    //6 7 1 2 3 4  1
+    public static int search(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+            if (nums[low] <= nums[mid]) {//左边有序
+                if (nums[mid] > target && nums[low] <= target) {
+                    high = mid - 1;
+                } else {
+                    low = mid +1;
+                }
+            } else {//右边有序
+                if (nums[mid] < target && nums[high] >= target) {
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+            }
+        }
+        return nums[low] == target ? low : -1;
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
