@@ -372,6 +372,22 @@ public class leetcode {
         return nums[low] == target ? low : -1;
     }
 
+    public int minPathSum(int[][] grid) {
+        for (int i = 0; i < grid.length; ++i) {
+            for (int j = 0; j < grid[i].length; ++j) {
+                if (i == 0 && j == 0) {
+                } else if (i == 0) {
+                    grid[i][j] += grid[i][j - 1];
+                } else if (j == 0) {
+                    grid[i][j] += grid[i - 1][j];
+                } else {
+                    grid[i][j] += Math.min(grid[i - 1][j], grid[i][j - 1]);
+                }
+            }
+        }
+        return grid[grid.length - 1][grid[0].length - 1];
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
