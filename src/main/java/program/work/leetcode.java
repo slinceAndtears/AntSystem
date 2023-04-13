@@ -388,6 +388,60 @@ public class leetcode {
         return grid[grid.length - 1][grid[0].length - 1];
     }
 
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head;
+        if (slow == null) {
+            return false;
+        }
+        ListNode fast = slow.next;
+        while (slow != null && fast != null && slow!=fast) {
+            slow = slow.next;
+            fast = fast.next == null ? null : fast.next.next;
+        }
+        return slow != null;
+    }
+
+    public int majorityElement(int[] nums) {
+        int count = 1;
+        int res = nums[0];
+        for (int i = 1; i < nums.length; ++i) {
+            if (res == nums[i]) {
+                ++count;
+            } else {
+                --count;
+                if (count == 0) {
+                    count = 1;
+                    res = nums[i];
+                }
+            }
+        }
+        return res;
+    }
+
+    public List<List<Integer>> permuteRes = new ArrayList<>();
+
+    public void dfs(int[] nums, List<Integer> num, int count,int[] flag) {
+        if (count == nums.length) {
+            permuteRes.add(new ArrayList<>(num));
+            return;
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            if (flag[i] == 0) {
+                flag[i] = 1;
+                num.add(nums[i]);
+                dfs(nums, num, count + 1, flag);
+                num.remove(num.size()-1);
+                flag[i] = 0;
+            }
+        }
+    }
+
+    public List<List<Integer>> permute(int[] nums) {
+        int[] flag =new int[nums.length];
+        dfs(nums,new ArrayList<>(), 0, flag);
+        return permuteRes;
+    }
+
     public static void main(String[] args) {
         System.out.println(threeSum(new int[]{-2,0,0,2,2}));
     }
