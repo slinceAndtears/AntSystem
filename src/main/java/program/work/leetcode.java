@@ -436,6 +436,32 @@ public class leetcode {
         }
     }
 
+    public boolean canJump(int[] nums) {
+        int max = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            if (i > max) {
+                return false;
+            }
+            max = Math.max(max, i + nums[i]);
+        }
+        return true;
+    }
+
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode tail = new ListNode();
+        ListNode p;
+        while (head != null) {
+            p = head;
+            head = head.next;
+            p.next = tail.next;
+            tail.next = p;
+        }
+        return tail.next;
+    }
+
     public List<List<Integer>> permute(int[] nums) {
         int[] flag =new int[nums.length];
         dfs(nums,new ArrayList<>(), 0, flag);
