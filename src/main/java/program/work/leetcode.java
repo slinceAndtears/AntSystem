@@ -468,8 +468,22 @@ public class leetcode {
         return permuteRes;
     }
 
+    public static List<Integer> findDisappearedNumber(int[] nums) {
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < nums.length; ++i) {
+            int t = nums[i] - 1;
+            nums[t] = - Math.abs(nums[t]);
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] > 0) {
+                res.add(i + 1);
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
-        System.out.println(threeSum(new int[]{-2,0,0,2,2}));
+        System.out.println(findDisappearedNumber(new int[]{4,3,2,7,8,2,3,1}));
     }
 }
 class TreeNode {

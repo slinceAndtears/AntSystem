@@ -26,3 +26,21 @@ group by DepartmentId
 )
 
 
+select a.customer_number from
+ select
+ customer_number,
+ count(1) as sum
+ from
+ Orders
+ group by customer_number
+ order by sum desc) a limit 1
+
+ select
+    name,
+    population,
+    area
+  from
+   World
+  where
+    area>=3000000 or population>= 25000000;
+
