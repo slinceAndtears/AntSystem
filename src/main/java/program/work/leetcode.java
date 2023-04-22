@@ -482,6 +482,44 @@ public class leetcode {
         return res;
     }
 
+    public void moveZeros(int[] nums) {
+        int sum = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] == 0) {
+                ++sum;
+            }
+        }
+        if (sum == 0) {
+            return;
+        }
+        int index = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] != 0) {
+                nums[index++] = nums[i];
+            }
+        }
+        for (int i = index; i < nums.length; ++i) {
+            nums[i] = 0;
+        }
+    }
+
+    public static int searchInsert(int[] nums, int target) {
+        if (nums[nums.length-1] < target) {
+            return nums.length;
+        }
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+
     public static void main(String[] args) {
         System.out.println(findDisappearedNumber(new int[]{4,3,2,7,8,2,3,1}));
     }
