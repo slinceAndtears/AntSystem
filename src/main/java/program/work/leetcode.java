@@ -520,6 +520,53 @@ public class leetcode {
         return low;
     }
 
+    public static List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> t = new ArrayList<>();
+        t.add(1);
+        res.add(t);
+        for (int i = 2; i <= numRows; ++i) {
+            List<Integer> pre = res.get(res.size() - 1);
+            List<Integer> tmp = new ArrayList<>();
+            tmp.add(1);
+            for (int j = 0; j < pre.size();++j) {
+                tmp.add(pre.get(j - i - 1) + pre.get(j - i));
+            }
+            tmp.add(1);
+            res.add(tmp);
+        }
+        return res;
+    }
+
+    //3[a2[b]]
+    public static String decodeString(String s) {
+        Deque<Integer> num = new LinkedList<>();
+        Deque<String> strs = new LinkedList<>();
+        StringBuilder res = new StringBuilder();
+        int multi = 0;
+        for (int i = 0; i < s.length(); ++i) {
+            if (s.charAt(i) == '[') {
+                num.push(multi);
+                multi = 0;
+                strs.push(res.toString());
+                res = new StringBuilder();
+            } else if (s.charAt(i) == ']') {
+                StringBuilder tmp = new StringBuilder();
+                multi = num.pop();
+                for (int j = 0; j < multi; ++j) {
+                    tmp.append(res);
+                }
+                multi = 0;
+                res = new StringBuilder(strs.pop()).append(tmp);
+            } else if (s.charAt(i) >= '0' && s.charAt(i) <= '9') {
+                multi = multi * 10 + (s.charAt(i) - '0');
+            } else {
+                res.append(s.charAt(i));
+            }
+        }
+        return res.toString();
+    }
+
     public static void main(String[] args) {
         System.out.println(findDisappearedNumber(new int[]{4,3,2,7,8,2,3,1}));
     }
@@ -559,3 +606,35 @@ class ListNode {
     }
 }
 
+class MinStack {
+
+    Deque<Integer> stack;
+    Deque<Integer> min;
+
+    public MinStack() {
+        stack = new LinkedList<>();
+        min = new LinkedList<>();
+    }
+
+    public void push(int val) {
+        stack.push(val);
+        if (min.isEmpty() || min.peek() > val) {
+            min.push(val);
+        } else {
+            min.push(min.peek());
+        }
+    }
+
+    public void pop() {
+        stack.pop();
+        min.pop();
+    }
+
+    public int top() {
+        return stack.peek();
+    }
+
+    public int getMin() {
+        return min.peek();
+    }
+}
