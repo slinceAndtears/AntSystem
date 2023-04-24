@@ -538,7 +538,6 @@ public class leetcode {
         return res;
     }
 
-    //3[a2[b]]
     public static String decodeString(String s) {
         Deque<Integer> num = new LinkedList<>();
         Deque<String> strs = new LinkedList<>();
@@ -565,6 +564,44 @@ public class leetcode {
             }
         }
         return res.toString();
+    }
+
+    public static int quickSort(int low, int high, int[] nums) {
+        int tmp = nums[low];
+        int left = low;
+        while (low < high) {
+            while (low < high && nums[high] >= tmp) {
+                --high;
+            }
+            while (low < high && nums[low] <= tmp) {
+                ++low;
+            }
+            if (low < high) {
+                int t = nums[low];
+                nums[low] = nums[high];
+                nums[high] = t;
+            }
+        }
+        nums[left] = nums[low];
+        nums[low] = tmp;
+        return low;
+    }
+
+    public static int findKthLargest(int[] nums, int k) {
+        int low = 0;
+        int high = nums.length - 1;
+        k = nums.length - k;
+        while (low < high) {
+            int mid = quickSort(low, high, nums);
+            if (mid < k) {
+                low = mid + 1;
+            } else if (mid > k) {
+                high = mid - 1;
+            } else {
+                return nums[mid];
+            }
+        }
+        return nums[low];
     }
 
     public static void main(String[] args) {
