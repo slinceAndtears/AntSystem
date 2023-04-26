@@ -604,6 +604,22 @@ public class leetcode {
         return nums[low];
     }
 
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode a = headA;
+        ListNode b = headB;
+        while (a != b) {
+            a = a.next;
+            b = b.next;
+            if (a == null) {
+                a.next = headB;
+            }
+            if (b == null) {
+                b.next = headA;
+            }
+        }
+        return headA;
+    }
+
     public static void main(String[] args) {
         System.out.println(findDisappearedNumber(new int[]{4,3,2,7,8,2,3,1}));
     }

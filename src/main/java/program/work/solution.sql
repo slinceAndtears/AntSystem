@@ -44,3 +44,24 @@ select a.customer_number from
   where
     area>=3000000 or population>= 25000000;
 
+select
+ product_id
+from
+ Products
+where
+ low_fats='Y'
+ and recyclable = 'Y'
+
+select
+ name
+from
+ customer
+where
+ referee_id !='2'
+
+select b.unique_id, a.name from
+ ((select * from Employees) a
+  left join (select * from EmployeeUNI)b on a.id=b.id)
+
+select name from Employee where id in
+(select count(1) as sum, managerId from Employee having(sum) >=5)
