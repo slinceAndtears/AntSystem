@@ -620,8 +620,66 @@ public class leetcode {
         return headA;
     }
 
+    public boolean isEqual(String a, String b) {
+        if (a.length() != b.length()) {
+            return false;
+        }
+        int[] t = new int[26];
+        for (int i = 0; i < a.length(); ++i) {
+            ++t[a.charAt(i) - 'a'];
+            --t[b.charAt(i) - 'a'];
+        }
+        for (int i = 0; i < t.length; ++i) {
+            if (t[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<List<String>> groupAnagrams(String[] strs) {
+        List<List<String>> res = new ArrayList<>();
+        Map<String, List<String>> tmp = new HashMap<>();
+        for (int i = 0; i < strs.length; ++i) {
+            boolean tag = false;
+            for (String s : tmp.keySet()) {
+                if (isEqual(s, strs[i])) {
+                    tmp.get(s).add(strs[i]);
+                    tag = true;
+                }
+            }
+            if (!tag) {
+                List<String> t = new ArrayList<>();
+                t.add(strs[i]);
+                tmp.put(strs[i], t);
+            }
+        }
+        for (Map.Entry<String,List<String>> e : tmp.entrySet()){
+            res.add(e.getValue());
+        }
+        return res;
+    }
+
+    public static List<List<String>> groupAnagramsNew(String[] strs) {
+        int[] od = new int[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103};
+        Map<Long, List<String>> tmp = new HashMap<>();
+        for (int i = 0; i < strs.length; ++i) {
+            long index = 1l;
+            for (int j = 0; j < strs[i].length(); ++j) {
+                index *= od[strs[i].charAt(j) - 'a'];
+            }
+            if (!tmp.containsKey(index)) {
+                List<String> t = new ArrayList<>();
+                tmp.put(index, t);
+            }
+            tmp.get(index).add(strs[i]);
+        }
+        return new ArrayList<>(tmp.values());
+    }
+
     public static void main(String[] args) {
-        System.out.println(findDisappearedNumber(new int[]{4,3,2,7,8,2,3,1}));
+        System.out.println(groupAnagramsNew(new String[]{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"}));
+
     }
 }
 class TreeNode {
