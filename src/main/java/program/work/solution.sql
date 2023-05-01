@@ -65,3 +65,12 @@ select b.unique_id, a.name from
 
 select name from Employee where id in
 (select count(1) as sum, managerId from Employee having(sum) >=5)
+
+select * from cinema where description!='boring' and id mod 2==1 order by rating
+
+select a.product_id, round(sum(a.price*b.units)/sum(units), 2) as average_price  from
+  ((select * from Prices) a  left join (select * from UnitsSold) b on
+   a.start_date<=b.purchase_date  and a.end_date>=b.purchase_date and a.product_id = b.product_id)
+   group by product_id
+
+select class from Courses group by class  having count(1) > 5;
