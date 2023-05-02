@@ -74,3 +74,25 @@ select a.product_id, round(sum(a.price*b.units)/sum(units), 2) as average_price 
    group by product_id
 
 select class from Courses group by class  having count(1) > 5;
+
+select
+ substring(trans_date, 1,7)  as mouth,
+ country,
+ count(1) as trans_count,
+ sum(case when state ='approved' then 1 else 0 end) as approved_count,
+ sum(amount) as  trans_total_amount ,
+ sum(case when state = 'approved' then amount else 0 end ) as approved_total_amount
+from Transactions
+group by substring(trans_date, 1,7), country
+
+
+select  a.employee_id,b.name,a.reports_count,a.average_age from
+((select
+ reports_to,
+ count(1) as reports_count,
+ sum(age)/count(1) as average_age
+from
+ Employees
+where
+   reports_to  is not null
+ group by reports_to) a left join Employees b on a.reports_to=b.employee_id) order by a.employee_id
