@@ -677,6 +677,24 @@ public class leetcode {
         return new ArrayList<>(tmp.values());
     }
 
+    public ListNode swapPairs(ListNode head) {
+        if (head == null) {
+            return head;
+        }
+        ListNode tail = new ListNode();
+        tail.next = head;
+        ListNode p = tail;
+        while (p != null && p.next != null && p.next.next != null) {
+            ListNode q = p.next;
+            ListNode r = q.next;
+            p.next = r;
+            q.next = r.next;
+            r.next = q;
+            p = q;
+        }
+        return tail.next;
+    }
+
     public static void main(String[] args) {
         System.out.println(groupAnagramsNew(new String[]{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"}));
 

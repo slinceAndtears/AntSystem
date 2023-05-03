@@ -96,3 +96,9 @@ from
 where
    reports_to  is not null
  group by reports_to) a left join Employees b on a.reports_to=b.employee_id) order by a.employee_id
+
+
+select employee_id from Employees
+where salary<30000 and manager_id not in (select employee_id from Employees group by employee_id)
+order by employee_id
+
