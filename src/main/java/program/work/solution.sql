@@ -102,3 +102,40 @@ select employee_id from Employees
 where salary<30000 and manager_id not in (select employee_id from Employees group by employee_id)
 order by employee_id
 
+
+select
+  employee_id,
+  department_id
+from
+ Employee
+group by employee_id having(count(1)=1) union
+select
+ employee_id,
+ department_id
+from
+ Employee
+where
+ primary_flag = 'Y'
+
+select
+ l1.Num as ConsecutiveNums
+from
+Logs l1,
+Logs l2,
+Logs l3
+ where
+ l1.id = l2.id-1
+ and l2.id=l3.id-1
+ and l1.Num=l2.Num
+ and l2.Num=l3.Num
+
+select
+ x,
+ y,
+ z,
+ case
+   when x+y>z and x+z>y and y+z>x then 'Yes'
+   else 'No'
+  end as triangle
+ from
+Triangle
