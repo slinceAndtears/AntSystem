@@ -707,6 +707,61 @@ public class leetcode {
         return root;
     }
 
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        List<int[]> res = new ArrayList<>();
+        for (int[] tmp : intervals) {
+            if (res.size() == 0) {
+                res.add(tmp);
+            } else {
+                int[] t = res.get(res.size() - 1);
+                if (t[1] < tmp[0]) {
+                    res.add(tmp);
+                } else {
+                    res.get(res.size() - 1)[1] = Math.max(t[1], tmp[1]);
+                }
+            }
+        }
+        int[][] result = new int[res.size()][2];
+        for (int i = 0; i < res.size(); ++i) {
+            result[i] = res.get(i);
+        }
+        return result;
+    }
+
+    public void reverse(int[] nums, int low, int high) {
+        while (low < high) {
+            int t = nums[low];
+            nums[low] = nums[high];
+            nums[high] = t;
+            ++low;
+            --high;
+        }
+    }
+
+    public void rotate(int[] nums, int k) {
+        k = k % nums.length;
+        reverse(nums, 0, nums.length - k - 1);
+        reverse(nums, nums.length - k, nums.length - 1);
+        reverse(nums, 0, nums.length - 1);
+    }
+
+    public int uniquePaths(int m , int n) {
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; ++i) {
+            dp[i][0] = 1;
+        }
+        for (int i = 0; i < n; ++i) {
+            dp[0][i] = 1;
+        }
+        for (int i = 1; i < m; ++i) {
+            for (int j = 1; j < n; ++j) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
     public static void main(String[] args) {
         System.out.println(groupAnagramsNew(new String[]{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"}));
 
