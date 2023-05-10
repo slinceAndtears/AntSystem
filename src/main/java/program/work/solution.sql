@@ -139,3 +139,34 @@ select
   end as triangle
  from
 Triangle
+
+select
+ distinct author_id  AS id
+from
+ Views
+where
+ author_id  = viewer_id
+ order by id
+
+ select
+  b.product_name,
+  a.year
+  a.price
+ from
+  ((select * from Sales ) a left join (select * from Product) b on a.product_id = b.product_id)
+
+ select
+  customer_id,
+  count(1) as count_no_trans
+ from Visits
+ where visit_id  not in ( select visit_id  from Transactions)
+ group by customer_id
+
+ select
+  w2.id
+ from
+  Weather w1,
+   Weather w2
+ where
+  DATEDIFF(w2.recordDate,w1.recordDate)=1
+ and w2.Temperature >w1.Temperature
