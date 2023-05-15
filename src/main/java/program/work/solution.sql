@@ -170,3 +170,21 @@ where
  where
   DATEDIFF(w2.recordDate,w1.recordDate)=1
  and w2.Temperature >w1.Temperature
+
+select
+ machine_id,
+ round(sum(time)/count(1), 3) as processing_time
+ from
+ (select
+ machine_id,
+ process_id,
+ max(timestamp)-min(timestamp) as time
+from Activity
+group by machine_id,process_id)a group by machine_id
+
+select
+ a.name
+ b.bonus
+from
+ (select * from Employee a left join select * from bonus b on a.empId =b.empId) c
+ where b.bonus is null or b.bonus < 1000
