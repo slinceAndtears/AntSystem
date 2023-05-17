@@ -762,9 +762,42 @@ public class leetcode {
         return dp[m - 1][n - 1];
     }
 
-    public static void main(String[] args) {
-        System.out.println(groupAnagramsNew(new String[]{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"}));
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> tmp = new HashSet<>();
+        for (int num : nums) {
+            tmp.add(num);
+        }
+        int res = 0;
+        for (int num : nums) {
+            if (!tmp.contains(num - 1)) {
+                int len = 1;
+                while (tmp.contains(num + 1)) {
+                    ++num;
+                    ++len;
+                }
+                res = Math.max(len, res);
+            }
+        }
+        return res;
+    }
 
+    public static int subarraySum(int[] nums, int k) {
+        int res = 0;
+        int sum = 0;
+        Map<Integer, Integer> tmp = new HashMap<>();
+        tmp.put(0, 1);
+        for (int i = 0; i < nums.length; ++i) {
+            sum += nums[i];
+            if (tmp.containsKey(sum - k)) {
+                res += tmp.get(sum - k);
+            }
+            tmp.put(sum, tmp.getOrDefault(sum, 0) + 1);
+        }
+        return res;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(subarraySum(new int[]{1,1,1},2));
     }
 }
 class TreeNode {
