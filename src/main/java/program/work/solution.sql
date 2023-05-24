@@ -188,3 +188,37 @@ select
 from
  (select * from Employee a left join select * from bonus b on a.empId =b.empId) c
  where b.bonus is null or b.bonus < 1000
+
+select
+ project_id,
+ round(sum(experience_years)/count(1), 2) as average_years
+from
+((select * from Project) a left join (select * from Employee)b on a.employee_id=b.employee_id)
+group by project_id
+
+select
+ contest_id,
+ count(distinct user_id)*100/(select count(1) from Users) as percentage
+from
+ Register
+group by contest_id
+order by percentage desc
+
+select
+ query_name,
+ round(sum(rating/position)/count(1),2) as quality,
+ round(sum(case when rating < 3 then 1 else 0 end) *100 /count(1), 2) as poor_query_percentage
+from
+ Queries
+group by
+ query_name
+
+select
+ customer_id,
+ round(sum(case when order_date =customer_pref_delivery_date  then 1 else 0 end)/count(1),2) as immediate_percentage
+(
+select
+ *,
+ rank() over(partition by customer_id  order by order_date) as ranking
+from
+ Delivery) a where ranking = 1
