@@ -100,6 +100,35 @@ public class LeetCodeNew {
         return res;
     }
 
+    public static int removeDuplicates(int[] nums) {
+        int index = 0;
+        for (int i = index + 1; i < nums.length; ++i) {
+            if (nums[i] != nums[index]) {
+                nums[++index] = nums[i];
+            }
+        }
+        return index + 1;
+    }
+
+    public static int removeDuplicatesNew(int[] nums) {
+        int index = 0;
+        int sum = 1;
+        for (int i = index + 1; i < nums.length; ++i) {
+            if (nums[i] != nums[index]) {
+                nums[++index] = nums[i];
+                sum = 1;
+            } else {
+                if (sum == 1) {
+                    ++sum;
+                    nums[++index] = nums[i];
+                } else {
+                    ++sum;
+                }
+            }
+        }
+        return index + 1;
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
