@@ -129,6 +129,47 @@ public class LeetCodeNew {
         return index + 1;
     }
 
+    public static void merge(int[] nums1, int m, int[] nums2, int n) {
+        int index = nums1.length - 1;
+        int i = m - 1;
+        int j = n - 1;
+        while (index >= 0) {
+            if (j < 0 || (i >= 0 && nums1[i] > nums2[j])) {
+                nums1[index--] = nums1[i--];
+            } else {
+                nums1[index--] = nums2[j--];
+            }
+        }
+    }
+
+    public boolean canJump(int[] nums) {
+        int max = nums[0];
+        for (int i = 1; i < nums.length; ++i) {
+            if (max < i) {
+                return false;
+            }
+            max = Math.max(max, i + nums[i]);
+        }
+        return true;
+    }
+
+    public static int hIndex(int[] citations) {
+        int[] tmp = new int[1001];
+        for (int i = 0; i < citations.length; ++i) {
+            ++tmp[citations[i]];
+        }
+        int sum = 0;//论文数量
+        for (int i = tmp.length - 1; i >= 0; --i) {
+            for (int j = 0; j < tmp[i]; ++j) {
+                sum += 1;
+                if (sum > i) {
+                    return sum - 1;
+                }
+            }
+        }
+        return citations.length;
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
