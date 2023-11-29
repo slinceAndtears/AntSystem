@@ -170,6 +170,42 @@ public class LeetCodeNew {
         return citations.length;
     }
 
+    public static int maxProfit(int[] prices) {
+        int res = 0;
+        int min = prices[0];
+        for (int i = 1; i < prices.length; ++i) {
+            res = Math.max(res, prices[i] - min);
+            min = Math.min(min, prices[i]);
+        }
+        return res;
+    }
+
+    public static int maxProfit2(int[] prices) {
+        int res = 0;
+        int min = prices[0];
+        for (int i = 1; i < prices.length; ++i) {
+            if (min < prices[i]) {//
+                res += prices[i] - min;
+            }
+            min = prices[i];
+        }
+        return res;
+    }
+
+    public int jump2(int[] nums) {
+        int[] dp = new int[nums.length];
+        for (int i = 1; i < nums.length; ++i) {
+            int m = Integer.MAX_VALUE;
+            for (int j = 0; j < i; ++j) {
+                if (nums[j] + j >= i) {
+                    m = Math.min(m, dp[j]);
+                }
+            }
+            dp[i] = m + 1;
+        }
+        return dp[nums.length - 1];
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
