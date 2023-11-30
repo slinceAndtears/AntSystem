@@ -206,6 +206,39 @@ public class LeetCodeNew {
         return dp[nums.length - 1];
     }
 
+    public static int lengthOfLastWord(String s) {
+        int last = s.length() - 1;
+        int start = 0;
+        while (last >= 0) {
+            while (last >= 0 && s.charAt(last) == ' ') {
+                --last;
+            }
+            start = last;
+            while (last >= 0 && s.charAt(last) != ' ') {
+                --last;
+            }
+            return start - last;
+        }
+        return 0;
+    }
+
+    public static boolean canConstruct(String ransomNode, String magazine) {
+        if (ransomNode.length() > magazine.length()) {
+            return false;
+        }
+        Map<Character, Integer> tmp = new HashMap<>();
+        for (int i = 0; i < magazine.length(); ++i) {
+            tmp.put(magazine.charAt(i), tmp.getOrDefault(magazine.charAt(i), 0) + 1);
+        }
+        for (int i = 0; i < ransomNode.length(); ++i) {
+            if (!tmp.containsKey(ransomNode.charAt(i)) || tmp.get(ransomNode.charAt(i)) < 1) {
+                return false;
+            }
+            tmp.put(ransomNode.charAt(i), tmp.get(ransomNode.charAt(i)) - 1);
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
