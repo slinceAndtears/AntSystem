@@ -239,6 +239,33 @@ public class LeetCodeNew {
         return true;
     }
 
+    public static int removeElement(int[] nums, int val) {
+        int index = 0;
+        for (int i = 0; i < nums.length; ++i) {
+            if (nums[i] != val) {
+                nums[index++] = nums[i];
+            }
+        }
+        return index;
+    }
+
+    public static int majorityElement(int[] nums) {
+        int sum = 1;
+        int res = nums[0];
+        for (int i = 1; i < nums.length; ++i) {
+            if (res == nums[i]) {
+                ++sum;
+            } else {
+                --sum;
+                if (sum == 0) {
+                    sum = 1;
+                    res = nums[i];
+                }
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
