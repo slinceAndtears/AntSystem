@@ -266,6 +266,23 @@ public class LeetCodeNew {
         return res;
     }
 
+    public String longestCommonPrefix(String[] strs) {
+        if (strs.length == 1) {
+            return strs[0];
+        }
+        StringBuilder res = new StringBuilder();
+        int index = 0;
+        while (true) {
+            for (int i = 0; i < strs.length - 1; ++i) {
+                if (strs[i].length() <= index || strs[i + 1].length() <= index ||
+                        strs[i].charAt(index) != strs[i + 1].charAt(index)) {
+                    return res.toString();
+                }
+            }
+            res.append(strs[0].charAt(index++));
+        }
+    }
+
     public static void main(String[] args) {
         int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
         System.out.println(maxSubArray(nums));
