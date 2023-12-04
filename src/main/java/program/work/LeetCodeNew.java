@@ -283,8 +283,61 @@ public class LeetCodeNew {
         }
     }
 
+    public static int minSubArray(int target, int[] nums) {
+        int low = 0;
+        int high = 0;
+        int sum = 0;
+        int res = Integer.MAX_VALUE;
+        while (high < nums.length) {
+            while (sum < target && high < nums.length) {
+                sum += nums[high++];
+            }
+            if (sum >= target) {
+                res = Math.min(res, high - low);
+            }
+            while (sum >= target && low < high) {
+                sum -= nums[low++];
+            }
+            if (low > 0 && sum + nums[low - 1] >= target) {
+                res = Math.min(res, high - low + 1);
+            }
+        }
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
+    public static boolean isPalindrome(String s) {
+        int low = 0;
+        int high = s.length() - 1;
+        while (low < high) {
+            while (low < high && !(s.charAt(low) >= 'a' && s.charAt(low) <= 'z')
+                    && !(s.charAt(low) >= 'A' && s.charAt(low) <= 'Z') &&
+                    !(s.charAt(low) >= '0' && s.charAt(low) <= '9')) {
+                ++low;
+            }
+            while (low < high && !(s.charAt(high) >= 'a' && s.charAt(high) <= 'z')
+                    && !(s.charAt(high) >= 'A' && s.charAt(high) <= 'Z') &&
+                    !(s.charAt(high) >= '0' && s.charAt(high) <= '9')) {
+                --high;
+            }
+            if (!(s.charAt(low) >= '0' && s.charAt(low) <= '9') && !(s.charAt(high) >= '0' && s.charAt(high) <= '9')) {
+                if (s.charAt(low) == s.charAt(high) || s.charAt(low) + 32 == s.charAt(high) ||
+                        s.charAt(low) - 32 == s.charAt(high)){
+                    ++low;
+                    --high;
+                } else {
+                    return false;
+                }
+            } else if (s.charAt(low) == s.charAt(high)) {
+                ++low;
+                --high;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
-        int[] nums = new int[]{-2,1,-3,4,-1,2,1,-5,4};
-        System.out.println(maxSubArray(nums));
+        isPalindrome("ab2a");
     }
 }
