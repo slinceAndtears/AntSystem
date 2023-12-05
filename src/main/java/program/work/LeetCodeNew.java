@@ -337,6 +337,46 @@ public class LeetCodeNew {
         return true;
     }
 
+    public boolean isValidSodoku(char[][] board) {
+        boolean[][] tmp1 = new boolean[9][10];
+        boolean[][] tmp2 = new boolean[9][10];
+        boolean[][][] tmp3 = new boolean[3][3][10];
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[i].length; ++j) {
+                if (board[i][j] >= '0' && board[i][j] <= '9') {
+                    int num = board[i][j] - '0';
+                    if (tmp1[i][num] || tmp2[j][num] || tmp3[i / 3][j / 3][num]) {
+                        return false;
+                    }
+                    tmp1[i][num] = true;
+                    tmp2[j][num] = true;
+                    tmp3[i / 3][j / 3][num] = true;
+                }
+            }
+        }
+        return true;
+    }
+
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> tmp = new HashSet<>();
+        for (int num : nums) {
+            tmp.add(num);
+        }
+        int res = 0;
+        for (int num : tmp) {
+            if (!tmp.contains(num - 1)) {
+                int current = num;
+                int length = 1;
+                while (tmp.contains(current + 1)) {
+                    current += 1;
+                    length += 1;
+                }
+                res = Math.max(res, length);
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         isPalindrome("ab2a");
     }
