@@ -377,7 +377,83 @@ public class LeetCodeNew {
         return res;
     }
 
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> tmp = new HashMap<>();
+        for (int i = 0; i < nums.length; ++i) {
+            if (tmp.containsKey(target - nums[i])) {
+                return new int[]{i, tmp.get(target - nums[i])};
+            }
+            tmp.put(nums[i], i);
+        }
+        return new int[]{};
+    }
+
+    public Node copyRandomList(Node head) {
+        Map<Node, Node> tmp = new HashMap<>();
+        Node p = head;
+        Node tail = new Node(0);
+        Node q = tail;
+        while (p != null) {
+            Node t = new Node(p.val);
+            q.next = t;
+            q = t;
+            tmp.put(p, t);
+            p = p.next;
+        }
+        q.next = null;
+        p = head;
+        q = tail.next;
+        while (p != null) {
+            q.random = tmp.get(p.random);
+            p = p.next;
+            q = q.next;
+        }
+        return tail.next;
+    }
+
+    public int climbStairs(int n) {
+        int p = 0;
+        int q = 1;
+        for (int i = 2; i <= n; ++i) {
+            int sum = p + q;
+            p = q;
+            q = sum;
+        }
+        return q;
+    }
+
+    public static int minimumTotal(List<List<Integer>> triangle) {
+        for (int i = 0; i < triangle.size(); ++i) {
+            for (int j = 0; j < triangle.get(i).size(); ++j) {
+                //能够有两个备选路径的
+                if (i != 0 && j != 0 && j != triangle.get(i - 1).size()) {
+                    triangle.get(i).set(j, Math.min(triangle.get(i - 1).get(j - 1), triangle.get(i - 1).get(j)) + triangle.get(i).get(j));
+                } else if (i != 0 && j == 0) {//只能从上到下
+                    triangle.get(i).set(j, triangle.get(i - 1).get(j) + triangle.get(i).get(j));
+                } else if (i != 0 && j == triangle.get(i - 1).size()) {//只能走对角
+                    triangle.get(i).set(j, triangle.get(i).get(j) + triangle.get(i - 1).get(j - 1));
+                }
+            }
+        }
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < triangle.get(triangle.size() - 1).size(); ++i) {
+            min = Math.min(min, triangle.get(triangle.size() - 1).get(i));
+        }
+        return min;
+    }
+
     public static void main(String[] args) {
         isPalindrome("ab2a");
+    }
+}
+class Node {
+    int val;
+    Node next;
+    Node random;
+
+    public Node(int val) {
+        this.val = val;
+        this.next = null;
+        this.random = null;
     }
 }
