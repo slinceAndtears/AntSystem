@@ -442,6 +442,45 @@ public class LeetCodeNew {
         return min;
     }
 
+    public boolean isIsomorphic(String s, String t) {
+        if (s.length() != t.length()) {
+            return false;
+        }
+        Map<Character, Character> tmp1 = new HashMap<>();
+        Map<Character, Character> tmp2 = new HashMap<>();
+        for (int i = 0; i < s.length(); ++i) {
+            if (tmp1.containsKey(s.charAt(i)) && tmp1.get(s.charAt(i)) != t.charAt(i)) {
+                return false;
+            } else {
+                tmp1.put(s.charAt(i), t.charAt(i));
+            }
+            if (tmp2.containsKey(t.charAt(i)) && tmp2.get(t.charAt(i)) != s.charAt(i)) {
+                return false;
+            } else {
+                tmp2.put(t.charAt(i), s.charAt(i));
+            }
+        }
+        return true;
+    }
+
+    public int searchInsert(int[] nums, int target) {
+        if (nums[nums.length-1]<target){
+            return nums.length;
+        }
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = (high - low) / 2 + low;
+            if (nums[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+
+
     public static void main(String[] args) {
         isPalindrome("ab2a");
     }
