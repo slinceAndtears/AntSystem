@@ -1,5 +1,7 @@
 package program.work;
 
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+
 import java.util.*;
 
 public class LeetCodeNew {
@@ -496,6 +498,71 @@ public class LeetCodeNew {
         }
         return res;
     }
+
+    public static boolean wordPattern(String pattern, String s) {
+        String[] strs = s.split(" ");
+        if (strs.length != pattern.length()) {
+            return false;
+        }
+        Map<Character, String> tmp = new HashMap<>();
+        for (int i = 0; i < pattern.length(); ++i) {
+            if (tmp.containsKey(pattern.charAt(i))) {
+                if (!tmp.get(pattern.charAt(i)).equals(strs[i])) {
+                    return false;
+                }
+            } else {
+                if (tmp.containsValue(strs[i])) {
+                    return false;
+                }
+                tmp.put(pattern.charAt(i), strs[i]);
+            }
+        }
+        return true;
+    }
+
+    public boolean isValid(String s) {
+        Deque<Character> stack = new LinkedList<>();
+        for (int i = 0; i < s.length(); ++i) {
+            if (s.charAt(i) == ')') {
+                if (stack.size() == 0 || stack.peek() != '(') {
+                    return false;
+                }
+                stack.pop();
+            } else if (s.charAt(i) == ']') {
+                if (stack.size() == 0 || stack.peek() != '[') {
+                    return false;
+                }
+                stack.pop();
+            } else if (s.charAt(i) == '}') {
+                if (stack.size() == 0 || stack.peek() != '{') {
+                    return false;
+                }
+                stack.pop();
+            } else {
+                stack.push(s.charAt(i));
+            }
+        }
+        return stack.size() == 0;
+    }
+
+    public int maxDepth(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+    }
+
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q == null) {
+            return true;
+        }
+        if (p == null || q == null || p.val != q.val) {
+            return false;
+        }
+        return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    }
+
+
 
     public static void main(String[] args) {
         isPalindrome("ab2a");
