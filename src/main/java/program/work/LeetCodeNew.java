@@ -1,6 +1,5 @@
 package program.work;
 
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 
 import java.util.*;
 
@@ -562,12 +561,95 @@ public class LeetCodeNew {
         return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
     }
 
+    public void rotateWithIndex(int[] nums, int low, int high) {
+        while (low < high) {
+            int tmp = nums[low];
+            nums[low] = nums[high];
+            nums[high] = tmp;
+            ++low;
+            --high;
+        }
+    }
+    public void rotate(int[] nums, int k) {
+        if (k != 0) {
+            k = k % nums.length;
+            rotateWithIndex(nums, 0, nums.length - k - 1);
+            rotateWithIndex(nums, nums.length - k, nums.length - 1);
+            rotateWithIndex(nums, 0, nums.length - 1);
+        }
+    }
+
+    /**
+     * 1 1 1*2 1*2*3
+     * 4*3*2  4*3 4 1
+     *
+     */
+    public int[] productExceptSelf(int[] nums) {
+        int[] res = new int[nums.length];
+        int[] left = new int[nums.length];
+        int[] right = new int[nums.length];
+        Arrays.fill(left, 1);
+        Arrays.fill(right, 1);
+        for (int i = 1; i < left.length; ++i) {
+            left[i] = left[i - 1] * nums[i - 1];
+        }
+        for (int i = right.length - 2; i >= 0; --i) {
+            right[i] = right[i + 1] * nums[i + 1];
+        }
+        for (int i = 0; i < res.length; ++i) {
+            res[i] = left[i] * right[i];
+        }
+        return res;
+    }
+
 
 
     public static void main(String[] args) {
         isPalindrome("ab2a");
     }
 }
+
+class RandomizedSet {
+
+    Map<Integer, Integer> value;
+    Random r;
+    List<Integer> nums;
+
+    public RandomizedSet() {
+        r=new Random();
+        nums = new ArrayList<>();
+        value = new HashMap<>();
+    }
+
+    public boolean insert(int val) {
+        if (value.containsKey(val)) {
+            return false;
+        }
+        nums.add(val);
+        value.put(val,nums.size() - 1);
+        return true;
+    }
+
+    public boolean remove(int val) {
+        if (value.containsKey(val)) {
+            int idx = value.get(val);
+            int last = nums.size() -1;
+            int lastVal = nums.get(last);
+            nums.set(idx, lastVal);
+            nums.remove(last);
+            value.put(lastVal, idx);
+            value.remove(val);
+            return true;
+        }
+        return false;
+    }
+
+    public int getRandom() {
+        int x = r.nextInt(nums.size());
+        return nums.get(x);
+    }
+}
+
 class Node {
     int val;
     Node next;
