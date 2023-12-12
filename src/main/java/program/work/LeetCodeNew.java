@@ -627,6 +627,88 @@ public class LeetCodeNew {
         return -1;
     }
 
+    public int[] twoSum2(int[] numbers, int target) {
+        int low = 0;
+        int high = numbers.length - 1;
+        while (low < high) {
+            int sum = numbers[low] + numbers[high];
+            if (sum > target) {
+                --high;
+            } else if (sum < target) {
+                ++low;
+            } else {
+                return new int[]{low + 1, high + 1};
+            }
+        }
+        return new int[]{};
+    }
+
+    public int maxArea(int[] height) {
+        int low = 0;
+        int high = height.length - 1;
+        int res = 0;
+        while (low < high) {
+            res = Math.max(res, (high - low) * Math.min(height[low], height[high]));
+            if (height[low] > height[high]) {
+                --high;
+            } else {
+                ++low;
+            }
+        }
+        return res;
+    }
+
+    public static int trap(int[] height) {
+        int res = 0;
+        int maxIndex = 0;
+        int max = 0;
+        for (int i = 0; i < height.length; ++i) {
+            if (max < height[i]) {
+                max = height[i];
+                maxIndex = i;
+            }
+        }
+        max = 0;
+        for (int i = 0; i < maxIndex; ++i) {
+            max = Math.max(max, height[i]);
+            res += max - height[i];
+        }
+        max = 0;
+        for (int i = height.length - 1; i > maxIndex; --i) {
+            max = Math.max(max, height[i]);
+            res += max - height[i];
+        }
+        return res;
+    }
+
+    /**
+     * 13  841
+     * 1011
+     * 1101
+     */
+    public static double myPow(double x, int n) {
+        if (x == 1d || x == 0d) {
+            return x;
+        }
+        double res = 1d;
+        boolean t = n < 0;
+        long tmp = n;
+        tmp = Math.abs(tmp);
+
+        while (tmp != 0) {
+            long r = tmp % 2;
+            if (r == 1) {
+                res *= x;
+            }
+            x *= x;
+            tmp = tmp / 2;
+        }
+        if (t) {
+            return 1 / res;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         isPalindrome("ab2a");
     }
