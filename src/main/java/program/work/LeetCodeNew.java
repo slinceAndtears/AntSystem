@@ -2,6 +2,7 @@ package program.work;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LeetCodeNew {
     //如果前面的累加和小于0，就抛弃掉，累加和赋值为当前下标
@@ -707,6 +708,61 @@ public class LeetCodeNew {
             return 1 / res;
         }
         return res;
+    }
+
+    public static String reverseWords(String s) {
+        StringBuilder res = new StringBuilder();
+        int index = 0;
+        while (index<s.length()){
+            while (index<s.length()&&s.charAt(index)==' '){
+                ++index;
+            }
+            StringBuilder t =new StringBuilder(" ");
+            while (index<s.length()&&s.charAt(index)!=' '){
+                t.append(s.charAt(index++));
+            }
+            res.insert(0, t);
+        }
+        return res.toString().trim();
+    }
+
+    public boolean isAnagram(String s, String t) {
+        int[] tmp = new int[32];
+        for (int i = 0; i < s.length(); ++i) {
+            ++tmp[s.charAt(i) - 'a'];
+        }
+        for (int i = 0; i < t.length(); ++i) {
+            --tmp[t.charAt(i) - 'a'];
+        }
+        for (int i = 0; i < tmp.length; ++i) {
+            if (tmp[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> tmp = new HashMap<>();
+        for (int i = 0; i < strs.length; ++i) {
+            int[] count =new int[26];
+            for (int j = 0; j < strs[i].length(); j++) {
+                count[strs[i].charAt(j) - 'a']++;
+            }
+            StringBuilder sb=new StringBuilder();
+            for (int j = 0; j < 26; j++) {
+                if (count[j] != 0) {
+                    sb.append((char) ('a' + j));
+                    sb.append(count[j]);
+                }
+            }
+            String key = sb.toString();
+            List<String> list = tmp.getOrDefault(key, new ArrayList<String>());
+            list.add(strs[i]);
+            tmp.put(key, list);
+
+        }
+        return new ArrayList<>(tmp.values());
     }
 
     public static void main(String[] args) {
