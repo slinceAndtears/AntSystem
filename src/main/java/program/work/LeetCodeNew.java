@@ -765,6 +765,50 @@ public class LeetCodeNew {
         return new ArrayList<>(tmp.values());
     }
 
+    public String addBinary(String a,String b) {
+        StringBuilder res = new StringBuilder();
+        int i = a.length() - 1;
+        int j = b.length() - 1;
+        int jump = 0;
+        while (i >= 0 || j >= 0) {
+            int t1 = i >= 0 ? a.charAt(i) - '0' : 0;
+            int t2 = j >= 0 ? b.charAt(j) - '0' : 0;
+            int r = t1 + t2 + jump;
+            res.insert(0, r % 2);
+            jump = 0;
+            if (r > 1) {
+                jump = 1;
+            }
+            --i;
+            --j;
+        }
+        if (jump == 1) {
+            res.insert(0, 1);
+        }
+        return res.toString();
+    }
+
+    public boolean isPalindrome(int x) {
+        if (x<0){
+            return false;
+        }
+        List<Integer> t = new ArrayList<>();
+        while (x != 0) {
+            t.add(x % 10);
+            x = x / 10;
+        }
+        int low = 0;
+        int high = t.size()-1;
+        while (low < high) {
+            if (t.get(low) != t.get(high)) {
+                return false;
+            }
+            ++low;
+            --high;
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         isPalindrome("ab2a");
     }
