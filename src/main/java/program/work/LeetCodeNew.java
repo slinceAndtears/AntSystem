@@ -809,8 +809,30 @@ public class LeetCodeNew {
         return true;
     }
 
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode tail = new ListNode();
+        tail.next = head;
+        ListNode p = head;
+        ListNode t = tail;
+        while (p != null) {
+            ListNode q = p;
+            int sum = 0;
+            while (q != null && p.val == q.val) {
+                ++sum;
+                q = q.next;
+            }
+            if (sum == 1) {
+                t.next = p;
+                t = p;
+            }
+            p = q;
+        }
+        t.next = null;
+        return tail.next;
+    }
+
     public static void main(String[] args) {
-        isPalindrome("ab2a");
+
     }
 }
 
