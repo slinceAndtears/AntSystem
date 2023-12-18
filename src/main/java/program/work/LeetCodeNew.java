@@ -842,6 +842,32 @@ public class LeetCodeNew {
                 hasPathSum(root.right, targetSum - root.val);
     }
 
+    public boolean[][] tmp;
+    public void deepSearch(char[][] grid,int i,int j) {
+        if (i < 0 || j < 0 || i == grid.length || j == grid[i].length || grid[i][j] == '0'||tmp[i][j]) {
+            return;
+        }
+        tmp[i][j] = true;
+        deepSearch(grid, i - 1, j);
+        deepSearch(grid, i + 1, j);
+        deepSearch(grid, i, j - 1);
+        deepSearch(grid, i, j + 1);
+    }
+
+    public int numIslands(char[][] grid) {
+        tmp = new boolean[grid.length][grid[0].length];
+        int sum = 0;
+        for (int i = 0; i < grid.length; ++i) {
+            for (int j = 0; j < grid[i].length; ++j) {
+                if (!tmp[i][j] && grid[i][j] == '1') {
+                    ++sum;
+                    deepSearch(grid, i, j);
+                }
+            }
+        }
+        return sum;
+    }
+
     public static void main(String[] args) {
 
     }
