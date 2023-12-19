@@ -1,6 +1,8 @@
 package program.work;
 
 
+import program.test.LeetCode;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -868,8 +870,86 @@ public class LeetCodeNew {
         return sum;
     }
 
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode head = new ListNode();
+        ListNode p = head;
+        while (list1 != null || list2 != null) {
+            if (list1 == null || (list2 != null && list1.val > list2.val)) {
+                p.next = list2;
+                p = list2;
+                list2 = list2.next;
+            } else {
+                p.next = list1;
+                p = list1;
+                list1 = list1.next;
+            }
+        }
+        p.next = null;
+        return head.next;
+    }
+
+    public static ListNode reverseBetween(ListNode head, int left, int right) {
+        ListNode tail = new ListNode();
+        tail.next = head;
+        ListNode beforeStart = tail;
+        for (int i = 0; i < left - 1; ++i) {
+            beforeStart = beforeStart.next;
+        }
+        ListNode afterEnd = beforeStart.next;
+        for (int i = left; i <= right; ++i) {
+            afterEnd = afterEnd.next;
+        }
+        ListNode t = beforeStart.next;
+        ListNode start = beforeStart.next;
+        beforeStart.next = null;
+        for (int i = left; i <= right; ++i) {
+            ListNode q = start;
+            start = start.next;
+            q.next = beforeStart.next;
+            beforeStart.next = q;
+        }
+        t.next = afterEnd;
+        return tail.next;
+    }
+
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        if (head.next == null && n == 1) {
+            return null;
+        }
+        ListNode t = head;
+        for (int i = 0; i < n; ++i) {
+            t = t.next;
+        }
+        if (t == null) {
+            return head.next;
+        }
+        ListNode q = head;
+        while (t.next != null) {
+            t = t.next;
+            q = q.next;
+        }
+        if (q.next != null) {
+            q.next = q.next.next;
+        } else {
+            q.next = null;
+        }
+        return head;
+    }
+
     public static void main(String[] args) {
 
+    }
+
+    public static ListNode createList(int[] a) {
+        ListNode h = new ListNode(a[0]);
+        ListNode p = h;
+        for (int i = 1; i < a.length; ++i) {
+            ListNode t = new ListNode(a[i]);
+            p.next = t;
+            p = t;
+        }
+        p.next = null;
+        return h;
     }
 }
 
