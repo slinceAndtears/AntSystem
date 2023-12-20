@@ -936,6 +936,31 @@ public class LeetCodeNew {
         return head;
     }
 
+    public int getSum(int n) {
+        int res = 0;
+        while (n != 0) {
+            res += (n % 10) * (n % 10);
+            n = n / 10;
+        }
+        return res;
+    }
+    public boolean isHappy(int n) {
+        Map<Integer, Integer> tmp = new HashMap<>();
+        while (n != 1) {
+            int res = 0;
+            if (tmp.containsKey(n)) {
+                res = tmp.get(n);
+            } else {
+                res = getSum(n);
+            }
+            if (tmp.containsKey(res)) {
+                return false;
+            }
+            tmp.put(n, res);
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
 
     }
