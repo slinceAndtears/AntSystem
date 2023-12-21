@@ -961,6 +961,17 @@ public class LeetCodeNew {
         return true;
     }
 
+    public boolean containsNearbyDuplicate(int[] nums, int k) {
+        Map<Integer, Integer> tmp = new HashMap<>();
+        for (int i = 0; i < nums.length; ++i) {
+            if (tmp.containsKey(nums[i]) && Math.abs(i - tmp.get(nums[i])) <= k) {
+                return true;
+            }
+            tmp.put(nums[i], i);
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
 
     }
