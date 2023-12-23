@@ -972,6 +972,29 @@ public class LeetCodeNew {
         return false;
     }
 
+    public List<Double> averageOfLevels(TreeNode root) {
+        Queue<TreeNode> tmp = new LinkedList<>();
+        List<Double> res = new ArrayList<>();
+        tmp.offer(root);
+        while (!tmp.isEmpty()) {
+            int size = tmp.size();
+            double sum = 0d;
+            for (int i = 0; i < size; ++i) {
+                TreeNode poll = tmp.poll();
+                sum += poll.val;
+                if (poll.left != null) {
+                    tmp.offer(poll.left);
+                }
+                if (poll.right != null) {
+                    tmp.offer(poll.right);
+                }
+
+            }
+            res.add(sum / size);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 
     }
