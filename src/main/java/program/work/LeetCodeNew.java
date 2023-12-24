@@ -995,6 +995,23 @@ public class LeetCodeNew {
         return res;
     }
 
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (int[] a, int[] b) -> a[0] - b[0]);
+        List<int[]> res = new ArrayList<>();
+        for (int i = 0; i < intervals.length; ++i) {
+            if (res.size() == 0 || res.get(res.size() - 1)[1] < intervals[i][0]) {
+                res.add(intervals[i]);
+            } else {//有重合
+                res.get(res.size() - 1)[1] = Math.max(res.get(res.size() - 1)[1], intervals[i][1]);
+            }
+        }
+        int[][] result = new int[res.size()][2];
+        for (int i = 0; i < res.size(); ++i) {
+            result[i] = res.get(i);
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
 
     }
