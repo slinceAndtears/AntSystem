@@ -1012,6 +1012,31 @@ public class LeetCodeNew {
         return result;
     }
 
+    public List<List<Integer>> rightSideView(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        if (root != null) {
+            queue.offer(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; ++i) {
+                root = queue.poll();
+                level.add(root.val);
+                if (root.left != null) {
+                    queue.offer(root.left);
+                }
+                if (root.right != null) {
+                    queue.offer(root.right);
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
+
     public static void main(String[] args) {
 
     }
