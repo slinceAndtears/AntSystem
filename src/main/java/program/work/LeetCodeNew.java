@@ -1036,6 +1036,34 @@ public class LeetCodeNew {
         return res;
     }
 
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null) {
+            return head;
+        }
+        ListNode p = head;
+        int size = 1;
+        while (p.next != null) {
+            size += 1;
+            p = p.next;
+        }
+        k = k % size;
+        if (k == 0) {
+            return head;
+        }
+        p = head;
+        ListNode last = head;
+        while (last.next != null) {
+            last = last.next;
+        }
+        last.next = head;
+        for (int i = 0; i < size - k; ++i) {
+            p = p.next;
+        }
+        ListNode res = p.next;
+        p.next = null;
+        return res;
+    }
+
 
     public static void main(String[] args) {
 
