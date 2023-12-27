@@ -1064,6 +1064,32 @@ public class LeetCodeNew {
         return res;
     }
 
+    public List<String> summaryRanges(int[] nums) {
+        List<String> res = new ArrayList<>();
+        if (nums.length == 0) {
+            return res;
+        }
+        int pre = nums[0];
+        int min = nums[0];
+        for (int i = 0; i < nums.length; ++i) {
+            if (i < nums.length - 1 && nums[i + 1] - nums[i] == 1) {
+                pre = nums[i];
+            } else {
+                StringBuilder t = new StringBuilder();
+                if (min == nums[i]) {
+                    t.append(min);
+                } else {
+                    t.append(min).append("->").append(nums[i]);
+                }
+                res.add(t.toString());
+                if (i < nums.length - 1) {
+                    pre = nums[i + 1];
+                    min = pre;
+                }
+            }
+        }
+        return res;
+    }
 
     public static void main(String[] args) {
 
