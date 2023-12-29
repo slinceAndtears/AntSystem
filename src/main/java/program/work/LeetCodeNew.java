@@ -1091,8 +1091,93 @@ public class LeetCodeNew {
         return res;
     }
 
-    public static void main(String[] args) {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        for (int i = 0; i < nums.length - 1; ++i) {
+            if (nums[i] > 0) {
+                return res;
+            }
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            int left = i + 1;
+            int right = nums.length - 1;
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (sum > 0) {
+                    --right;
+                } else if (sum < 0) {
+                    ++left;
+                } else {
+                    List<Integer> integers = Arrays.asList(nums[i], nums[left], nums[right]);
+                    ++left;
+                    --right;
+                    res.add(integers);
+                    //跳过重复的
+                    while (left < right && nums[left] == nums[left - 1]) {
+                        ++left;
+                    }
+                    while (left < right && nums[right] == nums[right + 1]) {
+                        --right;
+                    }
+                }
+            }
+        }
+        return res;
+    }
 
+    public static String simplifyPath(String path) {
+        Deque<String> stack = new LinkedList<>();
+        StringBuilder res = new StringBuilder();
+        int index = 0;
+        while (index < path.length()) {
+            if (path.charAt(index) == '.') {
+                StringBuilder t = new StringBuilder();
+                int sum = 0;
+                while (index < path.length() && path.charAt(index) != '/') {
+                    if (path.charAt(index) == '.') {
+                        ++sum;
+                    }
+                    t.append(path.charAt(index++));
+                }
+                if (sum == 2 && t.length() == 2 ) {
+                    if (stack.size() > 2){
+                        stack.pop();
+                        stack.pop();
+                    }
+                } else if (t.length() > 1){
+                    stack.push(t.toString());
+                }
+            } else if (path.charAt(index) == '/') {
+                if (stack.isEmpty() || (!stack.peek().equals("/") && index != path.length() - 1)) {
+                    stack.push(String.valueOf(path.charAt(index)));
+                }
+                ++index;
+            } else {
+                StringBuilder name = new StringBuilder();
+                while (index < path.length() && path.charAt(index) != '/') {
+                    name.append(path.charAt(index++));
+                }
+                stack.push(name.toString());
+            }
+        }
+        if (stack.size() == 0) {
+            return "/";
+        } else {
+            if (stack.peek().equals("/")){
+                stack.pop();
+            }
+            while (!stack.isEmpty()) {
+                res.insert(0, stack.poll());
+            }
+            return res.toString();
+        }
+    }
+
+    public static void main(String[] args) {
+        String s = simplifyPath("/../..ga/b/.f..d/..../e.baaeeh./.a");
+        System.out.println(s);
     }
 
     public static ListNode createList(int[] a) {
