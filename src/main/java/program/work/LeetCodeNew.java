@@ -1208,9 +1208,66 @@ public class LeetCodeNew {
         return low;
     }
 
+    public TreeNode invertTree(TreeNode root) {
+        if (root == null) {
+            return root;
+        }
+        TreeNode left = invertTree(root.left);
+        TreeNode right = invertTree(root.right);
+        root.left = right;
+        root.right = left;
+        return root;
+    }
+
+    public boolean isSymmetric(TreeNode root) {
+        return check(root, root);
+    }
+
+    public boolean check(TreeNode left, TreeNode right) {
+        if (left == null && right == null) {
+            return true;
+        }
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.val == right.val && check(left.left, right.right) && check(left.right, right.left);
+    }
+
+    public static TreeNode buildTree(int[] preorder, int[] inorder) {
+        if (inorder.length == 0 || preorder.length == 0) {
+            return null;
+        }
+        int val = preorder[0];
+        TreeNode root = new TreeNode(val);
+        List<Integer> left = new ArrayList<>();
+        List<Integer> right = new ArrayList<>();
+        int index = 0;
+        while (index < inorder.length && inorder[index] != val) {
+            left.add(inorder[index++]);
+        }
+        ++index;
+        while (index < inorder.length) {
+            right.add(inorder[index++]);
+        }
+        if (preorder.length > left.size()) {
+            int[] newRightPreorder = new int[preorder.length - 1 - left.size()];
+            for (int i = 1 + left.size(); i < preorder.length; ++i) {
+                newRightPreorder[i - 1 - left.size()] = preorder[i];
+            }
+            int[] newLeftPreOrder = new int[left.size()];
+            for (int i = 1; i <= left.size(); ++i) {
+                newLeftPreOrder[i - 1] = preorder[i];
+            }
+            root.left = buildTree(newLeftPreOrder, left.stream().mapToInt(Integer::valueOf).toArray());
+            root.right = buildTree(newRightPreorder, right.stream().mapToInt(Integer::valueOf).toArray());
+        }
+        return root;
+    }
+
     public static void main(String[] args) {
-        String s = simplifyPath("/../..ga/b/.f..d/..../e.baaeeh./.a");
-        System.out.println(s);
+        int[] preorder = new int[]{3,9,20,15,7};
+        int[] inorder = new int[]{9,3,15,20,7};
+        buildTree(preorder, inorder);
     }
 
     public static ListNode createList(int[] a) {
