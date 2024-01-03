@@ -1264,6 +1264,25 @@ public class LeetCodeNew {
         return root;
     }
 
+    int sum = 0;
+    public void getSumNumbers(TreeNode root, int val) {
+        if (root == null) {
+            return;
+        }
+        int v = val * 10 + root.val;
+        if (root.left == null && root.right == null) {
+            sum += v;
+        } else {
+            getSumNumbers(root.left, v);
+            getSumNumbers(root.right, v);
+        }
+    }
+
+    public int sumNumbers(TreeNode root){
+        getSumNumbers(root, 0);
+        return sum;
+    }
+
     public static void main(String[] args) {
         int[] preorder = new int[]{3,9,20,15,7};
         int[] inorder = new int[]{9,3,15,20,7};
