@@ -1283,6 +1283,23 @@ public class LeetCodeNew {
         return sum;
     }
 
+    public int minPathSum(int[][] grid) {
+        for (int i = 0; i < grid.length; ++i) {
+            for (int j = 0; j < grid[i].length; ++j) {
+                if (i == 0 && j == 0) {
+
+                } else if (i == 0) {
+                    grid[i][j] += grid[i][j - 1];
+                } else if (j == 0) {
+                    grid[i][j] += grid[i - 1][j];
+                } else {
+                    grid[i][j] += Math.min(grid[i][j - 1], grid[i - 1][j]);
+                }
+            }
+        }
+        return grid[grid.length - 1][grid[grid.length - 1].length - 1];
+    }
+
     public static void main(String[] args) {
         int[] preorder = new int[]{3,9,20,15,7};
         int[] inorder = new int[]{9,3,15,20,7};
