@@ -1300,6 +1300,34 @@ public class LeetCodeNew {
         return grid[grid.length - 1][grid[grid.length - 1].length - 1];
     }
 
+    public static TreeNode sortedArrayToBST(int[] nums) {
+        if (nums.length == 0) {
+            return null;
+        }
+        TreeNode root = new TreeNode();
+        int index = nums.length / 2;
+        root.val = nums[index];
+        TreeNode leftNode = null;
+        TreeNode rightNode = null;
+        if (index >= 0) {
+            int[] left = new int[index];
+            for (int i = 0; i < left.length; ++i) {
+                left[i] = nums[i];
+            }
+            leftNode = sortedArrayToBST(left);
+        }
+        if (nums.length - index - 1 >= 0) {
+            int[] right = new int[nums.length - index - 1];
+            for (int i = index + 1; i < nums.length; ++i) {
+                right[i - index - 1] = nums[i];
+            }
+            rightNode = sortedArrayToBST(right);
+        }
+        root.left = leftNode;
+        root.right = rightNode;
+        return root;
+    }
+
     public static void main(String[] args) {
         int[] preorder = new int[]{3,9,20,15,7};
         int[] inorder = new int[]{9,3,15,20,7};
