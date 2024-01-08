@@ -1328,6 +1328,64 @@ public class LeetCodeNew {
         return root;
     }
 
+    List<String> letterRes = new ArrayList<>();
+    public String getStrByNum(int num) {
+        if (num == 2) {
+            return "abc";
+        } else if (num == 3) {
+            return "def";
+        } else if (num == 4) {
+            return "ghi";
+        } else if (num == 5) {
+            return "jkl";
+        } else if (num == 6) {
+            return "mno";
+        } else if (num == 7) {
+            return "pqrs";
+        } else if (num == 8) {
+            return "tuv";
+        } else {
+            return "wxyz";
+        }
+    }
+    public void dfs(int index, String digits, StringBuilder pre) {
+        if (index == digits.length()) {
+            letterRes.add(pre.toString());
+            return;
+        }
+        int num = digits.charAt(index) - '0';
+        String str = getStrByNum(num);
+        for (int i = 0; i < str.length(); ++i) {
+            StringBuilder t = new StringBuilder(pre);
+            t.append(str.charAt(i));
+            dfs(index + 1, digits, t);
+        }
+    }
+
+    public List<String> letterCombinations(String digits) {
+        if (digits.length() > 0) {
+            dfs(0, digits, new StringBuilder());
+        }
+        return letterRes;
+    }
+
+    List<List<Integer>> combineRes = new ArrayList<>();
+    public void dfs(int n, int current, int k, List<Integer> t) {
+        if (t.size() == k) {
+            combineRes.add(t);
+            return;
+        }
+        for (int i = current + 1; i <= n; ++i) {
+            List<Integer> tmp = new ArrayList<>(t);
+            tmp.add(i);
+            dfs(n,i,k,tmp);
+        }
+    }
+    public List<List<Integer>> combine(int n, int k) {
+        dfs(n, 0, k, new ArrayList<>());
+        return combineRes;
+    }
+
     public static void main(String[] args) {
         int[] preorder = new int[]{3,9,20,15,7};
         int[] inorder = new int[]{9,3,15,20,7};
