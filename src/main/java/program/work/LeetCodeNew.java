@@ -1386,6 +1386,22 @@ public class LeetCodeNew {
         return combineRes;
     }
 
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int x = 0;
+        int y = matrix[0].length - 1;
+        while (x < matrix.length && y >= 0) {
+            int num = matrix[x][y];
+            if (num > target) {
+                --y;
+            } else if (num < target) {
+                ++x;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         int[] preorder = new int[]{3,9,20,15,7};
         int[] inorder = new int[]{9,3,15,20,7};
