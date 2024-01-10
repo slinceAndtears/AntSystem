@@ -1402,10 +1402,26 @@ public class LeetCodeNew {
         return false;
     }
 
+    public static int search(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        // 左右肯定有一边是有序的 左边有序且一定
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            } else if ((nums[low] <= target && target < nums[mid]) || (nums[mid] < nums[high] && (target < nums[mid] || target > nums[high]))) {
+                // 左边有序且target在左边，或者右边有序但不在右边
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return -1;
+    }
+
     public static void main(String[] args) {
-        int[] preorder = new int[]{3,9,20,15,7};
-        int[] inorder = new int[]{9,3,15,20,7};
-        buildTree(preorder, inorder);
+        search(new int[]{5,1,3}, 5);
     }
 
     public static ListNode createList(int[] a) {
