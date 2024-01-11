@@ -1420,6 +1420,37 @@ public class LeetCodeNew {
         return -1;
     }
 
+    public int[] plusOne(int[] digits) {
+        int res = digits[digits.length - 1] + 1;
+        if (res < 10) {
+            digits[digits.length - 1] = res;
+            return digits;
+        } else {
+            int jump = 1;
+            digits[digits.length - 1] = res - 10;
+            for (int i = digits.length - 2; i >= 0; --i) {
+                res = jump + digits[i];
+                jump = 0;
+                if (res < 10) {
+                    digits[i] = res;
+                    return digits;
+                } else {
+                    digits[i] = res - 10;
+                    jump = 1;
+                }
+            }
+            if (jump != 0) {
+                int[] newDigits = new int[digits.length + 1];
+                newDigits[0] = 1;
+                for (int i = 0; i < digits.length; ++i) {
+                    newDigits[i + 1] = digits[i];
+                }
+                return newDigits;
+            }
+            return digits;
+        }
+    }
+
     public static void main(String[] args) {
         search(new int[]{5,1,3}, 5);
     }
