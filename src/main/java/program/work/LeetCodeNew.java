@@ -1451,6 +1451,18 @@ public class LeetCodeNew {
         }
     }
 
+    public static int hammingWeight(int n) {
+        int res = 0;
+        int t = 1;
+        for (int i = 0; i < 32; ++i) {
+            if ((t & n) != 0) {
+                ++res;
+            }
+            t = t << 1;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         search(new int[]{5,1,3}, 5);
     }
