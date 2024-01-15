@@ -1463,8 +1463,24 @@ public class LeetCodeNew {
         return res;
     }
 
+    public static int trailingZeroes(int n) {
+        int res = 0;
+        for (int i = 1; i <= n; ++i) {
+            int t = i;
+            while (t % 10 == 0) {
+                ++res;
+                t = t / 10;
+            }
+            while (t % 5 == 0) {
+                ++res;
+                t = t / 5;
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
-        search(new int[]{5,1,3}, 5);
+        trailingZeroes(15);
     }
 
     public static ListNode createList(int[] a) {
