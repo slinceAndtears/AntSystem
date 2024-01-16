@@ -1479,6 +1479,31 @@ public class LeetCodeNew {
         return res;
     }
 
+    int pre = -1;
+    int minimumDiff = Integer.MAX_VALUE;
+    public void midOrder(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        if (root.left != null) {
+            midOrder(root.left);
+        }
+        if (pre == -1) {
+            pre = root.val;
+        } else {
+            minimumDiff = Math.min(minimumDiff, Math.abs(pre - root.val));
+            pre = root.val;
+        }
+        if (root.right != null) {
+            midOrder(root.right);
+        }
+    }
+
+    public int getMinimumDifference(TreeNode root) {
+        midOrder(root);
+        return minimumDiff;
+    }
+
     public static void main(String[] args) {
         trailingZeroes(15);
     }
