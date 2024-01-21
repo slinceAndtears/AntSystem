@@ -1504,6 +1504,50 @@ public class LeetCodeNew {
         return minimumDiff;
     }
 
+    public static List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> res = new ArrayList<>();
+        int m = matrix.length;
+        int n = matrix[0].length;
+        boolean[][] tag = new boolean[m][n];
+        int x = 0;
+        int y = 0;
+        String direct = "right";
+        while (res.size() < m * n) {
+            res.add(matrix[x][y]);
+            tag[x][y] = true;
+            if (direct.equals("right")) {
+                if (y == n - 1 || tag[x][y + 1]) {
+                    direct = "down";
+                    ++x;
+                } else {
+                    ++y;
+                }
+            } else if (direct.equals("down")) {
+                if (x == m - 1 || tag[x + 1][y]) {
+                    direct = "left";
+                    --y;
+                } else {
+                    ++x;
+                }
+            } else if (direct.equals("left")) {
+                if (y == 0 || tag[x][y - 1]) {
+                    direct = "up";
+                    --x;
+                } else {
+                    --y;
+                }
+            } else {
+                if (x == 0 || tag[x - 1][y]) {
+                    direct = "right";
+                    ++y;
+                } else {
+                    --x;
+                }
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         trailingZeroes(15);
     }
