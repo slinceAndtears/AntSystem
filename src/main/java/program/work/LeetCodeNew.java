@@ -1575,6 +1575,26 @@ public class LeetCodeNew {
         }
     }
 
+    public ListNode partition(ListNode head, int x) {
+        ListNode l1 = new ListNode();
+        ListNode l2 = new ListNode();
+        ListNode p = l1;
+        ListNode q = l2;
+        while (head != null) {
+            if (head.val < x) {
+                p.next = head;
+                p = head;
+            } else {
+                q.next = head;
+                q = head;
+            }
+            head = head.next;
+        }
+        q.next = null;
+        p.next = l2.next;
+        return l1.next;
+    }
+
     public static void main(String[] args) {
         trailingZeroes(15);
     }
