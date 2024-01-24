@@ -1595,6 +1595,28 @@ public class LeetCodeNew {
         return l1.next;
     }
 
+    public List<List<Integer>> res = new ArrayList<>();
+    public void dfs(int[] nums, boolean[] tag, List<Integer> tmp) {
+        if (tmp.size() == nums.length) {
+            res.add(tmp);
+            return;
+        }
+        for (int i = 0; i < nums.length; ++i) {
+            if (!tag[i]) {
+                List<Integer> t = new ArrayList<>(tmp);
+                t.add(nums[i]);
+                tag[i] = true;
+                dfs(nums, tag, t);
+                tag[i] = false;
+            }
+        }
+    }
+
+    public List<List<Integer>> permute(int[] nums) {
+        dfs(nums, new boolean[nums.length], new ArrayList<>());
+        return res;
+    }
+
     public static void main(String[] args) {
         trailingZeroes(15);
     }
