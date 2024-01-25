@@ -1617,6 +1617,17 @@ public class LeetCodeNew {
         return res;
     }
 
+    public static int mySqrt(int x) {
+        for (int i = 1; i <= x / 2 + 1; ++i) {
+            long p = i * i;
+            long q = (i + 1) * (i + 1);
+            if (p <= x && (q > x || q < 0)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
     public static void main(String[] args) {
         trailingZeroes(15);
     }
