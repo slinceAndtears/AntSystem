@@ -1629,7 +1629,12 @@ public class LeetCodeNew {
     }
 
     public static void main(String[] args) {
-        trailingZeroes(15);
+        Deque<Integer> stack = new LinkedList<>();
+        stack.push(-2);
+        stack.push(0);
+        stack.push(-3);
+        stack.pop();
+        System.out.println(stack.peek());
     }
 
     public static ListNode createList(int[] a) {
@@ -1695,5 +1700,37 @@ class Node {
         this.val = val;
         this.next = null;
         this.random = null;
+    }
+}
+
+class MinStackNew {
+    private Deque<Integer> stack;
+    private Deque<Integer> min;
+
+    public MinStackNew() {
+        stack = new LinkedList<>();
+        min = new LinkedList<>();
+    }
+
+    public void push(int val) {
+        stack.push(val);
+        if (min.isEmpty() || val <= min.peek()) {
+            min.push(val);
+        } else {
+            min.push(min.peek());
+        }
+    }
+
+    public void pop() {
+        stack.pop();
+        min.pop();
+    }
+
+    public int top() {
+        return stack.peek();
+    }
+
+    public int getMin() {
+        return min.peek();
     }
 }
