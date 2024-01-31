@@ -1628,13 +1628,50 @@ public class LeetCodeNew {
         return 0;
     }
 
+    /**
+     *   1 2 3 1
+     * y 1 2 4 3
+     * n 0 1 2 4
+     */
+    public int rob(int[] nums) {
+        int yes = nums[0];
+        int no = 0;
+        for (int i=1;i<nums.length;++i) {
+            int newYes = no + nums[i];
+            int newNo = Math.max(yes, no);
+            yes = newYes;
+            no = newNo;
+        }
+        return Math.max(yes, no);
+    }
+
+    /**
+     * n = min()
+     */
+    public static int coinChange(int[] coins, int amount) {
+        int[] tmp = new int[amount + 1];
+        for (int i = 0; i < coins.length; ++i) {
+            if (coins[i] <= amount) {
+                tmp[coins[i]] = 1;
+            }
+        }
+        for (int i = 1; i <= amount; ++i) {
+            if (tmp[i] != 0) {
+                continue;
+            }
+            int min = Integer.MAX_VALUE;
+            for (int j = 0; j < coins.length; ++j) {
+                if (i > coins[j] && tmp[i - coins[j]] != 0 && tmp[i - coins[j]] != Integer.MAX_VALUE) {
+                    min = Math.min(min, tmp[i - coins[j]] + 1);
+                }
+            }
+            tmp[i] = min;
+        }
+        return tmp[amount] == Integer.MAX_VALUE ? -1 : tmp[amount];
+    }
+
     public static void main(String[] args) {
-        Deque<Integer> stack = new LinkedList<>();
-        stack.push(-2);
-        stack.push(0);
-        stack.push(-3);
-        stack.pop();
-        System.out.println(stack.peek());
+        coinChange(new int[]{1}, 1);
     }
 
     public static ListNode createList(int[] a) {
