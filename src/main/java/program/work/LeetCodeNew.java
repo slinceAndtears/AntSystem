@@ -1670,6 +1670,47 @@ public class LeetCodeNew {
         return tmp[amount] == Integer.MAX_VALUE ? -1 : tmp[amount];
     }
 
+    public ListNode mergeTwoList(ListNode l1, ListNode l2) {
+        ListNode head = new ListNode();
+        ListNode p = head;
+        while (l1 != null || l2 != null) {
+            if (l2 == null || (l1 != null && l1.val <= l2.val)) {
+                p.next = l1;
+                p = l1;
+                l1 = l1.next;
+            } else {
+                p.next = l2;
+                p = l2;
+                l2 = l2.next;
+            }
+        }
+        p.next = null;
+        return head.next;
+    }
+
+    public ListNode sortList(ListNode head) {
+        int len = 0;
+        ListNode p = head;
+        while (p != null) {
+            p = p.next;
+            ++len;
+        }
+        if (len < 2) {
+            return head;
+        }
+        p = head;
+        int half = len / 2;
+        for (int i = 1; i < half; ++i) {
+            p = p.next;
+        }
+        ListNode q = p.next;
+        p.next = null;
+        ListNode before = sortList(head);
+        ListNode after = sortList(q);
+        head = mergeTwoList(before, after);
+        return head;
+    }
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
