@@ -1711,6 +1711,59 @@ public class LeetCodeNew {
         return head;
     }
 
+    public void flatten(TreeNode root) {
+        if (root == null || (root.left == null && root.right == null)) {
+            return;
+        }
+        flatten(root.left);//左子树转化为链表
+        flatten(root.right);//右子树转化为链表
+        //左子树的根节点赋值到右子树然后 原左子树赋值为空
+        TreeNode tmp = root.right;
+        root.right = root.left;
+        root.left = null;
+        TreeNode t = root;
+        //找到最右边赋值为原右子树
+        while (t.right != null) {
+            t = t.right;
+        }
+        t.right = tmp;
+    }
+
+
+    public int charToInt(char s) {
+        switch (s){
+            case 'I':
+                return 1;
+            case 'V':
+                return 5;
+            case 'X':
+                return 10;
+            case 'L':
+                return 50;
+            case 'C':
+                return 100;
+            case 'D':
+                return 500;
+            case 'M':
+                return 1000;
+            default:
+                return 0;
+        }
+    }
+
+    public int romanToInt(String s) {
+        int res = 0;
+        for (int i = 0; i < s.length(); ++i) {
+            int t = charToInt(s.charAt(i));
+            if (i == s.length() - 1 || t <= charToInt(s.charAt(i + 1))) {
+                res += t;
+            } else {
+                res -= t;
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
