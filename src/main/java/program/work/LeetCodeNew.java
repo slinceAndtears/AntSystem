@@ -3,6 +3,7 @@ package program.work;
 
 import program.test.LeetCode;
 
+import javax.swing.text.Highlighter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1808,6 +1809,21 @@ public class LeetCodeNew {
             }
         }
         return dp[m - 1][n - 1];
+    }
+
+    public int findMin(int[] nums) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] < nums[high]) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return nums[low];
     }
 
     public static void main(String[] args) {
