@@ -1826,6 +1826,46 @@ public class LeetCodeNew {
         return nums[low];
     }
 
+    public int quickSort(int[] nums, int low, int high) {
+        int i = low;
+        int j = high;
+        int tmp = nums[low];
+        while (low < high) {
+            while (low < high && nums[high] > tmp) {
+                --high;
+            }
+            while (low < high && nums[low] <= tmp) {
+                ++low;
+            }
+            if (low<high){
+                int t = nums[low];
+                nums[low]=nums[high];
+                nums[high] = t;
+            }
+        }
+        nums[i] = nums[low];
+        nums[low] = tmp;
+        return low;
+    }
+
+    public int findKthLargest(int[] nums, int k) {
+        int low = 0;
+        int high = nums.length - 1;
+        k = nums.length - k;
+        while (low < high) {
+            int mid = quickSort(nums, low, high);
+            if (mid == k) {
+                return nums[mid];
+            } else if (mid > k) {
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return 0;
+    }
+
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
