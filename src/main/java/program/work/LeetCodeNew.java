@@ -1940,6 +1940,24 @@ public class LeetCodeNew {
 
     }
 
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) {
+            return res;
+        }
+        Deque<TreeNode> stack = new LinkedList<>();
+        while (!stack.isEmpty() || root != null) {
+            while (root != null) {
+                res.add(root.val);
+                stack.push(root);
+                root = root.left;
+            }
+            root = stack.pop();
+            root = root.right;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
