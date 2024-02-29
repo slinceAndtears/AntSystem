@@ -1973,6 +1973,44 @@ public class LeetCodeNew {
         return res;
     }
 
+    int BSTSum = 0;
+
+    public void  dfs(TreeNode root, int low, int high) {
+        if (root==null){
+            return;
+        }
+        if (root.val>=low &&root.val<=high){
+            BSTSum+=root.val;
+        }
+        dfs(root.left,low,high);
+        dfs(root.right, low, high);
+    }
+    public int rangeSumBST(TreeNode root, int low, int high) {
+        dfs(root, low, high);
+        return BSTSum;
+    }
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) {
+            return null;
+        }
+        if (root.val == p.val) {
+            return p;
+        }
+        if (root.val == q.val) {
+            return q;
+        }
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left == null) {
+            return right;
+        } else if (right == null) {
+            return left;
+        } else {
+            return root;
+        }
+    }
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
