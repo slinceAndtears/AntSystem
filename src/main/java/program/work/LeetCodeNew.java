@@ -2011,6 +2011,38 @@ public class LeetCodeNew {
         }
     }
 
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (root == null) {
+            return res;
+        }
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        boolean tag = true;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> data = new ArrayList<>();
+            for (int i = 0; i < size; ++i) {
+                root = queue.poll();
+                if (tag) {
+                    data.add(root.val);
+                } else {
+                    data.add(0, root.val);
+                }
+                if (root.left != null) {
+                    queue.offer(root.left);
+                }
+                if (root.right != null) {
+                    queue.offer(root.right);
+                }
+
+            }
+            tag = tag ? false : true;
+            res.add(data);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         coinChange(new int[]{1}, 1);
     }
